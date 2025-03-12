@@ -187,6 +187,11 @@ class GaussianProcessRegressor(MultiOutputMixin, RegressorMixin, BaseEstimator):
     0.3680...
     >>> gpr.predict(X[:2,:], return_std=True)
     (array([653.0..., 592.1...]), array([316.6..., 316.6...]))
+
+    For an example of complex kernel engineering and hyperparameter optimization
+    with Gaussian Process Regression, see
+    :ref:`sphx_glr_auto_examples_gaussian_process_plot_gpr_co2.py`.
+
     """
 
     _parameter_constraints: dict = {
@@ -594,8 +599,11 @@ class GaussianProcessRegressor(MultiOutputMixin, RegressorMixin, BaseEstimator):
             y_train = y_train[:, np.newaxis]
 
         # Alg 2.1, page 19, line 3 -> alpha = L^T \ (L \ y)
-        alpha = cho_solve((L, GPR_CHOLESKY_LOWER), y_train, check_finite=False)
-
+        alpha = cho_solve(
+            (L, GPR_CHOLESKY_LOWER),
+            y_train,
+            check_finite=False,
+        )
         # Alg 2.1, page 19, line 7
         # -0.5 . y^T . alpha - sum(log(diag(L))) - n_samples / 2 log(2*pi)
         # y is originally thought to be a (1, n_samples) row vector. However,
