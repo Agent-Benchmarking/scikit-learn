@@ -83,8 +83,8 @@ Let's first identify available examples in the clustering module.
 - [x] Add link to `plot_coin_segmentation.py`
 
 ### AffinityPropagation
-- [ ] Add link to `plot_affinity_propagation.py`
-- [ ] Add link to `plot_cluster_comparison.py`
+- [x] Add link to `plot_affinity_propagation.py`
+- [x] Add link to `plot_cluster_comparison.py`
 
 ### MeanShift
 - [ ] Add link to `plot_mean_shift.py`

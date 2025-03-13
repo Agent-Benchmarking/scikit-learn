@@ -440,11 +440,12 @@ class AffinityPropagation(ClusterMixin, BaseEstimator):
     array([[1, 2],
            [4, 2]])
 
-    For an example usage,
-    see :ref:`sphx_glr_auto_examples_cluster_plot_affinity_propagation.py`.
-
-    For a comparison of Affinity Propagation with other clustering algorithms, see
-    :ref:`sphx_glr_auto_examples_cluster_plot_cluster_comparison.py`
+    For additional examples on Affinity Propagation:
+    
+    - See :ref:`sphx_glr_auto_examples_cluster_plot_affinity_propagation.py`
+      for a detailed usage example of Affinity Propagation.
+    - See :ref:`sphx_glr_auto_examples_cluster_plot_cluster_comparison.py`
+      for a comparison of Affinity Propagation with other clustering algorithms.
     """
 
     _parameter_constraints: dict = {
