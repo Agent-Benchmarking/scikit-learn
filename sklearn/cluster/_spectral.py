@@ -482,11 +482,11 @@ class SpectralClustering(ClusterMixin, BaseEstimator):
            Added 'auto' option.
 
     assign_labels : {'kmeans', 'discretize', 'cluster_qr'}, default='kmeans'
-        The strategy for assigning labels in the embedding space. There are two
-        ways to assign labels after the Laplacian embedding. k-means is a
-        popular choice, but it can be sensitive to initialization.
-        Discretization is another approach which is less sensitive to random
-        initialization [3]_.
+        The strategy for assigning labels in the embedding
+        space. There are two ways to assign labels after the Laplacian
+        embedding. k-means is a popular choice, but it can be sensitive to
+        initialization. Discretization is another approach which is less
+        sensitive to random initialization [3]_.
         The cluster_qr method [5]_ directly extract clusters from eigenvectors
         in spectral clustering. In contrast to k-means and discretization, cluster_qr
         has no tuning parameters and runs no iterations, yet may outperform
@@ -602,8 +602,12 @@ class SpectralClustering(ClusterMixin, BaseEstimator):
     SpectralClustering(assign_labels='discretize', n_clusters=2,
         random_state=0)
 
-    For a comparison of Spectral clustering with other clustering algorithms, see
-    :ref:`sphx_glr_auto_examples_cluster_plot_cluster_comparison.py`
+    For additional examples on Spectral clustering:
+    
+    - See :ref:`sphx_glr_auto_examples_cluster_plot_cluster_comparison.py`
+      for a comparison of Spectral clustering with other clustering algorithms.
+    - See :ref:`sphx_glr_auto_examples_cluster_plot_coin_segmentation.py`
+      for an example of image segmentation using Spectral clustering.
     """
 
     _parameter_constraints: dict = {
