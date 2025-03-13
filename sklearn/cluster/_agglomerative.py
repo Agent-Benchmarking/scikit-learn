@@ -287,6 +287,20 @@ def ward_tree(X, *, connectivity=None, n_clusters=None, return_distance=False):
     1
     >>> n_leaves
     6
+    >>> clustering = AgglomerativeClustering(n_clusters=2).fit(X)
+    >>> clustering.labels_
+    array([1, 1, 1, 0, 0, 0])
+    For a comparison of Agglomerative clustering with other clustering algorithms, see
+    :ref:`sphx_glr_auto_examples_cluster_plot_cluster_comparison.py`
+
+    For more examples on Agglomerative clustering:
+    
+    - See :ref:`sphx_glr_auto_examples_cluster_plot_ward_structured_vs_unstructured.py`
+      for an example of hierarchical clustering with structured vs unstructured Ward linkage.
+    - See :ref:`sphx_glr_auto_examples_cluster_plot_agglomerative_clustering.py`
+      for an illustration of the effect of connectivity constraints on hierarchical clustering.
+    - See :ref:`sphx_glr_auto_examples_cluster_plot_agglomerative_dendrogram.py`
+      for an example of creating and visualizing a hierarchical clustering dendrogram.
     """
     X = np.asarray(X)
     if X.ndim == 1:
@@ -798,9 +812,6 @@ class AgglomerativeClustering(ClusterMixin, BaseEstimator):
         "single" and affinity is not "precomputed" any valid pairwise distance
         metric can be assigned.
 
-        For an example of agglomerative clustering with different metrics, see
-        :ref:`sphx_glr_auto_examples_cluster_plot_agglomerative_clustering_metrics.py`.
-
         .. versionadded:: 1.2
 
     memory : str or object with the joblib.Memory interface, default=None
@@ -809,8 +820,8 @@ class AgglomerativeClustering(ClusterMixin, BaseEstimator):
         path to the caching directory.
 
     connectivity : array-like, sparse matrix, or callable, default=None
-        Connectivity matrix. Defines for each sample the neighboring
-        samples following a given structure of the data.
+        Connectivity matrix. Defines for each sample the neighboring samples
+        following a given structure of the data.
         This can be a connectivity matrix itself or a callable that transforms
         the data into a connectivity matrix, such as derived from
         `kneighbors_graph`. Default is ``None``, i.e, the
@@ -928,9 +939,17 @@ class AgglomerativeClustering(ClusterMixin, BaseEstimator):
     AgglomerativeClustering()
     >>> clustering.labels_
     array([1, 1, 1, 0, 0, 0])
-
     For a comparison of Agglomerative clustering with other clustering algorithms, see
     :ref:`sphx_glr_auto_examples_cluster_plot_cluster_comparison.py`
+
+    For more examples on Agglomerative clustering:
+    
+    - See :ref:`sphx_glr_auto_examples_cluster_plot_ward_structured_vs_unstructured.py`
+      for an example of hierarchical clustering with structured vs unstructured Ward linkage.
+    - See :ref:`sphx_glr_auto_examples_cluster_plot_agglomerative_clustering.py`
+      for an illustration of the effect of connectivity constraints on hierarchical clustering.
+    - See :ref:`sphx_glr_auto_examples_cluster_plot_agglomerative_dendrogram.py`
+      for an example of creating and visualizing a hierarchical clustering dendrogram.
     """
 
     _parameter_constraints: dict = {

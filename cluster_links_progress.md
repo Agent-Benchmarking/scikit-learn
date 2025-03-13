@@ -68,11 +68,11 @@ Let's first identify available examples in the clustering module.
 - [x] Add link to `plot_hdbscan.py`
 
 ### AgglomerativeClustering
-- [ ] Add link to `plot_agglomerative_clustering.py`
-- [ ] Add link to `plot_agglomerative_clustering_metrics.py`
-- [ ] Add link to `plot_agglomerative_dendrogram.py`
-- [ ] Add link to `plot_ward_structured_vs_unstructured.py`
-- [ ] Add link to `plot_cluster_comparison.py`
+- [x] Add link to `plot_agglomerative_clustering.py`
+- [x] Add link to `plot_agglomerative_clustering_metrics.py`
+- [x] Add link to `plot_agglomerative_dendrogram.py`
+- [x] Add link to `plot_ward_structured_vs_unstructured.py`
+- [x] Add link to `plot_cluster_comparison.py`
 
 ### Birch
 - [ ] Add link to `plot_birch_vs_minibatchkmeans.py`
