@@ -91,8 +91,8 @@ Let's first identify available examples in the clustering module.
 - [x] Add link to `plot_cluster_comparison.py`
 
 ### FeatureAgglomeration
-- [ ] Add link to `plot_digits_agglomeration.py`
-- [ ] Add link to `plot_feature_agglomeration_vs_univariate_selection.py`
+- [x] Add link to `plot_digits_agglomeration.py`
+- [x] Add link to `plot_feature_agglomeration_vs_univariate_selection.py`
 
 ## Strategy
 1. Review available examples in the cluster directory

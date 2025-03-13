@@ -789,7 +789,6 @@ def _hc_cut(n_clusters, children, n_leaves):
 
 ###############################################################################
 
-
 class AgglomerativeClustering(ClusterMixin, BaseEstimator):
     """
     Agglomerative Clustering.
@@ -1282,6 +1281,13 @@ class FeatureAgglomeration(
     >>> X_reduced = agglo.transform(X)
     >>> X_reduced.shape
     (1797, 32)
+    
+    For additional examples on FeatureAgglomeration:
+    
+    - See :ref:`sphx_glr_auto_examples_cluster_plot_feature_agglomeration_vs_univariate_selection.py`
+      for an example comparison of FeatureAgglomeration with a univariate feature selection strategy.
+    - See :ref:`sphx_glr_auto_examples_cluster_plot_digits_agglomeration.py`
+      for an example of dimensionality reduction on handwritten digits.
     """
 
     _parameter_constraints: dict = {
