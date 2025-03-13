@@ -834,6 +834,10 @@ class Sum(KernelOperator):
     1.0
     >>> kernel
     1.41**2 + RBF(length_scale=1)
+
+    See :ref:`sphx_glr_auto_examples_gaussian_process_plot_gpr_prior_posterior.py`
+    for an example illustrating how the Sum kernel can be used to combine
+    different kernels to create more complex covariance functions.
     """
 
     def __call__(self, X, Y=None, eval_gradient=False):
@@ -2153,9 +2157,6 @@ class DotProduct(Kernel):
 
     The DotProduct kernel is commonly combined with exponentiation.
 
-    See [1]_, Chapter 4, Section 4.2, for further details regarding the
-    DotProduct kernel.
-
     Read more in the :ref:`User Guide <gp_kernels>`.
 
     .. versionadded:: 0.18
@@ -2226,7 +2227,7 @@ class DotProduct(Kernel):
         K : ndarray of shape (n_samples_X, n_samples_Y)
             Kernel k(X, Y)
 
-        K_gradient : ndarray of shape (n_samples_X, n_samples_X, n_dims),\
+        K_gradient : ndarray of shape (n_samples_X, n_samples_X, n_dims), \
             optional
             The gradient of the kernel k(X, X) with respect to the log of the
             hyperparameter of the kernel. Only returned when `eval_gradient`
@@ -2345,6 +2346,13 @@ class PairwiseKernel(Kernel):
     >>> gpc.predict_proba(X[:2,:])
     array([[0.8880..., 0.05663..., 0.05532...],
            [0.8676..., 0.07073..., 0.06165...]])
+
+    See :ref:`sphx_glr_auto_examples_gaussian_process_plot_gpr_prior_posterior.py`
+    for an example illustrating different kernels and how they can be used with
+    Gaussian processes.
+
+    See :ref:`sphx_glr_auto_examples_gaussian_process_plot_gpr_prior_posterior.py`
+    for an example illustrating the use of PairwiseKernel with a custom metric.
     """
 
     def __init__(
@@ -2385,7 +2393,7 @@ class PairwiseKernel(Kernel):
         K : ndarray of shape (n_samples_X, n_samples_Y)
             Kernel k(X, Y)
 
-        K_gradient : ndarray of shape (n_samples_X, n_samples_X, n_dims),\
+        K_gradient : ndarray of shape (n_samples_X, n_samples_X, n_dims), \
             optional
             The gradient of the kernel k(X, X) with respect to the log of the
             hyperparameter of the kernel. Only returned when `eval_gradient`
