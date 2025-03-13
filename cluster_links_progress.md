@@ -75,8 +75,8 @@ Let's first identify available examples in the clustering module.
 - [x] Add link to `plot_cluster_comparison.py`
 
 ### Birch
-- [ ] Add link to `plot_birch_vs_minibatchkmeans.py`
-- [ ] Add link to `plot_cluster_comparison.py`
+- [x] Add link to `plot_birch_vs_minibatchkmeans.py`
+- [x] Add link to `plot_cluster_comparison.py`
 
 ### SpectralClustering
 - [ ] Add link to `plot_cluster_comparison.py`

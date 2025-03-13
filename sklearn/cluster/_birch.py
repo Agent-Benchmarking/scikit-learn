@@ -110,7 +110,7 @@ class _CFNode:
     """Each node in a CFTree is called a CFNode.
 
     The CFNode can have a maximum of branching_factor
-    number of CFSubclusters.
+    number of CF subclusters.
 
     Parameters
     ----------
@@ -484,8 +484,12 @@ class Birch(
     >>> brc.predict(X)
     array([0, 0, 0, 1, 1, 1])
 
-    For a comparison of the BIRCH clustering algorithm with other clustering algorithms,
-    see :ref:`sphx_glr_auto_examples_cluster_plot_cluster_comparison.py`
+    For additional examples on Birch clustering:
+    
+    - See :ref:`sphx_glr_auto_examples_cluster_plot_birch_vs_minibatchkmeans.py`
+      for a comparison with :class:`~sklearn.cluster.MiniBatchKMeans`.
+    - See :ref:`sphx_glr_auto_examples_cluster_plot_cluster_comparison.py`
+      for a comparison of Birch with other clustering algorithms.
     """
 
     _parameter_constraints: dict = {
