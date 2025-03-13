@@ -134,6 +134,14 @@ class PCA(_BasePCA):
     For a usage example, see
     :ref:`sphx_glr_auto_examples_decomposition_plot_pca_iris.py`
 
+    For examples comparing PCA with other dimensionality reduction methods, see:
+    :ref:`sphx_glr_auto_examples_decomposition_plot_pca_vs_lda.py`
+    :ref:`sphx_glr_auto_examples_decomposition_plot_pca_vs_fa_model_selection.py`
+    :ref:`sphx_glr_auto_examples_decomposition_plot_ica_vs_pca.py`
+
+    For an example of PCA on high dimensional data, see:
+    :ref:`sphx_glr_auto_examples_decomposition_plot_faces_decomposition.py`
+
     Read more in the :ref:`User Guide <PCA>`.
 
     Parameters

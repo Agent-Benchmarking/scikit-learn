@@ -1374,6 +1374,9 @@ class NMF(_BaseNMF):
     Note that the transformed data is named W and the components matrix is named H. In
     the NMF literature, the naming convention is usually the opposite since the data
     matrix X is transposed.
+    For a usage example, see
+    :ref:`sphx_glr_auto_examples_decomposition_plot_faces_decomposition.py`
+
 
     Read more in the :ref:`User Guide <NMF>`.
 

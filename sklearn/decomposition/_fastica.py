@@ -485,6 +485,11 @@ class FastICA(ClassNamePrefixFeaturesOutMixin, TransformerMixin, BaseEstimator):
     ----------
     .. [1] A. Hyvarinen and E. Oja, Independent Component Analysis:
            Algorithms and Applications, Neural Networks, 13(4-5), 2000,
+    For usage examples, see:
+    :ref:`sphx_glr_auto_examples_decomposition_plot_ica_blind_source_separation.py`
+    :ref:`sphx_glr_auto_examples_decomposition_plot_ica_vs_pca.py`
+    :ref:`sphx_glr_auto_examples_decomposition_plot_faces_decomposition.py`
+
            pp. 411-430.
 
     Examples
