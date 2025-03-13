@@ -179,6 +179,10 @@ class Kernel(metaclass=ABCMeta):
 
     See :ref:`sphx_glr_auto_examples_gaussian_process_plot_gpr_prior_posterior.py`
     for an example illustrating different kernels and their behavior.
+
+    See :ref:`sphx_glr_auto_examples_gaussian_process_plot_gpr_on_structured_data.py`
+    for an example demonstrating how to create custom kernels by extending this base
+    class for structured data like variable-length sequences.
     """
 
     def get_params(self, deep=True):
@@ -507,6 +511,10 @@ class GenericKernelMixin:
     length sequences, trees, and graphs.
 
     .. versionadded:: 0.22
+
+    See :ref:`sphx_glr_auto_examples_gaussian_process_plot_gpr_on_structured_data.py`
+    for an example demonstrating how to use this mixin to create custom kernels
+    for variable-length sequence data.
     """
 
     @property
