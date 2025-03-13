@@ -838,6 +838,10 @@ class Sum(KernelOperator):
     See :ref:`sphx_glr_auto_examples_gaussian_process_plot_gpr_prior_posterior.py`
     for an example illustrating how the Sum kernel can be used to combine
     different kernels to create more complex covariance functions.
+
+    See :ref:`sphx_glr_auto_examples_gaussian_process_plot_gpr_co2.py`
+    for an example showing how combining multiple kernels with the Sum operator
+    can model time series with both long-term trends and seasonality.
     """
 
     def __call__(self, X, Y=None, eval_gradient=False):
@@ -2145,17 +2149,17 @@ class DotProduct(Kernel):
     The DotProduct kernel is non-stationary and can be obtained from linear
     regression by putting :math:`N(0, 1)` priors on the coefficients
     of :math:`x_d (d = 1, . . . , D)` and a prior of :math:`N(0, \sigma_0^2)`
-    on the bias. The DotProduct kernel is invariant to a rotation of
+    on the bias. The kernel is given by
+
+    .. math::
+        k(x_i, x_j) = \sigma_0 ^ 2 + x_i \cdot x_j
+
+    The DotProduct kernel is invariant to a rotation of
     the coordinates about the origin, but not translations.
     It is parameterized by a parameter sigma_0 :math:`\sigma`
     which controls the inhomogenity of the kernel. For :math:`\sigma_0^2 =0`,
     the kernel is called the homogeneous linear kernel, otherwise
     it is inhomogeneous. The kernel is given by
-
-    .. math::
-        k(x_i, x_j) = \sigma_0 ^ 2 + x_i \cdot x_j
-
-    The DotProduct kernel is commonly combined with exponentiation.
 
     Read more in the :ref:`User Guide <gp_kernels>`.
 
