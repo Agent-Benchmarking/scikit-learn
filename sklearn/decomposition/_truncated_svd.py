@@ -128,9 +128,14 @@ class TruncatedSVD(ClassNamePrefixFeaturesOutMixin, TransformerMixin, BaseEstima
     Notes
     -----
     SVD suffers from a problem called "sign indeterminacy", which means the
-    sign of the ``components_`` and the output from transform depend on the
     algorithm and random state. To work around this, fit instances of this
     class to data once, then keep the instance around to do transformations.
+
+    For a usage example in text mining, see
+    :ref:`sphx_glr_auto_examples_text_plot_document_clustering.py`
+
+    For an example of using TruncatedSVD for visualization, see
+    :ref:`sphx_glr_auto_examples_manifold_plot_lle_digits.py`
 
     References
     ----------

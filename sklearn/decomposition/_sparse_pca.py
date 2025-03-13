@@ -253,6 +253,9 @@ class SparsePCA(_BaseSparsePCA):
         accurate.
     DictionaryLearning : Generic dictionary learning problem using a sparse code.
 
+    For an example of using SparsePCA in faces dataset, see
+    :ref:`sphx_glr_auto_examples_decomposition_plot_faces_decomposition.py`
+
     Examples
     --------
     >>> import numpy as np
@@ -343,7 +346,7 @@ class MiniBatchSparsePCA(_BaseSparsePCA):
     the data.  The amount of sparseness is controllable by the coefficient
     of the L1 penalty, given by the parameter alpha.
 
-    For an example comparing sparse PCA to PCA, see
+    For an example comparing sparse PCA to PCA and using MiniBatchSparsePCA, see
     :ref:`sphx_glr_auto_examples_decomposition_plot_faces_decomposition.py`
 
     Read more in the :ref:`User Guide <SparsePCA>`.

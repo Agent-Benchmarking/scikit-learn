@@ -144,6 +144,12 @@ class FactorAnalysis(ClassNamePrefixFeaturesOutMixin, TransformerMixin, BaseEsti
     FastICA: Independent component analysis, a latent variable model with
         non-Gaussian latent variables.
 
+    For an example of using FactorAnalysis on faces dataset, see
+    :ref:`sphx_glr_auto_examples_decomposition_plot_faces_decomposition.py`
+
+    For an example of varimax FA rotation, see
+    :ref:`sphx_glr_auto_examples_decomposition_plot_varimax_fa.py`
+
     References
     ----------
     - David Barber, Bayesian Reasoning and Machine Learning,
