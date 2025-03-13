@@ -308,7 +308,7 @@ class MeanShift(ClusterMixin, BaseEstimator):
 
     Seeding is performed using a binning technique for scalability.
 
-    For an example of how to use MeanShift clustering, refer to:
+    For an example of how to use MeanShift clustering, refer to
     :ref:`sphx_glr_auto_examples_cluster_plot_mean_shift.py`.
 
     Read more in the :ref:`User Guide <mean_shift>`.
@@ -433,8 +433,12 @@ class MeanShift(ClusterMixin, BaseEstimator):
     >>> clustering
     MeanShift(bandwidth=2)
 
-    For a comparison of Mean Shift clustering with other clustering algorithms, see
-    :ref:`sphx_glr_auto_examples_cluster_plot_cluster_comparison.py`
+    For additional examples on MeanShift clustering:
+    
+    - See :ref:`sphx_glr_auto_examples_cluster_plot_mean_shift.py`
+      for a detailed usage example of MeanShift clustering.
+    - See :ref:`sphx_glr_auto_examples_cluster_plot_cluster_comparison.py`
+      for a comparison of MeanShift with other clustering algorithms.
     """
 
     _parameter_constraints: dict = {

@@ -87,8 +87,8 @@ Let's first identify available examples in the clustering module.
 - [x] Add link to `plot_cluster_comparison.py`
 
 ### MeanShift
-- [ ] Add link to `plot_mean_shift.py`
-- [ ] Add link to `plot_cluster_comparison.py`
+- [x] Add link to `plot_mean_shift.py`
+- [x] Add link to `plot_cluster_comparison.py`
 
 ### FeatureAgglomeration
 - [ ] Add link to `plot_digits_agglomeration.py`
