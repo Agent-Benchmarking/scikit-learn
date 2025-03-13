@@ -294,13 +294,17 @@ def ward_tree(X, *, connectivity=None, n_clusters=None, return_distance=False):
     :ref:`sphx_glr_auto_examples_cluster_plot_cluster_comparison.py`
 
     For more examples on Agglomerative clustering:
-    
+
     - See :ref:`sphx_glr_auto_examples_cluster_plot_ward_structured_vs_unstructured.py`
-      for an example of hierarchical clustering with structured vs unstructured Ward linkage.
+      for an example of hierarchical clustering with structured vs unstructured
+      Ward linkage.
     - See :ref:`sphx_glr_auto_examples_cluster_plot_agglomerative_clustering.py`
-      for an illustration of the effect of connectivity constraints on hierarchical clustering.
+      for an illustration of the effect of connectivity constraints on hierarchical
+      clustering.
     - See :ref:`sphx_glr_auto_examples_cluster_plot_agglomerative_dendrogram.py`
       for an example of creating and visualizing a hierarchical clustering dendrogram.
+    - See :ref:`sphx_glr_auto_examples_cluster_plot_agglomerative_clustering_metrics.py`
+      for an example of using different metrics for hierarchical clustering.
     """
     X = np.asarray(X)
     if X.ndim == 1:
@@ -789,6 +793,7 @@ def _hc_cut(n_clusters, children, n_leaves):
 
 ###############################################################################
 
+
 class AgglomerativeClustering(ClusterMixin, BaseEstimator):
     """
     Agglomerative Clustering.
@@ -942,13 +947,17 @@ class AgglomerativeClustering(ClusterMixin, BaseEstimator):
     :ref:`sphx_glr_auto_examples_cluster_plot_cluster_comparison.py`
 
     For more examples on Agglomerative clustering:
-    
+
     - See :ref:`sphx_glr_auto_examples_cluster_plot_ward_structured_vs_unstructured.py`
-      for an example of hierarchical clustering with structured vs unstructured Ward linkage.
+      for an example of hierarchical clustering with structured vs unstructured
+      Ward linkage.
     - See :ref:`sphx_glr_auto_examples_cluster_plot_agglomerative_clustering.py`
-      for an illustration of the effect of connectivity constraints on hierarchical clustering.
+      for an illustration of the effect of connectivity constraints on hierarchical
+      clustering.
     - See :ref:`sphx_glr_auto_examples_cluster_plot_agglomerative_dendrogram.py`
       for an example of creating and visualizing a hierarchical clustering dendrogram.
+    - See :ref:`sphx_glr_auto_examples_cluster_plot_agglomerative_clustering_metrics.py`
+      for an example of using different metrics for hierarchical clustering.
     """
 
     _parameter_constraints: dict = {
@@ -1219,6 +1228,9 @@ class FeatureAgglomeration(
 
         .. versionadded:: 0.24
 
+        For an example of dendrogram visualization, see
+        :ref:`sphx_glr_auto_examples_cluster_plot_agglomerative_dendrogram.py`.
+
     Attributes
     ----------
     n_clusters_ : int
@@ -1281,12 +1293,15 @@ class FeatureAgglomeration(
     >>> X_reduced = agglo.transform(X)
     >>> X_reduced.shape
     (1797, 32)
-    
+
     For additional examples on FeatureAgglomeration:
-    
-    - See :ref:`sphx_glr_auto_examples_cluster_plot_feature_agglomeration_vs_univariate_selection.py`
-      for an example comparison of FeatureAgglomeration with a univariate feature selection strategy.
-    - See :ref:`sphx_glr_auto_examples_cluster_plot_digits_agglomeration.py`
+
+    - See
+      :ref:`sphx_glr_auto_examples_cluster_plot_feature_agglomeration_vs_univariate_selection.py`
+      for an example comparison of FeatureAgglomeration with a univariate feature
+      selection strategy.
+    - See
+      :ref:`sphx_glr_auto_examples_cluster_plot_digits_agglomeration.py`
       for an example of dimensionality reduction on handwritten digits.
     """
 
