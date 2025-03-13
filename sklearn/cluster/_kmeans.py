@@ -1366,8 +1366,21 @@ class KMeans(_BaseKMeans):
 
     For a comparison between K-Means and BisectingKMeans refer to example
     :ref:`sphx_glr_auto_examples_cluster_plot_bisect_kmeans.py`.
-    """
 
+    To see a comparison of different initialization methods for K-means on the digits dataset see
+    :ref:`sphx_glr_auto_examples_cluster_plot_kmeans_digits.py`.
+
+    For an example of using silhouette analysis to determine the optimal number of clusters see
+    :ref:`sphx_glr_auto_examples_cluster_plot_kmeans_silhouette_analysis.py`.
+
+    For a visualization of how the k-means++ initialization works see
+    :ref:`sphx_glr_auto_examples_cluster_plot_kmeans_plusplus.py`.
+    For an evaluation of the impact of initialization and stability of k-means see
+    :ref:`sphx_glr_auto_examples_cluster_plot_kmeans_stability_low_dim_dense.py`.
+
+    For a comparison of various clustering algorithms including k-means see
+    :ref:`sphx_glr_auto_examples_cluster_plot_cluster_comparison.py`.
+    """
     _parameter_constraints: dict = {
         **_BaseKMeans._parameter_constraints,
         "copy_x": ["boolean"],
@@ -1842,6 +1855,10 @@ class MiniBatchKMeans(_BaseKMeans):
     See :ref:`sphx_glr_auto_examples_cluster_plot_birch_vs_minibatchkmeans.py` for a
     comparison with :class:`~sklearn.cluster.BIRCH`.
 
+    For a direct comparison between :class:`~sklearn.cluster.KMeans` and
+    :class:`~sklearn.cluster.MiniBatchKMeans`, see
+    :ref:`sphx_glr_auto_examples_cluster_plot_mini_batch_kmeans.py`.
+
     Examples
     --------
     >>> from sklearn.cluster import MiniBatchKMeans
@@ -2194,8 +2211,8 @@ class MiniBatchKMeans(_BaseKMeans):
                 self.cluster_centers_,
                 n_threads=self._n_threads,
             )
-        else:
-            self.inertia_ = self._ewa_inertia * n_samples
+
+        self.inertia_ = self._ewa_inertia * n_samples
 
         return self
 

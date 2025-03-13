@@ -188,6 +188,9 @@ class BisectingKMeans(_BaseKMeans):
     --------
     KMeans : Original implementation of K-Means algorithm.
 
+    For a comparison between K-Means and BisectingKMeans refer to example
+    :ref:`sphx_glr_auto_examples_cluster_plot_bisect_kmeans.py`.
+
     Notes
     -----
     It might be inefficient when n_cluster is less than 3, due to unnecessary
