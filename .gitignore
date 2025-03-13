@@ -96,3 +96,8 @@ jupyterlite_contents
 
 # file recognised by vscode IDEs containing env variables
 .env
+
+# Progress tracking files
+*_progress.md
+*_progress_detailed.md
+uv.lock
