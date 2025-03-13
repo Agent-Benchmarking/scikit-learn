@@ -13,6 +13,9 @@
 # rectangular). Instead of specifying bounds, hyperparameters can also be
 # declared to be "fixed", which causes these hyperparameters to be excluded from
 # optimization.
+#
+# See :ref:`sphx_glr_auto_examples_gaussian_process_plot_gpr_prior_posterior.py`
+# for an example illustrating different kernels and their parameters.
 
 
 # Authors: The scikit-learn developers
@@ -173,6 +176,9 @@ class Kernel(metaclass=ABCMeta):
     >>> print(kernel(X))
     [[ 25 121]
      [121 625]]
+
+    See :ref:`sphx_glr_auto_examples_gaussian_process_plot_gpr_prior_posterior.py`
+    for an illustration of different kernels and their behavior.
     """
 
     def get_params(self, deep=True):
@@ -846,6 +852,7 @@ class Sum(KernelOperator):
         eval_gradient : bool, default=False
             Determines whether the gradient with respect to the log of
             the kernel hyperparameter is computed.
+            Only supported when Y is None.
 
         Returns
         -------
@@ -868,7 +875,7 @@ class Sum(KernelOperator):
     def diag(self, X):
         """Returns the diagonal of the kernel k(X, X).
 
-        The result of this method is identical to `np.diag(self(X))`; however,
+        The result of this method is identical to np.diag(self(X)); however,
         it can be evaluated more efficiently since only the diagonal is
         evaluated.
 
@@ -1250,8 +1257,8 @@ class ConstantKernel(StationaryKernelMixin, GenericKernelMixin, Kernel):
             is evaluated instead.
 
         eval_gradient : bool, default=False
-            Determines whether the gradient with respect to the log of
-            the kernel hyperparameter is computed.
+            Determines whether the gradient with respect to the log of the
+            kernel hyperparameter is computed.
             Only supported when Y is None.
 
         Returns
@@ -1392,7 +1399,7 @@ class WhiteKernel(StationaryKernelMixin, GenericKernelMixin, Kernel):
         K_gradient : ndarray of shape (n_samples_X, n_samples_X, n_dims),\
             optional
             The gradient of the kernel k(X, X) with respect to the log of the
-            hyperparameter of the kernel. Only returned when eval_gradient
+            hyperparameter of the kernel. Only returned when `eval_gradient`
             is True.
         """
         if Y is not None and eval_gradient:
@@ -1805,7 +1812,7 @@ class RationalQuadratic(StationaryKernelMixin, NormalizedKernelMixin, Kernel):
 
     .. math::
         k(x_i, x_j) = \\left(
-        1 + \\frac{d(x_i, x_j)^2 }{ 2\\alpha  l^2}\\right)^{-\\alpha}
+        1 + \\frac{d(x_i, x_j)^2 }{ 2\\alpha  l^ 2}\\right)^{-\\alpha}
 
     where :math:`\\alpha` is the scale mixture parameter, :math:`l` is
     the length scale of the kernel and :math:`d(\\cdot,\\cdot)` is the
@@ -1853,7 +1860,7 @@ class RationalQuadratic(StationaryKernelMixin, NormalizedKernelMixin, Kernel):
     0.9733...
     >>> gpc.predict_proba(X[:2,:])
     array([[0.8881..., 0.0566..., 0.05518...],
-            [0.8678..., 0.0707... , 0.0614...]])
+           [0.8678..., 0.0707... , 0.0614...]])
     """
 
     def __init__(
@@ -1898,9 +1905,10 @@ class RationalQuadratic(StationaryKernelMixin, NormalizedKernelMixin, Kernel):
         K : ndarray of shape (n_samples_X, n_samples_Y)
             Kernel k(X, Y)
 
-        K_gradient : ndarray of shape (n_samples_X, n_samples_X, n_dims)
+        K_gradient : ndarray of shape (n_samples_X, n_samples_X, n_dims), \
+                optional
             The gradient of the kernel k(X, X) with respect to the log of the
-            hyperparameter of the kernel. Only returned when eval_gradient
+            hyperparameter of the kernel. Only returned when `eval_gradient`
             is True.
         """
         if len(np.atleast_1d(self.length_scale)) > 1:
@@ -1928,7 +1936,6 @@ class RationalQuadratic(StationaryKernelMixin, NormalizedKernelMixin, Kernel):
                 length_scale_gradient = length_scale_gradient[:, :, np.newaxis]
             else:  # l is kept fixed
                 length_scale_gradient = np.empty((K.shape[0], K.shape[1], 0))
-
             # gradient with respect to alpha
             if not self.hyperparameter_alpha.fixed:
                 alpha_gradient = K * (
@@ -1965,7 +1972,6 @@ class ExpSineSquared(StationaryKernelMixin, NormalizedKernelMixin, Kernel):
     where :math:`l` is the length scale of the kernel, :math:`p` the
     periodicity of the kernel and :math:`d(\cdot,\cdot)` is the
     Euclidean distance.
-
     Read more in the :ref:`User Guide <gp_kernels>`.
 
     .. versionadded:: 0.18
