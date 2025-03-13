@@ -63,15 +63,15 @@ From the GitHub issue #30621, the following GP examples are available:
 ## Potential Improvements
 
 ### Consider adding these links:
-- [ ] Add link to `plot_gpr_co2.py` in relevant kernel docstrings
+- [x] Add link to `plot_gpr_co2.py` in relevant kernel docstrings
   - This example shows time series forecasting with GPs
   - Could be relevant for kernels commonly used in time series:
-    - RBF kernel (for long-term trend modeling)
-    - ExpSineSquared kernel (for modeling seasonality)
-    - RationalQuadratic kernel (for modeling irregularities)
-    - WhiteKernel (for modeling noise)
-    - Sum kernel (for combining multiple kernel components)
-  - **Status**: Added reference to the Sum kernel docstring. Need to add to others.
+    - [x] RBF kernel (for long-term trend modeling)
+    - [x] ExpSineSquared kernel (for modeling seasonality)
+    - [x] RationalQuadratic kernel (for modeling irregularities)
+    - [x] WhiteKernel (for modeling noise)
+    - [x] Sum kernel (for combining multiple kernel components)
+  - **Status**: Added reference to all relevant kernels in the CO2 example.
 
 - [ ] Add link to `plot_gpr_on_structured_data.py` in relevant kernel docstrings
   - This example shows how to use GPs with structured data

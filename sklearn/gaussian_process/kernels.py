@@ -1387,6 +1387,10 @@ class WhiteKernel(StationaryKernelMixin, GenericKernelMixin, Kernel):
     See :ref:`sphx_glr_auto_examples_gaussian_process_plot_gpr_noisy.py`
     for an example showing the ability of WhiteKernel to estimate the noise level
     in the data.
+
+    See :ref:`sphx_glr_auto_examples_gaussian_process_plot_gpr_co2.py`
+    for an example demonstrating how WhiteKernel can be combined with other kernels
+    to model noise in time series data.
     """
 
     def __init__(self, noise_level=1.0, noise_level_bounds=(1e-5, 1e5)):
@@ -1540,6 +1544,10 @@ class RBF(StationaryKernelMixin, NormalizedKernelMixin, Kernel):
     See :ref:`sphx_glr_auto_examples_gaussian_process_plot_gpr_noisy.py`
     for an example demonstrating how RBF kernel is combined with WhiteKernel to
     model signal with noise.
+
+    See :ref:`sphx_glr_auto_examples_gaussian_process_plot_gpr_co2.py`
+    for an example demonstrating how RBF kernel can be used to model long-term trends
+    in time series data.
     """
 
     def __init__(self, length_scale=1.0, length_scale_bounds=(1e-5, 1e5)):
@@ -1900,6 +1908,10 @@ class RationalQuadratic(StationaryKernelMixin, NormalizedKernelMixin, Kernel):
     See :ref:`sphx_glr_auto_examples_gaussian_process_plot_gpr_prior_posterior.py`
     for an example illustrating RationalQuadratic kernel and how it affects the
     resulting Gaussian process.
+
+    See :ref:`sphx_glr_auto_examples_gaussian_process_plot_gpr_co2.py`
+    for an example demonstrating how RationalQuadratic kernel can be used to model
+    small irregularities in time series data.
     """
 
     def __init__(
@@ -1945,7 +1957,7 @@ class RationalQuadratic(StationaryKernelMixin, NormalizedKernelMixin, Kernel):
             Kernel k(X, Y)
 
         K_gradient : ndarray of shape (n_samples_X, n_samples_X, n_dims), \
-                optional
+            optional
             The gradient of the kernel k(X, X) with respect to the log of the
             hyperparameter of the kernel. Only returned when `eval_gradient`
             is True.
@@ -2051,6 +2063,10 @@ class ExpSineSquared(StationaryKernelMixin, NormalizedKernelMixin, Kernel):
     See :ref:`sphx_glr_auto_examples_gaussian_process_plot_gpr_prior_posterior.py`
     for an example illustrating the ExpSineSquared kernel and how it models
     periodic functions.
+
+    See :ref:`sphx_glr_auto_examples_gaussian_process_plot_gpr_co2.py`
+    for an example demonstrating how ExpSineSquared kernel can be used to model
+    seasonal patterns in time series data.
     """
 
     def __init__(
@@ -2097,7 +2113,7 @@ class ExpSineSquared(StationaryKernelMixin, NormalizedKernelMixin, Kernel):
             Kernel k(X, Y)
 
         K_gradient : ndarray of shape (n_samples_X, n_samples_X, n_dims), \
-                optional
+            optional
             The gradient of the kernel k(X, X) with respect to the log of the
             hyperparameter of the kernel. Only returned when `eval_gradient`
             is True.
@@ -2194,7 +2210,7 @@ class DotProduct(Kernel):
     >>> gpr.score(X, y)
     0.3680...
     >>> gpr.predict(X[:2,:], return_std=True)
-    (array([653.0..., 592.1...]), array([316.6..., 316.6...]))
+    (array([653.0..., 592.1... ]), array([316.6..., 316.6...]))
 
     See :ref:`sphx_glr_auto_examples_gaussian_process_plot_gpr_noisy.py`
     for an example demonstrating how DotProduct can be combined with WhiteKernel
