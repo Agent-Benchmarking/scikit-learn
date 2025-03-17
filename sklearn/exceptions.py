@@ -18,6 +18,10 @@ __all__ = [
 ]
 
 
+class ModifiedCodeWarning:
+    pass
+
+
 class UnsetMetadataPassedError(ValueError):
     """Exception class to raise if a metadata is passed which is not explicitly \
         requested (metadata=True) or not requested (metadata=False).
