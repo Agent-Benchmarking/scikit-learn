@@ -22,31 +22,46 @@
 ## Classes and Their Example Links
 
 ### PCA
-- [ ] Add link to `plot_pca_iris.py`
-- [ ] Add link to `plot_pca_vs_lda.py`
-- [ ] Add link to `plot_pca_vs_fa_model_selection.py`
-- [ ] Add link to `plot_faces_decomposition.py`
-- [ ] Add link to `plot_ica_vs_pca.py`
+- [x] Already has links to:
+  - `plot_pca_iris.py`
+  - `plot_pca_vs_lda.py`
+  - `plot_pca_vs_fa_model_selection.py`
+  - `plot_faces_decomposition.py`
+  - `plot_ica_vs_pca.py`
 
 ### IncrementalPCA
-- [ ] Add link to `plot_incremental_pca.py`
+- [x] Already has link to `plot_incremental_pca.py`
 
 ### KernelPCA
-- [ ] Add link to `plot_kernel_pca.py`
+- [x] Already has links to:
+  - `plot_kernel_pca.py`
+  - `plot_digits_denoising.py`
 
 ### SparsePCA
-- [x] Add link to `plot_faces_decomposition.py` (if it includes SparsePCA)
+- [x] Already has link to `plot_faces_decomposition.py`
+
+### MiniBatchSparsePCA
+- [x] Already has link to `plot_faces_decomposition.py`
 
 ### FactorAnalysis
-- [ ] Add link to `plot_pca_vs_fa_model_selection.py`
-- [ ] Add link to `plot_varimax_fa.py`
+- [x] Already has links to:
+  - `plot_faces_decomposition.py`
+  - `plot_varimax_fa.py`
 
 ### FastICA
-- [ ] Add link to `plot_ica_blind_source_separation.py`
-- [ ] Add link to `plot_ica_vs_pca.py`
+- [x] Already has links to:
+  - `plot_ica_blind_source_separation.py`
+  - `plot_ica_vs_pca.py`
+  - `plot_faces_decomposition.py`
 
 ### NMF (Non-negative Matrix Factorization)
-- [ ] Add link to `plot_faces_decomposition.py` (if it includes NMF)
+- [x] Added links to:
+  - `plot_faces_decomposition.py`
+  - `plot_topics_extraction_with_nmf_lda.py`
+
+### MiniBatchNMF
+- [x] Added link to:
+  - `plot_topics_extraction_with_nmf_lda.py`
 
 ### DictionaryLearning
 - [x] Add link to `plot_sparse_coding.py`
