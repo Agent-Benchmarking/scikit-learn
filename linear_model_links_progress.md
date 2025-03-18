@@ -76,7 +76,7 @@
 - [x] LarsCV - No specific examples found
 
 ### Logistic Regression
-- [ ] LogisticRegression - Check `plot_logistic.py`, `plot_logistic_path.py`, `plot_logistic_l1_l2_sparsity.py`, `plot_logistic_multinomial.py`
+- [x] LogisticRegression - Added example links: `plot_logistic.py`, `plot_logistic_path.py`, `plot_logistic_l1_l2_sparsity.py`, `plot_logistic_multinomial.py`
 - [ ] LogisticRegressionCV - Check for relevant examples
 
 ### Orthogonal Matching Pursuit (OMP)
