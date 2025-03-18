@@ -704,6 +704,11 @@ class GammaRegressor(_GeneralizedLinearRegressor):
     np.float64(2.896...)
     >>> clf.predict([[1, 0], [2, 8]])
     array([19.483..., 35.795...])
+
+    .. topic:: Examples:
+
+        * :ref:`plot_tweedie_regression_insurance_claims`
+          Modeling insurance claims using GammaRegressor.
     """
 
     _parameter_constraints: dict = {
