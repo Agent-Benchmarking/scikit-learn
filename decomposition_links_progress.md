@@ -73,7 +73,7 @@
 - [x] Already has links to `plot_document_clustering.py` and `plot_lle_digits.py`
 
 ### LatentDirichletAllocation
-- [ ] Identify if any examples demonstrate LDA
+- [x] Added link to `plot_topics_extraction_with_nmf_lda.py`
 
 ## Strategy
 1. First check each example file to understand what classes it demonstrates
