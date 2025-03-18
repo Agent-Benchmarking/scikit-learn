@@ -166,7 +166,7 @@ def _gram_omp(
     Parameters
     ----------
     Gram : ndarray of shape (n_features, n_features)
-        Gram matrix of the input data matrix.
+        Gram matrix of the input data.
 
     Xy : ndarray of shape (n_features,)
         Input targets.
@@ -549,8 +549,9 @@ def orthogonal_mp_gram(
     --------
     OrthogonalMatchingPursuit : Orthogonal Matching Pursuit model (OMP).
     orthogonal_mp : Solves n_targets Orthogonal Matching Pursuit problems.
-    lars_path : Compute Least Angle Regression or Lasso path using
-        LARS algorithm.
+    lars_path : Compute Least Angle Regression or Lasso path using LARS algorithm.
+    Lars : Least Angle Regression model a.k.a. LAR.
+    LassoLars : Lasso model fit with Least Angle Regression a.k.a. Lars.
     sklearn.decomposition.sparse_encode : Generic sparse coding.
         Each column of the result is the solution to a Lasso problem.
 
@@ -730,6 +731,10 @@ class OrthogonalMatchingPursuit(MultiOutputMixin, RegressorMixin, LinearModel):
     0.9991...
     >>> reg.predict(X[:1,])
     array([-78.3854...])
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_omp.py`
     """
 
     _parameter_constraints: dict = {
@@ -999,6 +1004,10 @@ class OrthogonalMatchingPursuitCV(RegressorMixin, LinearModel):
     np.int64(10)
     >>> reg.predict(X[:1,])
     array([-78.3854...])
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_omp.py`
     """
 
     _parameter_constraints: dict = {

@@ -80,8 +80,8 @@
 - [x] LogisticRegressionCV - Added example links: `plot_compare_calibration.py`, `plot_scaling_importance.py`
 
 ### Orthogonal Matching Pursuit (OMP)
-- [ ] OrthogonalMatchingPursuit - Check `plot_omp.py`
-- [ ] OrthogonalMatchingPursuitCV - Check for relevant examples
+- [x] OrthogonalMatchingPursuit - Added example link: `plot_omp.py`
+- [x] OrthogonalMatchingPursuitCV - Added example link: `plot_omp.py`
 
 ### Stochastic Gradient Descent
 - [ ] SGDClassifier - Check `plot_sgd_comparison.py`, `plot_sgd_iris.py`, `plot_sgd_loss_functions.py`, `plot_sgd_penalties.py`, `plot_sgd_separating_hyperplane.py`
