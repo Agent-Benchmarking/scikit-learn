@@ -52,10 +52,10 @@
 - [x] HistGradientBoostingClassifier - Added links to `plot_forest_hist_grad_boosting_comparison.py`, `plot_feature_transformation.py`, and `plot_cost_sensitive_learning.py`
 - [x] HistGradientBoostingRegressor - Added links to `plot_hgbt_regression.py`, `plot_forest_hist_grad_boosting_comparison.py`, `plot_time_series_lagged_features.py`, and `plot_partial_dependence.py`
 - [x] IsolationForest - Added links to `plot_isolation_forest.py`, `plot_anomaly_comparison.py`, and `plot_outlier_detection_bench.py`
-- [ ] StackingClassifier
-- [ ] StackingRegressor
-- [ ] VotingClassifier
-- [ ] VotingRegressor
+- [x] StackingClassifier - Added links to `plot_release_highlights_0_22_0.py` and `plot_stack_predictors.py`
+- [x] StackingRegressor - Added links to `plot_stack_predictors.py` and `plot_release_highlights_0_22_0.py`
+- [x] VotingClassifier - Added links to `plot_voting_decision_regions.py` and `plot_voting_probas.py`
+- [x] VotingRegressor - Added link to `plot_voting_regressor.py`
 - [x] AdaBoostClassifier - Already has links to `plot_adaboost_multiclass.py` and `plot_adaboost_twoclass.py`
 - [x] AdaBoostRegressor - Already has link to `plot_adaboost_regression.py`
 

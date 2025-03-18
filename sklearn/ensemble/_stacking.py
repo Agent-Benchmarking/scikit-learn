@@ -595,6 +595,13 @@ class StackingClassifier(ClassifierMixin, _BaseStacking):
     ... )
     >>> clf.fit(X_train, y_train).score(X_test, y_test)
     0.9...
+
+    .. topic:: Examples:
+
+        * :ref:`plot_stack_predictors`
+          Example of stacking to combine multiple predictors.
+        * :ref:`release_highlights_0_22_0`
+          Demonstration of StackingClassifier in release highlights.
     """
 
     _parameter_constraints: dict = {
@@ -989,6 +996,13 @@ class StackingRegressor(RegressorMixin, _BaseStacking):
     ... )
     >>> reg.fit(X_train, y_train).score(X_test, y_test)
     0.3...
+
+    .. topic:: Examples:
+
+        * :ref:`plot_stack_predictors`
+          Example of stacking to combine multiple regressors.
+        * :ref:`release_highlights_0_22_0`
+          Introduction of Stacking estimators in release highlights.
     """
 
     def __init__(
