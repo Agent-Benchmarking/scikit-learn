@@ -459,7 +459,12 @@ class PassiveAggressiveRegressor(BaseSGDRegressor):
     [-0.02306214]
     >>> print(regr.predict([[0, 0, 0, 0]]))
     [-0.02306214]
-    """
+    
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_sgd_comparison.py`
+"""
 
     _parameter_constraints: dict = {
         **BaseSGDRegressor._parameter_constraints,

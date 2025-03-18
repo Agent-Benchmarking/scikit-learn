@@ -2893,7 +2893,12 @@ class RidgeClassifierCV(_RidgeClassifierMixin, _BaseRidgeCV):
     >>> clf = RidgeClassifierCV(alphas=[1e-3, 1e-2, 1e-1, 1]).fit(X, y)
     >>> clf.score(X, y)
     0.9630...
-    """
+    
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_text_plot_document_classification_20newsgroups.py`
+"""
 
     _parameter_constraints: dict = {
         **_BaseRidgeCV._parameter_constraints,
