@@ -136,7 +136,7 @@ jobs:
 
       - name: Check selected tests for all random seeds
         if: github.event_name == 'pull_request'
-        run: python build_tools/azure/get_selected_tests.py
+        run: python build_tools/github/get_selected_tests.py
 
       - name: Setup conda
         run: build_tools/azure/install_setup_conda.sh
@@ -154,7 +154,7 @@ jobs:
         run: build_tools/azure/install.sh
 
       - name: Run tests
-        run: build_tools/azure/test_script.sh
+        run: build_tools/github/test_script.sh
 
       - name: Test documentation
         if: env.SELECTED_TESTS == ''
@@ -205,7 +205,7 @@ jobs:
 
       - name: Check selected tests for all random seeds
         if: github.event_name == 'pull_request'
-        run: python build_tools/azure/get_selected_tests.py
+        run: python build_tools/github/get_selected_tests.py
 
       - name: Setup conda
         run: build_tools/azure/install_setup_conda.sh
@@ -223,7 +223,7 @@ jobs:
         run: build_tools/azure/install.sh
 
       - name: Run tests
-        run: build_tools/azure/test_script.sh
+        run: build_tools/github/test_script.sh
 
       - name: Test documentation
         if: env.SELECTED_TESTS == ''
@@ -275,7 +275,7 @@ jobs:
 
       - name: Check selected tests for all random seeds
         if: github.event_name == 'pull_request'
-        run: python build_tools/azure/get_selected_tests.py
+        run: python build_tools/github/get_selected_tests.py
 
       - name: Cache ccache
         uses: actions/cache@v4
@@ -290,7 +290,7 @@ jobs:
         run: build_tools/azure/install.sh
 
       - name: Run tests
-        run: build_tools/azure/test_script.sh
+        run: build_tools/github/test_script.sh
 
       - name: Test documentation
         if: env.SELECTED_TESTS == ''
@@ -340,7 +340,7 @@ jobs:
 
       - name: Check selected tests for all random seeds
         if: github.event_name == 'pull_request'
-        run: python build_tools/azure/get_selected_tests.py
+        run: python build_tools/github/get_selected_tests.py
 
       - name: Cache ccache
         uses: actions/cache@v4
@@ -355,7 +355,7 @@ jobs:
         run: build_tools/azure/install.sh
 
       - name: Run tests
-        run: build_tools/azure/test_script.sh
+        run: build_tools/github/test_script.sh
 
       - name: Test documentation
         if: env.SELECTED_TESTS == ''
