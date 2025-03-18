@@ -866,6 +866,11 @@ class TweedieRegressor(_GeneralizedLinearRegressor):
     np.float64(1.600...)
     >>> clf.predict([[1, 1], [3, 4]])
     array([2.500..., 4.599...])
+
+    .. topic:: Examples:
+
+        * :ref:`plot_tweedie_regression_insurance_claims`
+          Modeling insurance claims using TweedieRegressor.
     """
 
     _parameter_constraints: dict = {

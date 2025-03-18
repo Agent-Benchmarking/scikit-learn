@@ -69,7 +69,7 @@
 ### Generalized Linear Models (GLM)
 - [x] PoissonRegressor - Completed - Added links to `plot_poisson_regression_non_normal_loss.py` and `plot_tweedie_regression_insurance_claims.py`
 - [ ] GammaRegressor - Check for relevant examples
-- [ ] TweedieRegressor - Check `plot_tweedie_regression_insurance_claims.py`
+- [x] TweedieRegressor - Completed - Added link to `plot_tweedie_regression_insurance_claims.py`
 
 ### Least Angle Regression
 - [ ] Lars - Check for relevant examples
