@@ -14,6 +14,12 @@ on:
     - cron: "30 2 * * *"
   # Manual run
   workflow_dispatch:
+    inputs:
+      parallel_mode:
+        description: 'Run in parallel mode'
+        required: false
+        default: 'false'
+        type: boolean
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -40,11 +46,13 @@ jobs:
         name: Get commit message
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
-            # For pull requests, use the last commit message in the PR
-            COMMIT_MSG=$(git log -1 --pretty=%B)
+            # For pull requests, use the PR title and body
+            COMMIT_MSG="${{ github.event.pull_request.title }} ${{ github.event.pull_request.body }}"
+            echo "Using PR title and body: $COMMIT_MSG"
           else
-            # For pushes, use the last non-merge commit message
-            COMMIT_MSG=$(git log --no-merges -1 --pretty=%B)
+            # For pushes, use the commit message
+            COMMIT_MSG="$(git log -1 --pretty=%B)"
+            echo "Using commit message: $COMMIT_MSG"
           fi
           echo "commit_message<<EOF" >> $GITHUB_OUTPUT
           echo "$COMMIT_MSG" >> $GITHUB_OUTPUT
@@ -65,11 +73,25 @@ jobs:
         run: |
           COMMIT_MSG="${{ steps.get_commit_message.outputs.commit_message }}"
           echo "Commit message: $COMMIT_MSG"
-          if [[ "$COMMIT_MSG" =~ \[azure\ parallel\] ]]; then
+
+          # Check if manual trigger with parallel_mode=true
+          if [[ "${{ github.event_name }}" = "workflow_dispatch" && "${{ github.event.inputs.parallel_mode }}" = "true" ]]; then
+            echo "Manual trigger with parallel_mode=true, enabling parallel mode"
+            echo "should_run_parallel=true" >> $GITHUB_OUTPUT
+          # Check for [azure parallel] with case insensitivity and allowing spaces
+          elif [[ "$COMMIT_MSG" =~ [Aa][Zz][Uu][Rr][Ee].*[Pp][Aa][Rr][Aa][Ll][Ll][Ee][Ll] ]]; then
+            echo "Found azure parallel tag, enabling parallel mode"
+            echo "should_run_parallel=true" >> $GITHUB_OUTPUT
+          # Also check for explicit tag
+          elif [[ "$COMMIT_MSG" == *"[azure parallel]"* ]]; then
             echo "Found [azure parallel] tag, enabling parallel mode"
             echo "should_run_parallel=true" >> $GITHUB_OUTPUT
+          # Also check if PR title or body contains 'parallel'
+          elif [[ "${{ github.event_name }}" = "pull_request" && "${{ github.event.pull_request.title }}" == *"parallel"* ]]; then
+            echo "PR title contains 'parallel', enabling parallel mode"
+            echo "should_run_parallel=true" >> $GITHUB_OUTPUT
           else
-            echo "No [azure parallel] tag found, using sequential mode"
+            echo "No parallel tag found, using sequential mode"
             echo "should_run_parallel=false" >> $GITHUB_OUTPUT
           fi
 
