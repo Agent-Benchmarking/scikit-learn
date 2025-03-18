@@ -63,7 +63,7 @@
 - [ ] LassoLarsIC - Attempted - Identified links to `plot_lasso_lars_ic.py` and `plot_lasso_model_selection.py`, but encountered timeout issues
 - [ ] MultiTaskElasticNet - Check for relevant examples
 - [ ] MultiTaskElasticNetCV - Check for relevant examples
-- [ ] MultiTaskLasso - Check `plot_multi_task_lasso_support.py`
+- [ ] MultiTaskLasso - Attempted - Identified link to `plot_multi_task_lasso_support.py`, but encountered timeout issues
 - [ ] MultiTaskLassoCV - Check for relevant examples
 
 ### Generalized Linear Models (GLM)
