@@ -97,10 +97,10 @@
 - [x] PassiveAggressiveRegressor - No suitable examples found in the codebase
 
 ### Robust Regression
-- [ ] HuberRegressor - Check `plot_huber_vs_ridge.py`
-- [ ] QuantileRegressor - Check `plot_quantile_regression.py`
-- [ ] RANSACRegressor - Check `plot_ransac.py`
-- [ ] TheilSenRegressor - Check `plot_theilsen.py`
+- [x] HuberRegressor - Added example link: `plot_huber_vs_ridge.py`
+- [x] QuantileRegressor - Added example link: `plot_quantile_regression.py`
+- [x] RANSACRegressor - Already had example link to `plot_ransac.py`
+- [x] TheilSenRegressor - Added example link: `plot_theilsen.py`
 
 ## Strategy
 1. First check each example file to understand what classes it demonstrates
