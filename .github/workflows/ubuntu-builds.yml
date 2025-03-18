@@ -139,7 +139,7 @@ jobs:
         run: python build_tools/github/get_selected_tests.py
 
       - name: Setup conda
-        run: build_tools/azure/install_setup_conda.sh
+        run: build_tools/github/install_setup_conda.sh
 
       - name: Cache ccache
         uses: actions/cache@v4
@@ -151,14 +151,14 @@ jobs:
         continue-on-error: true
 
       - name: Install dependencies
-        run: build_tools/azure/install.sh
+        run: build_tools/github/install.sh
 
       - name: Run tests
         run: build_tools/github/test_script.sh
 
       - name: Test documentation
         if: env.SELECTED_TESTS == ''
-        run: build_tools/azure/test_docs.sh
+        run: build_tools/github/test_docs.sh
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
@@ -169,7 +169,7 @@ jobs:
 
       - name: Upload to codecov
         if: success() && env.COVERAGE == 'true' && env.SELECTED_TESTS == ''
-        run: build_tools/azure/upload_codecov.sh
+        run: build_tools/github/upload_codecov.sh
 
   # Ubuntu Jammy Jellyfish build - parallel mode
   ubuntu_jammy_jellyfish_parallel:
@@ -208,7 +208,7 @@ jobs:
         run: python build_tools/github/get_selected_tests.py
 
       - name: Setup conda
-        run: build_tools/azure/install_setup_conda.sh
+        run: build_tools/github/install_setup_conda.sh
 
       - name: Cache ccache
         uses: actions/cache@v4
@@ -220,14 +220,14 @@ jobs:
         continue-on-error: true
 
       - name: Install dependencies
-        run: build_tools/azure/install.sh
+        run: build_tools/github/install.sh
 
       - name: Run tests
         run: build_tools/github/test_script.sh
 
       - name: Test documentation
         if: env.SELECTED_TESTS == ''
-        run: build_tools/azure/test_docs.sh
+        run: build_tools/github/test_docs.sh
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
@@ -238,7 +238,7 @@ jobs:
 
       - name: Upload to codecov
         if: success() && env.COVERAGE == 'true' && env.SELECTED_TESTS == ''
-        run: build_tools/azure/upload_codecov.sh
+        run: build_tools/github/upload_codecov.sh
 
   # Ubuntu Atlas build - depends on Ubuntu Jammy Jellyfish in sequential mode
   ubuntu_atlas:
@@ -287,14 +287,14 @@ jobs:
         continue-on-error: true
 
       - name: Install dependencies
-        run: build_tools/azure/install.sh
+        run: build_tools/github/install.sh
 
       - name: Run tests
         run: build_tools/github/test_script.sh
 
       - name: Test documentation
         if: env.SELECTED_TESTS == ''
-        run: build_tools/azure/test_docs.sh
+        run: build_tools/github/test_docs.sh
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
@@ -305,7 +305,7 @@ jobs:
 
       - name: Upload to codecov
         if: success() && env.COVERAGE == 'true' && env.SELECTED_TESTS == ''
-        run: build_tools/azure/upload_codecov.sh
+        run: build_tools/github/upload_codecov.sh
 
   # Ubuntu Atlas build - runs in parallel with Ubuntu Jammy Jellyfish in parallel mode
   ubuntu_atlas_parallel:
@@ -352,14 +352,14 @@ jobs:
         continue-on-error: true
 
       - name: Install dependencies
-        run: build_tools/azure/install.sh
+        run: build_tools/github/install.sh
 
       - name: Run tests
         run: build_tools/github/test_script.sh
 
       - name: Test documentation
         if: env.SELECTED_TESTS == ''
-        run: build_tools/azure/test_docs.sh
+        run: build_tools/github/test_docs.sh
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
@@ -370,4 +370,4 @@ jobs:
 
       - name: Upload to codecov
         if: success() && env.COVERAGE == 'true' && env.SELECTED_TESTS == ''
-        run: build_tools/azure/upload_codecov.sh
+        run: build_tools/github/upload_codecov.sh
