@@ -1455,6 +1455,15 @@ class GradientBoostingClassifier(ClassifierMixin, BaseGradientBoosting):
     ...     max_depth=1, random_state=0).fit(X_train, y_train)
     >>> clf.score(X_test, y_test)
     0.913...
+
+    .. topic:: Examples:
+
+        * :ref:`sphx_glr_auto_examples_ensemble_plot_gradient_boosting_oob.py`
+          Out-of-bag estimates for Gradient Boosting.
+        * :ref:`sphx_glr_auto_examples_ensemble_plot_gradient_boosting_regularization.py`  # noqa: E501
+          Regularization strategies for Gradient Boosting.
+        * :ref:`sphx_glr_auto_examples_ensemble_plot_feature_transformation.py`
+          Feature transformations with ensembles of trees.
     """
 
     _parameter_constraints: dict = {
@@ -2060,6 +2069,15 @@ class GradientBoostingRegressor(RegressorMixin, BaseGradientBoosting):
     :class:`~sklearn.ensemble.GradientBoostingRegressor`
     to fit an ensemble of weak predictive models, please refer to
     :ref:`sphx_glr_auto_examples_ensemble_plot_gradient_boosting_regression.py`.
+
+    .. topic:: Examples:
+
+        * :ref:`sphx_glr_auto_examples_ensemble_plot_gradient_boosting_regression.py`
+          Gradient Boosting for regression.
+        * :ref:`sphx_glr_auto_examples_ensemble_plot_gradient_boosting_quantile.py`
+          Prediction intervals using quantile regression.
+        * :ref:`sphx_glr_auto_examples_ensemble_plot_gradient_boosting_oob.py`
+          Out-of-bag estimates for Gradient Boosting.
     """
 
     _parameter_constraints: dict = {

@@ -767,7 +767,8 @@ class BaseHistGradientBoosting(BaseEstimator, ABC):
                     )
 
                     # If the scorer is a predefined string, then we optimize
-                    # the evaluation by reusing the incrementally updated raw predictions.
+                    # the evaluation by reusing the incrementally updated raw
+                    # predictions.
                     if scoring_is_predefined_string:
                         raw_predictions_small_train = raw_predictions[
                             indices_small_train
@@ -785,7 +786,6 @@ class BaseHistGradientBoosting(BaseEstimator, ABC):
                         raw_predictions_small_train=raw_predictions_small_train,
                         raw_predictions_val=raw_predictions_val,
                     )
-
             begin_at_stage = 0
 
         # warm start: this is not the first time fit was called
@@ -944,8 +944,8 @@ class BaseHistGradientBoosting(BaseEstimator, ABC):
                     )
 
                 else:
-                    # If the scorer is a predefined string, then we optimize
-                    # the evaluation by reusing the incrementally computed raw predictions.
+                    # If the scorer is a predefined string, then we optimize the
+                    # evaluation by reusing the incrementally computed raw predictions.
                     if scoring_is_predefined_string:
                         raw_predictions_small_train = raw_predictions[
                             indices_small_train
@@ -1675,21 +1675,13 @@ class HistGradientBoostingRegressor(RegressorMixin, BaseHistGradientBoosting):
 
     .. topic:: Examples:
 
-        * :ref:`sphx_glr_auto_examples_ensemble_plot_hgbt_regression.py
-          <sphx_glr_auto_examples_ensemble_plot_hgbt_regression.py>`_
-          
+        * :ref:`sphx_glr_auto_examples_ensemble_plot_hgbt_regression.py`
           Features in Histogram Gradient Boosting Trees.
-        * :ref:`sphx_glr_auto_examples_ensemble_plot_forest_hist_grad_boosting_comparison.py
-          <sphx_glr_auto_examples_ensemble_plot_forest_hist_grad_boosting_comparison.py>`_
-          
+        * :ref:`sphx_glr_auto_examples_ensemble_plot_forest_hist_grad_boosting_comparison.py`  # noqa: E501
           Comparison of Random Forests and Histogram Gradient Boosting models.
-        * :ref:`sphx_glr_auto_examples_applications_plot_time_series_lagged_features.py
-          <sphx_glr_auto_examples_applications_plot_time_series_lagged_features.py>`_
-          
+        * :ref:`sphx_glr_auto_examples_applications_plot_time_series_lagged_features.py`
           Using lagged features for time series forecasting.
-        * :ref:`sphx_glr_auto_examples_inspection_plot_partial_dependence.py
-          <sphx_glr_auto_examples_inspection_plot_partial_dependence.py>`_
-          
+        * :ref:`sphx_glr_auto_examples_inspection_plot_partial_dependence.py`
           Partial dependence plots with HistGradientBoostingRegressor.
     """
 
@@ -2094,17 +2086,11 @@ class HistGradientBoostingClassifier(ClassifierMixin, BaseHistGradientBoosting):
 
     .. topic:: Examples:
 
-        * :ref:`sphx_glr_auto_examples_ensemble_plot_forest_hist_grad_boosting_comparison.py
-          <sphx_glr_auto_examples_ensemble_plot_forest_hist_grad_boosting_comparison.py>`_
-          
+        * :ref:`sphx_glr_auto_examples_ensemble_plot_forest_hist_grad_boosting_comparison.py`  # noqa: E501
           Comparison of Random Forests and Histogram Gradient Boosting models.
-        * :ref:`sphx_glr_auto_examples_ensemble_plot_feature_transformation.py
-          <sphx_glr_auto_examples_ensemble_plot_feature_transformation.py>`_
-          
+        * :ref:`sphx_glr_auto_examples_ensemble_plot_feature_transformation.py`
           Feature transformations with ensembles of trees.
-        * :ref:`sphx_glr_auto_examples_model_selection_plot_cost_sensitive_learning.py
-          <sphx_glr_auto_examples_model_selection_plot_cost_sensitive_learning.py>`_
-          
+        * :ref:`sphx_glr_auto_examples_model_selection_plot_cost_sensitive_learning.py`
           Cost-sensitive learning for imbalanced classification.
     """
 
