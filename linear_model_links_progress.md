@@ -43,8 +43,8 @@
 ## Classes and Their Example Links
 
 ### Base and Helper Classes
-- [ ] LinearRegression - Check `plot_ols_ridge.py`
-- [ ] Ridge - Check `plot_ols_ridge.py`, `plot_ridge_path.py`, `plot_ridge_coeffs.py`, `plot_huber_vs_ridge.py`
+- [x] LinearRegression - Added link to `plot_ols_ridge.py`
+- [x] Ridge - Added links to `plot_ols_ridge.py`, `plot_ridge_path.py`, `plot_ridge_coeffs.py`, and `plot_huber_vs_ridge.py`
 - [ ] RidgeClassifier - Check for relevant examples
 - [ ] RidgeCV - Check for relevant examples
 - [ ] RidgeClassifierCV - Check for relevant examples

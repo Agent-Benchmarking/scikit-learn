@@ -5,7 +5,6 @@ Ridge regression
 # Authors: The scikit-learn developers
 # SPDX-License-Identifier: BSD-3-Clause
 
-
 import numbers
 import warnings
 from abc import ABCMeta, abstractmethod
@@ -517,6 +516,8 @@ def ridge_regression(
     random_state : int, RandomState instance, default=None
         Used when ``solver`` == 'sag' or 'saga' to shuffle the data.
         See :term:`Glossary <random_state>` for details.
+
+        .. versionadded:: 0.17
 
     return_n_iter : bool, default=False
         If True, the method also returns `n_iter`, the actual number of
@@ -1128,7 +1129,6 @@ class Ridge(MultiOutputMixin, RegressorMixin, _BaseRidge):
         See :term:`Glossary <random_state>` for details.
 
         .. versionadded:: 0.17
-           `random_state` to support Stochastic Average Gradient.
 
     Attributes
     ----------
@@ -1188,6 +1188,17 @@ class Ridge(MultiOutputMixin, RegressorMixin, _BaseRidge):
     >>> clf = Ridge(alpha=1.0)
     >>> clf.fit(X, y)
     Ridge()
+
+    .. topic:: Examples:
+
+        * :ref:`plot_ols_ridge`
+          Ordinary Least Squares and Ridge Regression comparison.
+        * :ref:`plot_ridge_path`
+          Regularization path of Ridge regression.
+        * :ref:`plot_ridge_coeffs`
+          Ridge coefficients as a function of regularization.
+        * :ref:`plot_huber_vs_ridge`
+          Huber Regressor vs Ridge on corrupted data.
     """
 
     def __init__(
@@ -1432,9 +1443,9 @@ class RidgeClassifier(_RidgeClassifierMixin, _BaseRidge):
           procedure.
 
         - 'sag' uses a Stochastic Average Gradient descent, and 'saga' uses
-          its unbiased and more flexible version named SAGA. Both methods
-          use an iterative procedure, and are often faster than other solvers
-          when both n_samples and n_features are large. Note that 'sag' and
+          its improved, unbiased version named SAGA. Both methods also use an
+          iterative procedure, and are often faster than other solvers when
+          both n_samples and n_features are large. Note that 'sag' and
           'saga' fast convergence is only guaranteed on features with
           approximately the same scale. You can preprocess the data with a
           scaler from sklearn.preprocessing.
@@ -1456,6 +1467,8 @@ class RidgeClassifier(_RidgeClassifierMixin, _BaseRidge):
         Used when ``solver`` == 'sag' or 'saga' to shuffle the data.
         See :term:`Glossary <random_state>` for details.
 
+        .. versionadded:: 0.17
+
     Attributes
     ----------
     coef_ : ndarray of shape (1, n_features) or (n_classes, n_features)
@@ -1470,6 +1483,8 @@ class RidgeClassifier(_RidgeClassifierMixin, _BaseRidge):
     n_iter_ : None or ndarray of shape (n_targets,)
         Actual number of iterations for each target. Available only for
         sag and lsqr solvers. Other solvers will return None.
+
+        .. versionadded:: 0.17
 
     classes_ : ndarray of shape (n_classes,)
         The classes labels.
@@ -1559,7 +1574,6 @@ class RidgeClassifier(_RidgeClassifierMixin, _BaseRidge):
             will have the same weight.
 
             .. versionadded:: 0.17
-               *sample_weight* support to RidgeClassifier.
 
         Returns
         -------
@@ -2653,7 +2667,7 @@ class RidgeCV(MultiOutputMixin, RegressorMixin, _BaseRidgeCV):
         .. versionchanged:: 1.5
             `cv_values_` changed to `cv_results_`.
 
-    coef_ : ndarray of shape (n_features) or (n_targets, n_features)
+    coef_ : ndarray of shape (n_features,) or (n_targets, n_features)
         Weight vector(s).
 
     intercept_ : float or ndarray of shape (n_targets,)
