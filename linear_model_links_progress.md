@@ -67,7 +67,7 @@
 - [ ] MultiTaskLassoCV - No examples found specifically for this class
 
 ### Generalized Linear Models (GLM)
-- [ ] PoissonRegressor - Check `plot_poisson_regression_non_normal_loss.py`
+- [x] PoissonRegressor - Completed - Added links to `plot_poisson_regression_non_normal_loss.py` and `plot_tweedie_regression_insurance_claims.py`
 - [ ] GammaRegressor - Check for relevant examples
 - [ ] TweedieRegressor - Check `plot_tweedie_regression_insurance_claims.py`
 

@@ -565,6 +565,13 @@ class PoissonRegressor(_GeneralizedLinearRegressor):
     np.float64(2.088...)
     >>> clf.predict([[1, 1], [3, 4]])
     array([10.676..., 21.875...])
+
+    .. topic:: Examples:
+
+        * :ref:`plot_poisson_regression_non_normal_loss`
+          Comparison of Poisson regression with other regression models on count data.
+        * :ref:`plot_tweedie_regression_insurance_claims`
+          Modeling insurance claims using Poisson regression.
     """
 
     _parameter_constraints: dict = {
