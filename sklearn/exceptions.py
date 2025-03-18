@@ -18,7 +18,7 @@ __all__ = [
 ]
 
 
-class ModifiedCodeWarning:
+class ModifiedCode:
     pass
 
 
