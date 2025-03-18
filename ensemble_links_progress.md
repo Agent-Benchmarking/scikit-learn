@@ -34,6 +34,8 @@
 
 ### Other Examples
 - `plot_isolation_forest.py` - Demonstrates IsolationForest for anomaly detection
+- `plot_anomaly_comparison.py` - Compares different anomaly detection methods
+- `plot_outlier_detection_bench.py` - Benchmarks different outlier detection methods
 - `plot_feature_transformation.py` - Shows feature transformation with ensemble models
 
 ## Classes and Their Example Links
@@ -49,7 +51,7 @@
 - [x] GradientBoostingRegressor - Added links to `plot_gradient_boosting_regression.py`, `plot_gradient_boosting_quantile.py`, and `plot_gradient_boosting_oob.py`
 - [x] HistGradientBoostingClassifier - Added links to `plot_forest_hist_grad_boosting_comparison.py`, `plot_feature_transformation.py`, and `plot_cost_sensitive_learning.py`
 - [x] HistGradientBoostingRegressor - Added links to `plot_hgbt_regression.py`, `plot_forest_hist_grad_boosting_comparison.py`, `plot_time_series_lagged_features.py`, and `plot_partial_dependence.py`
-- [ ] IsolationForest
+- [x] IsolationForest - Added links to `plot_isolation_forest.py`, `plot_anomaly_comparison.py`, and `plot_outlier_detection_bench.py`
 - [ ] StackingClassifier
 - [ ] StackingRegressor
 - [ ] VotingClassifier

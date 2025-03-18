@@ -218,10 +218,15 @@ class IsolationForest(OutlierMixin, BaseBagging):
     >>> clf.predict([[0.1], [0], [90]])
     array([ 1,  1, -1])
 
-    For an example of using isolation forest for anomaly detection see
-    :ref:`sphx_glr_auto_examples_ensemble_plot_isolation_forest.py`.
+    .. topic:: Examples:
+    
+        * :ref:`sphx_glr_auto_examples_ensemble_plot_isolation_forest.py`
+          Isolation Forest for anomaly detection.
+        * :ref:`sphx_glr_auto_examples_miscellaneous_plot_anomaly_comparison.py`
+          Comparing different anomaly detection algorithms.
+        * :ref:`sphx_glr_auto_examples_miscellaneous_plot_outlier_detection_bench.py`
+          Benchmarking outlier detection techniques.
     """
-
     _parameter_constraints: dict = {
         "n_estimators": [Interval(Integral, 1, None, closed="left")],
         "max_samples": [
