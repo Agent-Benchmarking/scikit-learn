@@ -61,10 +61,10 @@
 - [ ] LassoLars - In progress - Need to add links to examples that use LassoLars
 - [ ] LassoLarsCV - In progress - Need to add links to `plot_lasso_model_selection.py`
 - [ ] LassoLarsIC - Attempted - Identified links to `plot_lasso_lars_ic.py` and `plot_lasso_model_selection.py`, but encountered timeout issues
-- [ ] MultiTaskElasticNet - Check for relevant examples
-- [ ] MultiTaskElasticNetCV - Check for relevant examples
+- [ ] MultiTaskElasticNet - No examples found specifically for this class
+- [ ] MultiTaskElasticNetCV - No examples found specifically for this class
 - [ ] MultiTaskLasso - Attempted - Identified link to `plot_multi_task_lasso_support.py`, but encountered timeout issues
-- [ ] MultiTaskLassoCV - Check for relevant examples
+- [ ] MultiTaskLassoCV - No examples found specifically for this class
 
 ### Generalized Linear Models (GLM)
 - [ ] PoissonRegressor - Check `plot_poisson_regression_non_normal_loss.py`
