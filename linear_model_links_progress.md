@@ -60,7 +60,7 @@
 - [ ] LassoCV - In progress - Need to add links to `plot_lasso_model_selection.py` and `plot_linear_model_coefficient_interpretation.py`
 - [ ] LassoLars - In progress - Need to add links to examples that use LassoLars
 - [ ] LassoLarsCV - In progress - Need to add links to `plot_lasso_model_selection.py`
-- [ ] LassoLarsIC - In progress - Need to add links to `plot_lasso_lars_ic.py` and `plot_lasso_model_selection.py`
+- [ ] LassoLarsIC - Attempted - Identified links to `plot_lasso_lars_ic.py` and `plot_lasso_model_selection.py`, but encountered timeout issues
 - [ ] MultiTaskElasticNet - Check for relevant examples
 - [ ] MultiTaskElasticNetCV - Check for relevant examples
 - [ ] MultiTaskLasso - Check `plot_multi_task_lasso_support.py`
