@@ -8,9 +8,9 @@ This document tracks progress on adding example links to scikit-learn documentat
 - [x] cluster - All clustering classes have example links added where appropriate
 - [x] decomposition - Added example links for NMF, MiniBatchNMF, and LatentDirichletAllocation
 - [x] ensemble - Added example links for all ensemble classes including StackingRegressor, VotingClassifier, and VotingRegressor
+- [x] linear_model - Added example links for MultiTaskLassoCV, MultiTaskElasticNet, MultiTaskElasticNetCV, RidgeClassifierCV, and PassiveAggressiveRegressor
 
 ## In Progress
-- [ ] linear_model
 - [ ] svm
 - [ ] neighbors
 - [ ] preprocessing
@@ -21,7 +21,6 @@ This document tracks progress on adding example links to scikit-learn documentat
 - [ ] etc.
 
 ## To Do
-- [ ] linear_model
 - [ ] svm
 - [ ] neighbors
 - [ ] preprocessing
