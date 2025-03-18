@@ -77,7 +77,7 @@
 
 ### Logistic Regression
 - [x] LogisticRegression - Added example links: `plot_logistic.py`, `plot_logistic_path.py`, `plot_logistic_l1_l2_sparsity.py`, `plot_logistic_multinomial.py`
-- [ ] LogisticRegressionCV - Check for relevant examples
+- [x] LogisticRegressionCV - Added example links: `plot_compare_calibration.py`, `plot_scaling_importance.py`
 
 ### Orthogonal Matching Pursuit (OMP)
 - [ ] OrthogonalMatchingPursuit - Check `plot_omp.py`
