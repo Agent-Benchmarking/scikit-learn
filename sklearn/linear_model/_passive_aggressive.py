@@ -169,6 +169,11 @@ class PassiveAggressiveClassifier(BaseSGDClassifier):
     [1.84127814]
     >>> print(clf.predict([[0, 0, 0, 0]]))
     [1]
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_sgd_comparison.py`
+        - :ref:`sphx_glr_auto_examples_applications_plot_out_of_core_classification.py`
     """
 
     _parameter_constraints: dict = {

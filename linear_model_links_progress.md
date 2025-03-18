@@ -93,8 +93,8 @@
 - [x] Perceptron - Added example links: `plot_sgd_comparison.py`, `plot_sgd_loss_functions.py`, `plot_out_of_core_classification.py`
 
 ### Passive Aggressive Algorithms
-- [ ] PassiveAggressiveClassifier - Check for relevant examples
-- [ ] PassiveAggressiveRegressor - Check for relevant examples
+- [x] PassiveAggressiveClassifier - Added example links: `plot_sgd_comparison.py`, `plot_out_of_core_classification.py`
+- [x] PassiveAggressiveRegressor - No suitable examples found in the codebase
 
 ### Robust Regression
 - [ ] HuberRegressor - Check `plot_huber_vs_ridge.py`
