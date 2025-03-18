@@ -28,7 +28,8 @@ jobs:
   check_build_trigger:
     name: Check build trigger
     runs-on: ubuntu-latest
-    if: github.repository == 'scikit-learn/scikit-learn'
+    if: github.repository == 'Agent-Benchmarking/scikit-learn'
+    needs: [jammy-build]
     outputs:
       build: ${{ steps.check_build_trigger.outputs.build }}
 
@@ -41,6 +42,12 @@ jobs:
       - id: check_build_trigger
         name: Check build trigger
         run: bash build_tools/github/check_build_trigger.sh
+
+  # This job allows the workflow to complete even if the jammy-build job is skipped
+  jammy-build:
+    name: Depend on Jammy Build
+    if: github.repository == 'Agent-Benchmarking/scikit-learn'
+    uses: ./.github/workflows/jammy-build.yml
 
   # Build the wheels for Linux, Windows and macOS for Python 3.9 and newer
   build_wheels:

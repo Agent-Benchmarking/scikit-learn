@@ -1,0 +1,132 @@
+name: Ubuntu Jammy Build
+permissions:
+  contents: read
+
+on:
+  push:
+    branches:
+      - main
+      # Release branches
+      - "[0-9]+.[0-9]+.X"
+  pull_request:
+    branches:
+      - main
+      - "[0-9]+.[0-9]+.X"
+  # Trigger the workflow on schedule
+  schedule:
+    # Nightly build at 2:30 A.M.
+    - cron: "30 2 * * *"
+  # Manual run
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  check_skip:
+    name: Check if job should be skipped
+    runs-on: ubuntu-latest
+    outputs:
+      skip: ${{ steps.check-skip.outputs.skip }}
+      commit_message: ${{ steps.get-commit-message.outputs.message }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: get-commit-message
+        name: Get commit message
+        run: |
+          echo "message=$(git log --format=%B -n 1 ${{ github.event.after || github.sha }} | tr '\n' ' ')" >> $GITHUB_OUTPUT
+      - id: check-skip
+        name: Check if job should be skipped
+        run: |
+          if [[ "${{ steps.get-commit-message.outputs.message }}" =~ \[ci\ skip\] ]]; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+
+  jammy_build:
+    name: Ubuntu Jammy Build (Python min, OpenBLAS)
+    needs: check_skip
+    if: needs.check_skip.outputs.skip != 'true' && github.repository == 'Agent-Benchmarking/scikit-learn'
+    runs-on: ubuntu-22.04
+    env:
+      DISTRIB: conda
+      LOCK_FILE: ./build_tools/azure/pymin_conda_forge_openblas_ubuntu_2204_linux-64_conda.lock
+      SKLEARN_WARNINGS_AS_ERRORS: 1
+      COVERAGE: false
+      SKLEARN_TESTS_GLOBAL_RANDOM_SEED: 0
+      TEST_DIR: /tmp/scikit-learn-test
+      VIRTUALENV: testvenv
+      JUNITXML: test-data.xml
+      SKLEARN_SKIP_NETWORK_TESTS: 1
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
+      CCACHE_COMPRESS: 1
+      PYTEST_XDIST_VERSION: latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup conda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          miniforge-variant: Mambaforge
+          miniforge-version: latest
+          activate-environment: scikit-learn-env
+
+      - name: Cache ccache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ${{ runner.os }}-ccache-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-ccache-
+
+      - name: Install dependencies
+        shell: bash -el {0}
+        run: |
+          set -ex
+          source build_tools/shared.sh
+
+          if [[ "$LOCK_FILE" == *.lock ]]; then
+            # Extract the platform from the lock file name
+            PLATFORM=$(echo $LOCK_FILE | sed -n 's/.*\(linux-64\|linux-aarch64\|win-64\|osx-64\|osx-arm64\).*/\1/p')
+            $CONDA_EXE create -y -p $CONDA_PREFIX --file $LOCK_FILE
+          else
+            pip install -r $LOCK_FILE
+          fi
+
+          # Setup ccache
+          mkdir -p $CCACHE_DIR
+          echo "Using ccache directory: $CCACHE_DIR"
+          ccache -M 500M
+          ccache -z
+
+          pip install -e ".[test]" --no-build-isolation -v
+
+      - name: Run tests
+        shell: bash -el {0}
+        run: |
+          set -ex
+          mkdir -p $TEST_DIR
+          cd $TEST_DIR
+
+          # Display environment information
+          python -c "import sklearn; sklearn.show_versions()"
+
+          # Run tests with pytest
+          python -m pytest --junitxml=$JUNITXML -xvs sklearn
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-test-results
+          path: ${{ env.TEST_DIR }}/${{ env.JUNITXML }}
+        if: always()
+
+      - name: Run ccache stats
+        shell: bash -el {0}
+        run: ccache -s
