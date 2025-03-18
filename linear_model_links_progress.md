@@ -72,7 +72,7 @@
 - [x] TweedieRegressor - Completed - Added link to `plot_tweedie_regression_insurance_claims.py`
 
 ### Least Angle Regression
-- [ ] Lars - Check for relevant examples
+- [x] Lars - No specific examples found
 - [ ] LarsCV - Check for relevant examples
 
 ### Logistic Regression
