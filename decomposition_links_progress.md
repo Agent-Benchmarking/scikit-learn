@@ -55,7 +55,7 @@
 - [x] Add link to `plot_image_denoising.py`
 
 ### TruncatedSVD
-- [ ] Add link to relevant example (if available)
+- [x] Already has links to `plot_document_clustering.py` and `plot_lle_digits.py`
 
 ### LatentDirichletAllocation
 - [ ] Identify if any examples demonstrate LDA
