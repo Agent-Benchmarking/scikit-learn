@@ -24,7 +24,7 @@ jobs:
   check_commit:
     name: Check commit message
     runs-on: ubuntu-latest
-    if: github.repository == 'scikit-learn/scikit-learn'
+    # Running on all repositories including forks for testing
     outputs:
       commit_message: ${{ steps.get_commit_message.outputs.commit_message }}
       should_skip: ${{ steps.check_skip.outputs.should_skip }}
@@ -76,7 +76,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: [check_commit]
     if: |
-      github.repository == 'scikit-learn/scikit-learn' &&
       needs.check_commit.outputs.should_skip != 'true' &&
       !contains(needs.check_commit.outputs.commit_message, '[lint skip]')
 
@@ -109,7 +108,6 @@ jobs:
     runs-on: ubuntu-22.04
     needs: [check_commit, linting]
     if: |
-      github.repository == 'scikit-learn/scikit-learn' &&
       needs.check_commit.outputs.should_skip != 'true' &&
       needs.check_commit.outputs.should_run_parallel != 'true'
 
@@ -179,7 +177,6 @@ jobs:
     runs-on: ubuntu-22.04
     needs: [check_commit, linting]
     if: |
-      github.repository == 'scikit-learn/scikit-learn' &&
       needs.check_commit.outputs.should_skip != 'true' &&
       needs.check_commit.outputs.should_run_parallel == 'true'
 
@@ -250,7 +247,6 @@ jobs:
     needs: [check_commit, linting, ubuntu_jammy_jellyfish]
     if: |
       always() &&
-      github.repository == 'scikit-learn/scikit-learn' &&
       needs.check_commit.outputs.should_skip != 'true' &&
       needs.check_commit.outputs.should_run_parallel != 'true' &&
       (needs.ubuntu_jammy_jellyfish.result == 'success' || needs.ubuntu_jammy_jellyfish.result == 'skipped')
@@ -317,7 +313,6 @@ jobs:
     runs-on: ubuntu-22.04
     needs: [check_commit, linting]
     if: |
-      github.repository == 'scikit-learn/scikit-learn' &&
       needs.check_commit.outputs.should_skip != 'true' &&
       needs.check_commit.outputs.should_run_parallel == 'true'
 
