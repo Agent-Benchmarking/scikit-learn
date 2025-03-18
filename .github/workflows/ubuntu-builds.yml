@@ -64,9 +64,12 @@ jobs:
         name: Check if builds should run in parallel
         run: |
           COMMIT_MSG="${{ steps.get_commit_message.outputs.commit_message }}"
+          echo "Commit message: $COMMIT_MSG"
           if [[ "$COMMIT_MSG" =~ \[azure\ parallel\] ]]; then
+            echo "Found [azure parallel] tag, enabling parallel mode"
             echo "should_run_parallel=true" >> $GITHUB_OUTPUT
           else
+            echo "No [azure parallel] tag found, using sequential mode"
             echo "should_run_parallel=false" >> $GITHUB_OUTPUT
           fi
 
@@ -126,6 +129,12 @@ jobs:
       SKLEARN_TESTS_GLOBAL_RANDOM_SEED: '0'  # non-default seed
 
     steps:
+      - name: Debug Sequential Mode
+        run: |
+          echo "Commit message: ${{ needs.check_commit.outputs.commit_message }}"
+          echo "Should skip: ${{ needs.check_commit.outputs.should_skip }}"
+          echo "Should run parallel: ${{ needs.check_commit.outputs.should_run_parallel }}"
+
       - name: Checkout scikit-learn
         uses: actions/checkout@v4
 
@@ -195,6 +204,12 @@ jobs:
       SKLEARN_TESTS_GLOBAL_RANDOM_SEED: '0'  # non-default seed
 
     steps:
+      - name: Debug Parallel Mode
+        run: |
+          echo "Commit message: ${{ needs.check_commit.outputs.commit_message }}"
+          echo "Should skip: ${{ needs.check_commit.outputs.should_skip }}"
+          echo "Should run parallel: ${{ needs.check_commit.outputs.should_run_parallel }}"
+
       - name: Checkout scikit-learn
         uses: actions/checkout@v4
 
@@ -330,6 +345,12 @@ jobs:
       SKLEARN_TESTS_GLOBAL_RANDOM_SEED: '1'  # non-default seed
 
     steps:
+      - name: Debug Parallel Mode
+        run: |
+          echo "Commit message: ${{ needs.check_commit.outputs.commit_message }}"
+          echo "Should skip: ${{ needs.check_commit.outputs.should_skip }}"
+          echo "Should run parallel: ${{ needs.check_commit.outputs.should_run_parallel }}"
+
       - name: Checkout scikit-learn
         uses: actions/checkout@v4
 
