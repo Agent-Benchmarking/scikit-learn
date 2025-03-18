@@ -56,11 +56,11 @@
 ### Coordinate Descent Models
 - [ ] ElasticNet - In progress - Need to add links to `plot_lasso_and_elasticnet.py`, `plot_elastic_net_precomputed_gram_matrix_with_weighted_samples.py`, and `plot_train_error_vs_test_error.py`
 - [ ] ElasticNetCV - Check for relevant examples
-- [ ] Lasso - Check `plot_lasso_and_elasticnet.py`, `plot_lasso_lasso_lars_elasticnet_path.py`, `plot_lasso_dense_vs_sparse_data.py`
-- [ ] LassoCV - Check `plot_lasso_model_selection.py`
-- [ ] LassoLars - Check `plot_lasso_lasso_lars_elasticnet_path.py`
-- [ ] LassoLarsCV - Check for relevant examples
-- [ ] LassoLarsIC - Check `plot_lasso_lars_ic.py`
+- [ ] Lasso - In progress - Need to add links to `plot_lasso_and_elasticnet.py`, `plot_lasso_model_selection.py`, `plot_lasso_lars_ic.py`, and `plot_tomography_l1_reconstruction.py`
+- [ ] LassoCV - In progress - Need to add links to `plot_lasso_model_selection.py` and `plot_linear_model_coefficient_interpretation.py`
+- [ ] LassoLars - In progress - Need to add links to examples that use LassoLars
+- [ ] LassoLarsCV - In progress - Need to add links to `plot_lasso_model_selection.py`
+- [ ] LassoLarsIC - In progress - Need to add links to `plot_lasso_lars_ic.py` and `plot_lasso_model_selection.py`
 - [ ] MultiTaskElasticNet - Check for relevant examples
 - [ ] MultiTaskElasticNetCV - Check for relevant examples
 - [ ] MultiTaskLasso - Check `plot_multi_task_lasso_support.py`
