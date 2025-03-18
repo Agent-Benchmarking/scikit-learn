@@ -20,6 +20,7 @@
 - `plot_nnls.py` - Non-negative least squares
 - `plot_ols_ridge.py` - Ordinary Least Squares and Ridge regression
 - `plot_omp.py` - Orthogonal Matching Pursuit (OMP)
+- `plot_out_of_core_classification.py` - Out of core classification
 - `plot_poisson_regression_non_normal_loss.py` - Poisson regression
 - `plot_polynomial_interpolation.py` - Polynomial interpolation
 - `plot_quantile_regression.py` - Quantile regression
@@ -89,7 +90,7 @@
 - [x] SGDOneClassSVM - Added example link: `plot_sgdocsvm_vs_ocsvm.py`
 
 ### Perceptron
-- [ ] Perceptron - Check for relevant examples
+- [x] Perceptron - Added example links: `plot_sgd_comparison.py`, `plot_sgd_loss_functions.py`, `plot_out_of_core_classification.py`
 
 ### Passive Aggressive Algorithms
 - [ ] PassiveAggressiveClassifier - Check for relevant examples
