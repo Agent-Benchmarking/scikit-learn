@@ -1276,8 +1276,8 @@ class SparseCoder(_BaseSparseCoding, BaseEstimator):
     See Also
     --------
     DictionaryLearning : Find a dictionary that sparsely encodes data.
-    MiniBatchDictionaryLearning : A faster, less accurate, version of the
-        dictionary learning algorithm.
+    MiniBatchDictionaryLearning : A faster, less accurate, version of the dictionary
+        learning algorithm.
     MiniBatchSparsePCA : Mini-batch Sparse Principal Components Analysis.
     SparsePCA : Sparse Principal Components Analysis.
     sparse_encode : Sparse coding where each row of the result is the solution
@@ -1602,6 +1602,9 @@ class DictionaryLearning(_BaseSparseCoding, BaseEstimator):
     >>> X_hat = X_transformed @ dict_learner.components_
     >>> np.mean(np.sum((X_hat - X) ** 2, axis=1) / np.sum(X ** 2, axis=1))
     np.float64(0.05...)
+
+    For sparse coding example using DictionaryLearning, see
+    :ref:`sphx_glr_auto_examples_decomposition_plot_sparse_coding.py`
     """
 
     _parameter_constraints: dict = {

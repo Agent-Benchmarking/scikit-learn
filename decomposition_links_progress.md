@@ -49,13 +49,13 @@
 - [ ] Add link to `plot_faces_decomposition.py` (if it includes NMF)
 
 ### DictionaryLearning
-- [ ] Add link to `plot_sparse_coding.py`
+- [x] Add link to `plot_sparse_coding.py`
 
 ### MiniBatchDictionaryLearning
 - [x] Add link to `plot_image_denoising.py`
 
 ### TruncatedSVD
-- [ ] Add link to `plot_faces_decomposition.py` (if it includes TruncatedSVD)
+- [ ] Add link to relevant example (if available)
 
 ### LatentDirichletAllocation
 - [ ] Identify if any examples demonstrate LDA
