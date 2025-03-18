@@ -1,36 +1,56 @@
-# Documentation Patch Files
+# Documentation Enhancement Strategy
 
-This directory contains patch files for adding example links to various scikit-learn linear model classes. These patches were created because direct edits to the larger files were experiencing timeout issues.
+This directory was created to store patch files for adding example links to scikit-learn docstrings. After experimentation, we discovered several challenges with the patch approach for documentation updates.
 
-## Patch Files
+## Challenges with Patch Files
 
-The following patch files have been created:
+While patches seemed like a promising solution for timeout issues encountered when editing large files, we discovered several limitations:
 
-1. `elasticnet_patch.txt` - Adds example links to the ElasticNet class docstring
-2. `elasticnetcv_patch.txt` - Adds example links to the ElasticNetCV class docstring
-3. `lasso_patch.txt` - Adds example links to the Lasso class docstring
-4. `lassocv_patch.txt` - Adds example links to the LassoCV class docstring
-5. `lassolars_patch.txt` - Adds example links to the LassoLars class docstring
-6. `lassolars_cv_patch.txt` - Adds example links to the LassoLarsCV class docstring
-7. `lassolarsic_patch.txt` - Adds example links to the LassoLarsIC class docstring
-8. `multitasklasso_patch.txt` - Adds example links to the MultiTaskLasso class docstring
+1. **Formatting issues**: Patches need extremely precise context lines, making them brittle when applied
+2. **Syntax errors**: Even with fuzzy matching, patches can insert content at incorrect positions, causing Python syntax errors 
+3. **Maintainability**: The patch process adds complexity to the documentation workflow
 
-## How to Apply Patches
+## Recommended Alternative Approaches
 
-To apply these patches, you can use the `patch` command. Navigate to the root directory of the scikit-learn repository and run:
+For classes in large files where direct edits cause timeout issues, we recommend the following alternatives:
 
-```bash
-# For a single patch
-patch -p0 < doc_patches/elasticnet_patch.txt
+1. **Command-line editing tools**: Use `sed`, `awk`, or similar tools to make targeted changes:
+   ```bash
+   # Example: Add example links to ElasticNet docstring
+   sed -i '/ElasticNet.*predict(\[\[0, 0\]\])/a\\\n    .. topic:: Examples:\\\n\\\n        - :ref:`sphx_glr_auto_examples_linear_model_plot_lasso_and_elasticnet.py`\\\n        - :ref:`sphx_glr_auto_examples_linear_model_plot_elastic_net_precomputed_gram_matrix_with_weighted_samples.py`\\\n        - :ref:`sphx_glr_auto_examples_inspection_plot_train_error_vs_test_error.py`' sklearn/linear_model/_coordinate_descent.py
+   ```
 
-# Or to apply all patches at once
-for patch_file in doc_patches/*.txt; do
-    patch -p0 < "$patch_file"
-done
-```
+2. **Split changes into minimal edits**: Focus on one very specific section at a time:
+   - Target only one class per edit
+   - Minimize the amount of context required in your edits
+   - Test changes on small sections before applying to larger files
 
-Note: If you encounter any issues with the patches, you can try applying them with the `-p1` option or manually edit the files based on the content in the patch files.
+3. **Python scripting**: Create a Python script that reads a file, makes targeted modifications, and writes it back:
+   ```python
+   def add_example_links(file_path, class_name, example_links, context_line):
+       with open(file_path, 'r') as f:
+           content = f.read()
+       
+       # Find docstring location based on context line
+       insert_index = content.find(context_line) + len(context_line)
+       
+       # Create example links block
+       links_block = "\n\n    .. topic:: Examples:\n\n"
+       for link in example_links:
+           links_block += f"        - :ref:`{link}`\n"
+       
+       # Insert links block
+       new_content = content[:insert_index] + links_block + content[insert_index:]
+       
+       # Write back to file
+       with open(file_path, 'w') as f:
+           f.write(new_content)
+   ```
 
-## Tracking Progress
+## Progress Tracking
 
-The progress of documentation enhancements is tracked in the `linear_model_links_progress.md` file. Classes marked with `[-]` have patch files created but not yet applied to the codebase.
+Documentation progress is tracked in `linear_model_links_progress.md`. For classes in large files, consider using one of the alternative approaches mentioned above.
+
+## Conclusion
+
+After attempting the patch approach, we found it's not well-suited for documentation updates in this codebase. The alternative methods suggested above provide more reliable ways to make docstring enhancements while avoiding timeout issues.
