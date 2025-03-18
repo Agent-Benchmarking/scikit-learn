@@ -84,9 +84,9 @@
 - [x] OrthogonalMatchingPursuitCV - Added example link: `plot_omp.py`
 
 ### Stochastic Gradient Descent
-- [ ] SGDClassifier - Check `plot_sgd_comparison.py`, `plot_sgd_iris.py`, `plot_sgd_loss_functions.py`, `plot_sgd_penalties.py`, `plot_sgd_separating_hyperplane.py`
-- [ ] SGDRegressor - Check `plot_sgd_comparison.py`, `plot_sgd_loss_functions.py`
-- [ ] SGDOneClassSVM - Check `plot_sgdocsvm_vs_ocsvm.py`
+- [x] SGDClassifier - Added example links: `plot_sgd_comparison.py`, `plot_sgd_iris.py`, `plot_sgd_loss_functions.py`, `plot_sgd_penalties.py`, `plot_sgd_separating_hyperplane.py`, `plot_sgd_early_stopping.py`
+- [x] SGDRegressor - Added example links: `plot_sgd_comparison.py`, `plot_sgd_loss_functions.py`, `plot_sgd_early_stopping.py`
+- [x] SGDOneClassSVM - Added example link: `plot_sgdocsvm_vs_ocsvm.py`
 
 ### Perceptron
 - [ ] Perceptron - Check for relevant examples
