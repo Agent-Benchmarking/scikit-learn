@@ -73,7 +73,7 @@
 
 ### Least Angle Regression
 - [x] Lars - No specific examples found
-- [ ] LarsCV - Check for relevant examples
+- [x] LarsCV - No specific examples found
 
 ### Logistic Regression
 - [ ] LogisticRegression - Check `plot_logistic.py`, `plot_logistic_path.py`, `plot_logistic_l1_l2_sparsity.py`, `plot_logistic_multinomial.py`
