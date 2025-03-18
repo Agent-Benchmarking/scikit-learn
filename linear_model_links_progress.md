@@ -45,13 +45,13 @@
 ### Base and Helper Classes
 - [x] LinearRegression - Added link to `plot_ols_ridge.py`
 - [x] Ridge - Added links to `plot_ols_ridge.py`, `plot_ridge_path.py`, `plot_ridge_coeffs.py`, and `plot_huber_vs_ridge.py`
-- [ ] RidgeClassifier - Check for relevant examples
-- [ ] RidgeCV - Check for relevant examples
-- [ ] RidgeClassifierCV - Check for relevant examples
+- [x] RidgeClassifier - Added link to `plot_document_classification_20newsgroups.py`
+- [x] RidgeCV - Added links to `plot_transformed_target.py`, `plot_cyclical_feature_engineering.py`, `plot_linear_model_coefficient_interpretation.py`, `plot_select_from_model_diabetes.py`, and `plot_stack_predictors.py`
+- [ ] RidgeClassifierCV - No specific examples found
 
 ### Bayesian Regression
-- [ ] ARDRegression - Check `plot_ard.py`
-- [ ] BayesianRidge - Check `plot_bayesian_ridge_curvefit.py`
+- [x] ARDRegression - Added links to `plot_ard.py` and `plot_lasso_and_elasticnet.py`
+- [x] BayesianRidge - Added links to `plot_bayesian_ridge_curvefit.py`, `plot_ard.py`, `plot_feature_agglomeration_vs_univariate_selection.py`, and `plot_iterative_imputer_variants_comparison.py`
 
 ### Coordinate Descent Models
 - [ ] ElasticNet - Check `plot_lasso_and_elasticnet.py`, `plot_lasso_lasso_lars_elasticnet_path.py`
