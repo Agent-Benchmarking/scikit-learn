@@ -759,6 +759,8 @@ def dict_learning_online(
         for more details.
 
     method : {'lars', 'cd'}, default='lars'
+        The method used:
+
         * `'lars'`: uses the least angle regression method to solve the lasso
           problem (`linear_model.lars_path`);
         * `'cd'`: uses the coordinate descent method to compute the
@@ -967,6 +969,8 @@ def dict_learning(
 
     callback : callable, default=None
         Callable that gets invoked every five iterations.
+
+        .. versionadded:: 1.3
 
     verbose : bool, default=False
         To control the verbosity of the procedure.
@@ -1208,7 +1212,7 @@ class SparseCoder(_BaseSparseCoding, BaseEstimator):
           (`linear_model.lars_path`);
         - `'lasso_lars'`: uses Lars to compute the Lasso solution;
         - `'lasso_cd'`: uses the coordinate descent method to compute the
-          Lasso solution (linear_model.Lasso). `'lasso_lars'` will be faster if
+          Lasso solution (`linear_model.Lasso`). `'lasso_lars'` will be faster if
           the estimated components are sparse;
         - `'omp'`: uses orthogonal matching pursuit to estimate the sparse
           solution;
@@ -1249,7 +1253,7 @@ class SparseCoder(_BaseSparseCoding, BaseEstimator):
 
     transform_max_iter : int, default=1000
         Maximum number of iterations to perform if `algorithm='lasso_cd'` or
-        `lasso_lars`.
+        `'lasso_lars'`.
 
         .. versionadded:: 0.22
 
@@ -1413,7 +1417,7 @@ class DictionaryLearning(_BaseSparseCoding, BaseEstimator):
 
     Solves the optimization problem::
 
-        (U^*,V^*) = argmin 0.5 || X - U V ||_Fro^2 + alpha * || U ||_1,1
+       (U^*,V^*) = argmin 0.5 || X - U V ||_Fro^2 + alpha * || U ||_1,1
                     (U,V)
                     with || V_k ||_2 <= 1 for all  0 <= k < n_components
 
@@ -1439,9 +1443,11 @@ class DictionaryLearning(_BaseSparseCoding, BaseEstimator):
         Tolerance for numerical error.
 
     fit_algorithm : {'lars', 'cd'}, default='lars'
-        * `'lars'`: uses the least angle regression method to solve the lasso
+        The algorithm used:
+
+        - `'lars'`: uses the least angle regression method to solve the lasso
           problem (:func:`~sklearn.linear_model.lars_path`);
-        * `'cd'`: uses the coordinate descent method to compute the
+        - `'cd'`: uses the coordinate descent method to compute the
           Lasso solution (:class:`~sklearn.linear_model.Lasso`). Lars will be
           faster if the estimated components are sparse.
 
@@ -1556,8 +1562,8 @@ class DictionaryLearning(_BaseSparseCoding, BaseEstimator):
 
     See Also
     --------
-    MiniBatchDictionaryLearning: A faster, less accurate, version of the
-        dictionary learning algorithm.
+    MiniBatchDictionaryLearning: A faster, less accurate, version of the dictionary
+        learning algorithm.
     MiniBatchSparsePCA : Mini-batch Sparse Principal Components Analysis.
     SparseCoder : Find a sparse representation of data from a fixed,
         precomputed dictionary.
@@ -1955,6 +1961,9 @@ class MiniBatchDictionaryLearning(_BaseSparseCoding, BaseEstimator):
     >>> X_hat = X_transformed @ dict_learner.components_
     >>> np.mean(np.sum((X_hat - X) ** 2, axis=1) / np.sum(X ** 2, axis=1))
     np.float64(0.052...)
+
+    For image denoising example using MiniBatchDictionaryLearning, see
+    :ref:`sphx_glr_auto_examples_decomposition_plot_image_denoising.py`
     """
 
     _parameter_constraints: dict = {
