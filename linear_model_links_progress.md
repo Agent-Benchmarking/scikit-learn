@@ -54,7 +54,7 @@
 - [x] BayesianRidge - Added links to `plot_bayesian_ridge_curvefit.py`, `plot_ard.py`, `plot_feature_agglomeration_vs_univariate_selection.py`, and `plot_iterative_imputer_variants_comparison.py`
 
 ### Coordinate Descent Models
-- [ ] ElasticNet - Check `plot_lasso_and_elasticnet.py`, `plot_lasso_lasso_lars_elasticnet_path.py`
+- [ ] ElasticNet - In progress - Need to add links to `plot_lasso_and_elasticnet.py`, `plot_elastic_net_precomputed_gram_matrix_with_weighted_samples.py`, and `plot_train_error_vs_test_error.py`
 - [ ] ElasticNetCV - Check for relevant examples
 - [ ] Lasso - Check `plot_lasso_and_elasticnet.py`, `plot_lasso_lasso_lars_elasticnet_path.py`, `plot_lasso_dense_vs_sparse_data.py`
 - [ ] LassoCV - Check `plot_lasso_model_selection.py`
