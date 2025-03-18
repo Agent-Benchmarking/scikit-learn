@@ -1,0 +1,15 @@
+--- sklearn/linear_model/_coordinate_descent.py
++++ sklearn/linear_model/_coordinate_descent.py
+@@ -874,6 +874,11 @@
+     >>> print(regr.intercept_)
+     1.451...
+     >>> print(regr.predict([[0, 0]]))
+     [1.451...]
++
++    .. topic:: Examples:
++
++        - :ref:`sphx_glr_auto_examples_linear_model_plot_lasso_and_elasticnet.py`
++        - :ref:`sphx_glr_auto_examples_linear_model_plot_elastic_net_precomputed_gram_matrix_with_weighted_samples.py`
++        - :ref:`sphx_glr_auto_examples_inspection_plot_train_error_vs_test_error.py`
+     """
+

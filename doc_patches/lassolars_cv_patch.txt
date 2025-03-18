@@ -1,0 +1,12 @@
+--- sklearn/linear_model/_least_angle.py
++++ sklearn/linear_model/_least_angle.py
+@@ -1913,6 +1913,10 @@
+     >>> print(reg.coef_)
+     [ 0.         -0.96...]
+
++    .. topic:: Examples:
++
++        - :ref:`sphx_glr_auto_examples_linear_model_plot_lasso_model_selection.py`
++
+     """
+

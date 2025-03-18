@@ -55,16 +55,16 @@
 - [x] BayesianRidge - Added links to `plot_bayesian_ridge_curvefit.py`, `plot_ard.py`, `plot_feature_agglomeration_vs_univariate_selection.py`, and `plot_iterative_imputer_variants_comparison.py`
 
 ### Coordinate Descent Models
-- [ ] ElasticNet - In progress - Need to add links to `plot_lasso_and_elasticnet.py`, `plot_elastic_net_precomputed_gram_matrix_with_weighted_samples.py`, and `plot_train_error_vs_test_error.py`
-- [ ] ElasticNetCV - Check for relevant examples
-- [ ] Lasso - In progress - Need to add links to `plot_lasso_and_elasticnet.py`, `plot_lasso_model_selection.py`, `plot_lasso_lars_ic.py`, and `plot_tomography_l1_reconstruction.py`
-- [ ] LassoCV - In progress - Need to add links to `plot_lasso_model_selection.py` and `plot_linear_model_coefficient_interpretation.py`
-- [ ] LassoLars - In progress - Need to add links to examples that use LassoLars
-- [ ] LassoLarsCV - In progress - Need to add links to `plot_lasso_model_selection.py`
-- [ ] LassoLarsIC - Attempted - Identified links to `plot_lasso_lars_ic.py` and `plot_lasso_model_selection.py`, but encountered timeout issues
+- [-] ElasticNet - Created patch file with links to `plot_lasso_and_elasticnet.py`, `plot_elastic_net_precomputed_gram_matrix_with_weighted_samples.py`, and `plot_train_error_vs_test_error.py`
+- [-] ElasticNetCV - Created patch file with link to `plot_lasso_model_selection.py`
+- [-] Lasso - Created patch file with links to `plot_lasso_and_elasticnet.py`, `plot_lasso_model_selection.py`, `plot_lasso_lars_ic.py`, and `plot_tomography_l1_reconstruction.py`
+- [-] LassoCV - Created patch file with links to `plot_lasso_model_selection.py` and `plot_linear_model_coefficient_interpretation.py`
+- [-] LassoLars - Created patch file with link to `plot_lasso_lasso_lars_elasticnet_path.py`
+- [-] LassoLarsCV - Created patch file with link to `plot_lasso_model_selection.py`
+- [-] LassoLarsIC - Created patch file with links to `plot_lasso_lars_ic.py` and `plot_lasso_model_selection.py`
 - [ ] MultiTaskElasticNet - No examples found specifically for this class
 - [ ] MultiTaskElasticNetCV - No examples found specifically for this class
-- [ ] MultiTaskLasso - Attempted - Identified link to `plot_multi_task_lasso_support.py`, but encountered timeout issues
+- [-] MultiTaskLasso - Created patch file with link to `plot_multi_task_lasso_support.py`
 - [ ] MultiTaskLassoCV - No examples found specifically for this class
 
 ### Generalized Linear Models (GLM)
@@ -112,3 +112,5 @@
 - Focus on making examples more discoverable in the API documentation
 - Some classes may already have example links - check before adding
 - Will add one example reference at a time to avoid edit conflicts
+- For classes in larger files with timeout issues, created patch files in the `doc_patches` directory
+- Use [-] to indicate classes for which patch files have been created but not yet applied
