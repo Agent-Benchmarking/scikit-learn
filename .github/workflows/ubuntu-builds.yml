@@ -8,10 +8,7 @@ on:
       - main
       # Release branches
       - "[0-9]+.[0-9]+.X"
-  pull_request:
-    branches:
-      - main
-      - "[0-9]+.[0-9]+.X"
+  pull_request: # Run on all PRs regardless of target branch
   # Nightly build
   schedule:
     - cron: "30 2 * * *"
