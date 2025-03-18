@@ -55,16 +55,16 @@
 - [x] BayesianRidge - Added links to `plot_bayesian_ridge_curvefit.py`, `plot_ard.py`, `plot_feature_agglomeration_vs_univariate_selection.py`, and `plot_iterative_imputer_variants_comparison.py`
 
 ### Coordinate Descent Models
-- [ ] ElasticNet - Patch created but encountered issues during application - Need to add links to `plot_lasso_and_elasticnet.py`, `plot_elastic_net_precomputed_gram_matrix_with_weighted_samples.py`, and `plot_train_error_vs_test_error.py`
-- [ ] ElasticNetCV - Patch created but encountered issues during application - Need to add link to `plot_lasso_model_selection.py`
-- [ ] Lasso - Patch created but encountered issues during application - Need to add links to `plot_lasso_and_elasticnet.py`, `plot_lasso_model_selection.py`, `plot_lasso_lars_ic.py`, and `plot_tomography_l1_reconstruction.py`
-- [ ] LassoCV - Patch created but encountered issues during application - Need to add links to `plot_lasso_model_selection.py` and `plot_linear_model_coefficient_interpretation.py`
-- [ ] LassoLars - Patch created but encountered issues during application - Need to add link to `plot_lasso_lasso_lars_elasticnet_path.py`
-- [ ] LassoLarsCV - Patch created but encountered issues during application - Need to add link to `plot_lasso_model_selection.py`
-- [ ] LassoLarsIC - Patch created but encountered issues during application - Need to add links to `plot_lasso_lars_ic.py` and `plot_lasso_model_selection.py`
+- [x] ElasticNet - Added links to `plot_lasso_and_elasticnet.py`, `plot_elastic_net_precomputed_gram_matrix_with_weighted_samples.py`, and `plot_train_error_vs_test_error.py`
+- [x] ElasticNetCV - Added link to `plot_lasso_model_selection.py`
+- [x] Lasso - Added links to `plot_lasso_and_elasticnet.py`, `plot_lasso_model_selection.py`, `plot_lasso_lars_ic.py`, and `plot_tomography_l1_reconstruction.py`
+- [x] LassoCV - Added links to `plot_lasso_model_selection.py` and `plot_linear_model_coefficient_interpretation.py`
+- [x] LassoLars - Added link to `plot_lasso_lasso_lars_elasticnet_path.py`
+- [x] LassoLarsCV - Added link to `plot_lasso_model_selection.py`
+- [x] LassoLarsIC - Added links to `plot_lasso_lars_ic.py` and `plot_lasso_model_selection.py`
 - [ ] MultiTaskElasticNet - No examples found specifically for this class
 - [ ] MultiTaskElasticNetCV - No examples found specifically for this class
-- [ ] MultiTaskLasso - Patch created but encountered issues during application - Need to add link to `plot_multi_task_lasso_support.py`
+- [x] MultiTaskLasso - Added link to `plot_multi_task_lasso_support.py`
 - [ ] MultiTaskLassoCV - No examples found specifically for this class
 
 ### Generalized Linear Models (GLM)
@@ -109,11 +109,6 @@
 4. Track progress in this file
 
 ## Notes
-- Focus on making examples more discoverable in the API documentation
-- Some classes may already have example links - check before adding
-- Will add one example reference at a time to avoid edit conflicts
-- For larger files with timeout issues, investigated patch approach but encountered syntax issues
-- Need to evaluate alternative approaches for larger files with timeout constraints:
-  1. Smaller, more targeted patches that focus on specific line numbers
-  2. Command-line editing tools like sed/awk to make targeted changes
-  3. Split the task into even smaller increments to avoid timeouts
+- The automated Python scripting approach worked well for adding example links to classes in large files that were causing timeout issues when edited directly.
+- For the remaining classes in other large files (e.g., _least_angle.py), we'll continue using the scripting approach.
+- Classes in smaller, more manageable files can be updated directly.
