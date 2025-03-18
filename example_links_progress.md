@@ -6,10 +6,10 @@ This document tracks progress on adding example links to scikit-learn documentat
 - [x] gaussian_process.kernels - All kernel classes have been linked to appropriate examples
 - [x] kernel_approximation - Added links where appropriate examples exist (PolynomialCountSketch and RBFSampler)
 - [x] cluster - All clustering classes have example links added where appropriate
+- [x] decomposition - Added example links for NMF, MiniBatchNMF, and LatentDirichletAllocation
+- [x] ensemble - Added example links for all ensemble classes including StackingRegressor, VotingClassifier, and VotingRegressor
 
 ## In Progress
-- [ ] decomposition
-- [ ] ensemble
 - [ ] linear_model
 - [ ] svm
 - [ ] neighbors
@@ -21,8 +21,6 @@ This document tracks progress on adding example links to scikit-learn documentat
 - [ ] etc.
 
 ## To Do
-- [ ] decomposition
-- [ ] ensemble
 - [ ] linear_model
 - [ ] svm
 - [ ] neighbors
