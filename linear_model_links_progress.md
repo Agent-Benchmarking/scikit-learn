@@ -73,8 +73,8 @@
 - [x] TweedieRegressor - Completed - Added link to `plot_tweedie_regression_insurance_claims.py`
 
 ### Least Angle Regression
-- [x] Lars - No specific examples found
-- [x] LarsCV - No specific examples found
+- [x] Lars - Added example links
+- [x] LarsCV - Added example links
 
 ### Logistic Regression
 - [x] LogisticRegression - Added example links: `plot_logistic.py`, `plot_logistic_path.py`, `plot_logistic_l1_l2_sparsity.py`, `plot_logistic_multinomial.py`
@@ -110,5 +110,5 @@
 
 ## Notes
 - The automated Python scripting approach worked well for adding example links to classes in large files that were causing timeout issues when edited directly.
-- For the remaining classes in other large files (e.g., _least_angle.py), we'll continue using the scripting approach.
-- Classes in smaller, more manageable files can be updated directly.
+- We've successfully added example links to coordinate descent models and least angle regression models.
+- The same approach can be applied to any remaining large files requiring docstring updates.
