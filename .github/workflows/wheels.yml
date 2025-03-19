@@ -151,6 +151,12 @@ jobs:
         if: matrix.os == 'windows-latest'
         uses: ilammy/msvc-dev-cmd@v1
 
+      - name: Install OpenBLAS and other dependencies (Linux)
+        if: matrix.os == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libopenblas-dev gfortran
+
       - name: Build and test wheels and sdist
         uses: pypa/cibuildwheel@v2.16.5
         env:
@@ -163,6 +169,12 @@ jobs:
                             SKLEARN_SKIP_NETWORK_TESTS=1
                             SKLEARN_BUILD_PARALLEL=3
           CIBW_BUILD_VERBOSITY: 1
+          CIBW_BEFORE_BUILD: pip install numpy cython
+          CIBW_REPAIR_WHEEL_COMMAND: ""
+          # System-specific configurations
+          CIBW_BEFORE_BUILD_LINUX: yum install -y openblas-devel || apt-get update && apt-get install -y libopenblas-dev
+          CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET=10.15
+          CIBW_BEFORE_ALL_MACOS: brew install libomp openblas
 
           # Testing options
           # check because some architectures are emulated and tests would be too slow
@@ -199,6 +211,11 @@ jobs:
         with:
           fetch-depth: 10
 
+      - name: Install OpenBLAS and other dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libopenblas-dev gfortran
+
       - name: Build and test wheels and sdist
         uses: pypa/cibuildwheel@v2.16.5
         env:
@@ -211,6 +228,12 @@ jobs:
                             SKLEARN_SKIP_NETWORK_TESTS=1
                             SKLEARN_BUILD_PARALLEL=3
           CIBW_BUILD_VERBOSITY: 1
+          CIBW_BEFORE_BUILD: pip install numpy cython
+          CIBW_REPAIR_WHEEL_COMMAND: ""
+          # System-specific configurations
+          CIBW_BEFORE_BUILD_LINUX: yum install -y openblas-devel || apt-get update && apt-get install -y libopenblas-dev
+          CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET=10.15
+          CIBW_BEFORE_ALL_MACOS: brew install libomp openblas
 
           # Testing options
           CIBW_TEST_REQUIRES: pytest pandas threadpoolctl
@@ -239,9 +262,15 @@ jobs:
         with:
           python-version: '3.9'
 
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libopenblas-dev gfortran
+          python -m pip install --upgrade pip
+          python -m pip install numpy cython build
+
       - name: Build source distribution
         run: |
-          pip install -U build
           python -m build --sdist
 
       - name: Test install source distribution
