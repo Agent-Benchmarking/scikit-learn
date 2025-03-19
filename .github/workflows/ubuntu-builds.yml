@@ -13,12 +13,11 @@ on:
   # Also trigger on workflow_dispatch
   workflow_dispatch:
 
-# Set default permissions as read only
+# Set default permissions to read-only
 permissions:
   contents: read
-  checks: write    # Required for test results
-  pull-requests: write  # Required for PR comments
-  issues: write    # Required for issue comments
+  issues: read
+  pull-requests: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -91,7 +90,7 @@ jobs:
       - name: Setup build
         run: |
           source build_tools/github/setup_conda.sh
-          pip install pytest pytest-xdist coverage gast pyamg threadpoolctl
+          pip install pytest pytest-xdist coverage pytest-cov gast pyamg threadpoolctl
           pip install --progress-bar off --pre --extra-index-url https://pypi.anaconda.org/scientific-python-nightly-wheels/simple --prefer-binary pandas$PANDAS_VERSION scipy matplotlib$MATPLOTLIB_VERSION
       
       - name: Build and test
@@ -118,21 +117,22 @@ jobs:
           
           cd $TEST_DIR
           
+          # Configure coverage
+          export COVERAGE_PROCESS_START="$GITHUB_WORKSPACE/.coveragerc"
+          
+          # Use sys.monitoring to make coverage faster for Python >= 3.12
+          HAS_SYSMON=$(python -c 'import sys; print(sys.version_info >= (3, 12))')
+          if [[ "$HAS_SYSMON" == "True" ]]; then
+              export COVERAGE_CORE=sysmon
+          fi
+          
           # Pytest Arguments
           PYTEST_ARGS="-xvs --durations=10 --timeout=1800 --timeout-method=thread --log-level=DEBUG --color=yes --junitxml=$GITHUB_WORKSPACE/junit/test-results.xml"
           
           # Run the tests
           if [[ "$COVERAGE" == "true" ]]; then
-            # Create coverage environment
-            export COVERAGE_PROCESS_START="$GITHUB_WORKSPACE/.coveragerc"
-            # Use sys.monitoring to make coverage faster for Python >= 3.12
-            HAS_SYSMON=$(python -c 'import sys; print(sys.version_info >= (3, 12))')
-            if [[ "$HAS_SYSMON" == "True" ]]; then
-                export COVERAGE_CORE=sysmon
-            fi
-            
-            # Run pytest with coverage
-            python -m pytest $PYTEST_ARGS --cov=sklearn --cov-report=xml $GITHUB_WORKSPACE/sklearn
+            # Note: --cov-report= is used to disable the long text output report
+            python -m pytest $PYTEST_ARGS --cov-config=$COVERAGE_PROCESS_START --cov sklearn --cov-report=xml $GITHUB_WORKSPACE/sklearn
           else
             python -m pytest $PYTEST_ARGS $GITHUB_WORKSPACE/sklearn
           fi
@@ -192,6 +192,8 @@ jobs:
       - name: Setup build
         run: |
           build_tools/github/setup_atlas_ubuntu.sh
+          # Ensure pytest-cov is installed
+          pip3 install pytest-cov
       
       - name: Display information from Jammy build
         run: |
@@ -207,22 +209,23 @@ jobs:
           python3 -c "import sklearn; sklearn._show_versions()"
           echo "::endgroup::"
           
+          # Configure coverage
+          export COVERAGE_PROCESS_START="$GITHUB_WORKSPACE/.coveragerc"
+          
+          # Use sys.monitoring to make coverage faster for Python >= 3.12
+          HAS_SYSMON=$(python3 -c 'import sys; print(sys.version_info >= (3, 12))')
+          if [[ "$HAS_SYSMON" == "True" ]]; then
+              export COVERAGE_CORE=sysmon
+          fi
+          
           cd $TEST_DIR
           
           # Pytest Arguments
           PYTEST_ARGS="-xvs --durations=10 --timeout=1800 --timeout-method=thread --log-level=DEBUG --color=yes --junitxml=$GITHUB_WORKSPACE/junit/test-results.xml"
           
           if [[ "$COVERAGE" == "true" ]]; then
-            # Create coverage environment
-            export COVERAGE_PROCESS_START="$GITHUB_WORKSPACE/.coveragerc"
-            # Use sys.monitoring to make coverage faster for Python >= 3.12
-            HAS_SYSMON=$(python3 -c 'import sys; print(sys.version_info >= (3, 12))')
-            if [[ "$HAS_SYSMON" == "True" ]]; then
-                export COVERAGE_CORE=sysmon
-            fi
-            
-            # Run pytest with coverage
-            python3 -m pytest $PYTEST_ARGS --cov=sklearn --cov-report=xml $GITHUB_WORKSPACE/sklearn
+            # Note: --cov-report= is used to disable the long text output report
+            python3 -m pytest $PYTEST_ARGS --cov-config=$COVERAGE_PROCESS_START --cov sklearn --cov-report=xml $GITHUB_WORKSPACE/sklearn
           else
             python3 -m pytest $PYTEST_ARGS $GITHUB_WORKSPACE/sklearn
           fi
