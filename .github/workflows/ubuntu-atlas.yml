@@ -219,8 +219,11 @@ jobs:
           source build_tools/shared.sh
           show_installed_libraries
           
+          # Ensure ninja is installed and reinstalled to avoid any version issues
+          pip install --force-reinstall ninja
+          
           export LDFLAGS="$LDFLAGS -Wl,--sysroot=/"
-          pip install --verbose --no-build-isolation --editable .
+          pip install --verbose --no-build-isolation --editable . --config-settings editable-verbose=true
           ccache -s
       
       - name: Test scikit-learn

@@ -96,7 +96,9 @@ jobs:
         run: |
           # Install build dependencies for meson-python
           conda install -y numpy scipy cython joblib threadpoolctl pytest pytest-xdist pytest-timeout
-          pip install meson ninja meson-python build setuptools pip wheel
+          # Explicitly install ninja and ensure it's available before meson
+          pip install --force-reinstall ninja
+          pip install meson meson-python build setuptools pip wheel
           
           # Install testing dependencies
           pip install pytest-cov coverage gast pyamg
@@ -104,8 +106,8 @@ jobs:
           # Install specific versions for testing
           pip install --progress-bar off --pre --extra-index-url https://pypi.anaconda.org/scientific-python-nightly-wheels/simple --prefer-binary pandas$PANDAS_VERSION scipy matplotlib$MATPLOTLIB_VERSION
           
-          # Try regular install first
-          pip install -e . || {
+          # Try editable install with proper flags to prevent meson-python issues
+          pip install -e . --verbose --no-build-isolation --config-settings editable-verbose=true || {
             echo "::warning::Editable install failed, trying alternative installation"
             # Alternative: build and install without editable mode
             pip install . --no-build-isolation --no-deps
@@ -220,13 +222,15 @@ jobs:
           conda install -y numpy scipy cython joblib threadpoolctl pytest pytest-xdist pytest-timeout
           
           # Install build dependencies for meson-python
-          pip install meson ninja meson-python build setuptools pip wheel
+          # Explicitly install ninja and ensure it's available before meson
+          pip install --force-reinstall ninja
+          pip install meson meson-python build setuptools pip wheel
           
           # Install testing dependencies
           pip install pytest-cov coverage
           
-          # Try regular install first
-          pip install -e . || {
+          # Try editable install with proper flags to prevent meson-python issues
+          pip install -e . --verbose --no-build-isolation --config-settings editable-verbose=true || {
             echo "::warning::Editable install failed, trying alternative installation"
             # Alternative: build and install without editable mode
             pip install . --no-build-isolation --no-deps
