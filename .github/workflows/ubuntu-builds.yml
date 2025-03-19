@@ -133,7 +133,7 @@ jobs:
           # Create the test directory
           mkdir -p $TEST_DIR
           echo "::group::System information"
-          python -c "import sklearn; sklearn._show_versions()"
+          python -c "import sklearn; sklearn.show_versions()"
           echo "::endgroup::"
           
           cd $TEST_DIR
@@ -252,7 +252,7 @@ jobs:
           # Create the test directory
           mkdir -p $TEST_DIR
           echo "::group::System information"
-          python -c "import sklearn; sklearn._show_versions()"
+          python -c "import sklearn; sklearn.show_versions()"
           echo "::endgroup::"
           
           # Configure coverage
