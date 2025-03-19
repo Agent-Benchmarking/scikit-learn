@@ -13,6 +13,13 @@ on:
   # Also trigger on workflow_dispatch
   workflow_dispatch:
 
+# Set default permissions as read only
+permissions:
+  contents: read
+  checks: write    # Required for test results
+  pull-requests: write  # Required for PR comments
+  issues: write    # Required for issue comments
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -116,7 +123,16 @@ jobs:
           
           # Run the tests
           if [[ "$COVERAGE" == "true" ]]; then
-            python -m pytest $PYTEST_ARGS --cov sklearn --cov-report=xml $GITHUB_WORKSPACE/sklearn
+            # Create coverage environment
+            export COVERAGE_PROCESS_START="$GITHUB_WORKSPACE/.coveragerc"
+            # Use sys.monitoring to make coverage faster for Python >= 3.12
+            HAS_SYSMON=$(python -c 'import sys; print(sys.version_info >= (3, 12))')
+            if [[ "$HAS_SYSMON" == "True" ]]; then
+                export COVERAGE_CORE=sysmon
+            fi
+            
+            # Run pytest with coverage
+            python -m pytest $PYTEST_ARGS --cov=sklearn --cov-report=xml $GITHUB_WORKSPACE/sklearn
           else
             python -m pytest $PYTEST_ARGS $GITHUB_WORKSPACE/sklearn
           fi
@@ -197,7 +213,16 @@ jobs:
           PYTEST_ARGS="-xvs --durations=10 --timeout=1800 --timeout-method=thread --log-level=DEBUG --color=yes --junitxml=$GITHUB_WORKSPACE/junit/test-results.xml"
           
           if [[ "$COVERAGE" == "true" ]]; then
-            python3 -m pytest $PYTEST_ARGS --cov sklearn --cov-report=xml $GITHUB_WORKSPACE/sklearn
+            # Create coverage environment
+            export COVERAGE_PROCESS_START="$GITHUB_WORKSPACE/.coveragerc"
+            # Use sys.monitoring to make coverage faster for Python >= 3.12
+            HAS_SYSMON=$(python3 -c 'import sys; print(sys.version_info >= (3, 12))')
+            if [[ "$HAS_SYSMON" == "True" ]]; then
+                export COVERAGE_CORE=sysmon
+            fi
+            
+            # Run pytest with coverage
+            python3 -m pytest $PYTEST_ARGS --cov=sklearn --cov-report=xml $GITHUB_WORKSPACE/sklearn
           else
             python3 -m pytest $PYTEST_ARGS $GITHUB_WORKSPACE/sklearn
           fi

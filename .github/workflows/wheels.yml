@@ -14,6 +14,13 @@ on:
   # Also trigger on workflow_dispatch
   workflow_dispatch:
 
+# Set default permissions as read only
+permissions:
+  contents: read
+  checks: write    # Required for test results
+  pull-requests: write  # Required for PR comments
+  issues: write    # Required for issue comments
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
