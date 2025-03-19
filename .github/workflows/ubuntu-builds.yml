@@ -120,12 +120,6 @@ jobs:
           # Configure coverage
           export COVERAGE_PROCESS_START="$GITHUB_WORKSPACE/.coveragerc"
           
-          # Use sys.monitoring to make coverage faster for Python >= 3.12
-          HAS_SYSMON=$(python -c 'import sys; print(sys.version_info >= (3, 12))')
-          if [[ "$HAS_SYSMON" == "True" ]]; then
-              export COVERAGE_CORE=sysmon
-          fi
-          
           # Pytest Arguments
           PYTEST_ARGS="-xvs --durations=10 --timeout=1800 --timeout-method=thread --log-level=DEBUG --color=yes --junitxml=$GITHUB_WORKSPACE/junit/test-results.xml"
           
@@ -212,17 +206,12 @@ jobs:
           # Configure coverage
           export COVERAGE_PROCESS_START="$GITHUB_WORKSPACE/.coveragerc"
           
-          # Use sys.monitoring to make coverage faster for Python >= 3.12
-          HAS_SYSMON=$(python3 -c 'import sys; print(sys.version_info >= (3, 12))')
-          if [[ "$HAS_SYSMON" == "True" ]]; then
-              export COVERAGE_CORE=sysmon
-          fi
-          
           cd $TEST_DIR
           
           # Pytest Arguments
           PYTEST_ARGS="-xvs --durations=10 --timeout=1800 --timeout-method=thread --log-level=DEBUG --color=yes --junitxml=$GITHUB_WORKSPACE/junit/test-results.xml"
           
+          # Run the tests
           if [[ "$COVERAGE" == "true" ]]; then
             # Note: --cov-report= is used to disable the long text output report
             python3 -m pytest $PYTEST_ARGS --cov-config=$COVERAGE_PROCESS_START --cov sklearn --cov-report=xml $GITHUB_WORKSPACE/sklearn
