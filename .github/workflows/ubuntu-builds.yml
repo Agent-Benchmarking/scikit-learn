@@ -1,0 +1,226 @@
+name: Ubuntu Builds
+
+on:
+  # Trigger the workflow on push or pull request on main branch or any release branch
+  push:
+    branches:
+      - main
+      - '[0-9]+.[0-9]+.X'
+  pull_request:
+    branches:
+      - main
+      - '[0-9]+.[0-9]+.X'
+  # Also trigger on workflow_dispatch
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check_build_trigger:
+    name: Check if workflow should be run
+    runs-on: ubuntu-latest
+    outputs:
+      build: ${{ steps.check.outputs.build }}
+    steps:
+      - name: Check if workflow should be run
+        id: check
+        env:
+          # We run the full workflow for github.repository == scikit-learn/scikit-learn 
+          # or the Agent-Benchmarking/scikit-learn repo
+          REPO_NAME: ${{ github.repository }}
+        run: |
+          # Run if this is the main scikit-learn repo or the Agent-Benchmarking repo
+          if [[ "$REPO_NAME" == "scikit-learn/scikit-learn" || "$REPO_NAME" == "Agent-Benchmarking/scikit-learn" ]]; then
+            echo "build=true" >> $GITHUB_OUTPUT
+            echo "::notice::Building on repository $REPO_NAME"
+          else
+            echo "build=false" >> $GITHUB_OUTPUT
+            echo "::notice::Skipping build on fork repository $REPO_NAME"
+          fi
+
+  # Jammy Jellyfish workflow jobs
+  jammy_linux:
+    name: Ubuntu Jammy Jellyfish
+    needs: check_build_trigger
+    if: needs.check_build_trigger.outputs.build == 'true'
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        shell: bash
+    outputs:
+      numpy_version: ${{ steps.build.outputs.numpy_version }}
+      scipy_version: ${{ steps.build.outputs.scipy_version }}
+      pandas_version: ${{ steps.build.outputs.pandas_version }}
+    env:
+      # Matplotlib 3.8.0 is incompatible with numpy 2.0.0
+      MATPLOTLIB_VERSION: ">=3.9.0"
+      PANDAS_VERSION: ">=2.0.3"
+      TEST_DIR: "/tmp/sklearn_test_dir"
+      # Force matplotlib to build font cache in /tmp and not $HOME/.matplolib
+      MPLCONFIGDIR: "/tmp/matplotlib"
+      PYTHONUNBUFFERED: "1"
+      DEBIAN_FRONTEND: "noninteractive"
+      COVERAGE: "true"
+      OMP_NUM_THREADS: "2"
+      OPENBLAS_NUM_THREADS: "2"
+      SKLEARN_SKIP_NETWORK_TESTS: "1"
+      CONDA_ENV_NAME: "testvenv"
+      CONDA_PATH: "/usr/share/miniconda"
+      # If python executable is not specified, test_parallel can use system's python
+      # that has no pytest installed
+      SKLEARN_TESTS_PYTHON_EXECUTABLE: "${{ github.workspace }}/testvenv/bin/python"
+      # Set timeout for codecov uploader daemon
+      CODECOV_THRESHOLD: "2"
+      CODECOV_KILLER_TIMEOUT: "5"
+      PYTHON_VERSION: "3.9"
+    steps:
+      - name: Checkout scikit-learn
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 10
+      
+      - name: Setup build
+        run: |
+          source build_tools/github/setup_conda.sh
+          pip install pytest pytest-xdist coverage gast pyamg threadpoolctl
+          pip install --progress-bar off --pre --extra-index-url https://pypi.anaconda.org/scientific-python-nightly-wheels/simple --prefer-binary pandas$PANDAS_VERSION scipy matplotlib$MATPLOTLIB_VERSION
+      
+      - name: Build and test
+        id: build
+        env:
+          COVERAGE: "true"
+        run: |
+          source $CONDA_PATH/etc/profile.d/conda.sh
+          conda activate $CONDA_ENV_NAME
+          
+          # Create the test directory
+          mkdir -p $TEST_DIR
+          echo "::group::System information"
+          python -c "import sklearn; sklearn._show_versions()"
+          echo "::endgroup::"
+          
+          # Get dependency versions for reporting
+          NUMPY_VERSION=$(python -c "import numpy; print(numpy.__version__)")
+          SCIPY_VERSION=$(python -c "import scipy; print(scipy.__version__)")
+          PANDAS_VERSION=$(python -c "import pandas; print(pandas.__version__)")
+          echo "numpy_version=$NUMPY_VERSION" >> $GITHUB_OUTPUT
+          echo "scipy_version=$SCIPY_VERSION" >> $GITHUB_OUTPUT
+          echo "pandas_version=$PANDAS_VERSION" >> $GITHUB_OUTPUT
+          
+          cd $TEST_DIR
+          
+          # Pytest Arguments
+          PYTEST_ARGS="-xvs --durations=10 --timeout=1800 --timeout-method=thread --log-level=DEBUG --color=yes --junitxml=$GITHUB_WORKSPACE/junit/test-results.xml"
+          
+          # Run the tests
+          if [[ "$COVERAGE" == "true" ]]; then
+            python -m pytest $PYTEST_ARGS --cov sklearn --cov-report=xml $GITHUB_WORKSPACE/sklearn
+          else
+            python -m pytest $PYTEST_ARGS $GITHUB_WORKSPACE/sklearn
+          fi
+          
+          # Move coverage XML report
+          if [[ -f coverage.xml ]]; then
+            mv coverage.xml $GITHUB_WORKSPACE
+          fi
+          cd $GITHUB_WORKSPACE
+      
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jammy-pytest-results
+          path: junit/test-results.xml
+      
+      - name: Upload coverage
+        if: success()
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: coverage.xml
+          flags: ubuntu,cp39,numpy-dev,scipy-dev
+          name: ubuntu-latest-coverage
+          fail_ci_if_error: false
+
+  # Atlas workflow jobs
+  atlas_linux:
+    name: Ubuntu Atlas
+    needs: [check_build_trigger, jammy_linux]
+    if: needs.check_build_trigger.outputs.build == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    env:
+      DEBIAN_FRONTEND: "noninteractive"
+      TEST_DIR: "/tmp/sklearn_test_dir"
+      PYTHONUNBUFFERED: "1"
+      SKLEARN_SKIP_NETWORK_TESTS: "1"
+      # Force matplotlib to build font cache in /tmp and not $HOME/.matplolib
+      MPLCONFIGDIR: "/tmp/matplotlib"
+      COVERAGE: "true"
+      OMP_NUM_THREADS: "2"
+      OPENBLAS_NUM_THREADS: "2"
+      SKLEARN_TESTS_PYTHON_EXECUTABLE: "/usr/bin/python3"
+      # Set timeout for codecov uploader daemon
+      CODECOV_THRESHOLD: "2"
+      CODECOV_KILLER_TIMEOUT: "5"
+    steps:
+      - name: Checkout scikit-learn
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 10
+      
+      - name: Setup build
+        run: |
+          build_tools/github/setup_atlas_ubuntu.sh
+      
+      - name: Display information from Jammy build
+        run: |
+          echo "::notice::Numpy version from Jammy build: ${{ needs.jammy_linux.outputs.numpy_version }}"
+          echo "::notice::Scipy version from Jammy build: ${{ needs.jammy_linux.outputs.scipy_version }}"
+          echo "::notice::Pandas version from Jammy build: ${{ needs.jammy_linux.outputs.pandas_version }}"
+
+      - name: Build and test
+        run: |
+          # Create the test directory
+          mkdir -p $TEST_DIR
+          echo "::group::System information"
+          python3 -c "import sklearn; sklearn._show_versions()"
+          echo "::endgroup::"
+          
+          cd $TEST_DIR
+          
+          # Pytest Arguments
+          PYTEST_ARGS="-xvs --durations=10 --timeout=1800 --timeout-method=thread --log-level=DEBUG --color=yes --junitxml=$GITHUB_WORKSPACE/junit/test-results.xml"
+          
+          if [[ "$COVERAGE" == "true" ]]; then
+            python3 -m pytest $PYTEST_ARGS --cov sklearn --cov-report=xml $GITHUB_WORKSPACE/sklearn
+          else
+            python3 -m pytest $PYTEST_ARGS $GITHUB_WORKSPACE/sklearn
+          fi
+          
+          # Move coverage to workspace for upload
+          if [[ -f coverage.xml ]]; then
+            mv coverage.xml $GITHUB_WORKSPACE
+          fi
+          cd $GITHUB_WORKSPACE
+      
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: atlas-pytest-results
+          path: junit/test-results.xml
+      
+      - name: Upload coverage
+        if: success()
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: coverage.xml
+          flags: ubuntu,atlas
+          name: ubuntu-atlas-coverage
+          fail_ci_if_error: false 
