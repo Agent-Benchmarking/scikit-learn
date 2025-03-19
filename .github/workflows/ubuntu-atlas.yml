@@ -1,0 +1,232 @@
+name: "Ubuntu Atlas"
+permissions:
+  contents: read
+
+on:
+  schedule:
+    # Nightly build at 2:30 A.M.
+    - cron: "30 2 * * *"
+  push:
+    branches:
+      - main
+      # Release branches
+      - "[0-9]+.[0-9]+.X"
+  pull_request:
+    branches:
+      - main
+      - "[0-9]+.[0-9]+.X"
+  # Manual run
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  check_build_trigger:
+    name: Check build trigger
+    runs-on: ubuntu-latest
+    if: github.repository == 'scikit-learn/scikit-learn'
+    outputs:
+      build: ${{ steps.check_build_trigger.outputs.build }}
+
+    steps:
+      - name: Checkout scikit-learn
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - id: check_build_trigger
+        name: Check build trigger
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            echo "build=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "build=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          COMMIT_MESSAGE=$(git log -1 --pretty=%B)
+          if [[ "$COMMIT_MESSAGE" =~ \[ci\ skip\] ]]; then
+            echo "build=false" >> $GITHUB_OUTPUT
+          else
+            echo "build=true" >> $GITHUB_OUTPUT
+          fi
+
+  # This job depends on the Ubuntu Jammy Jellyfish workflow to complete successfully
+  wait_for_ubuntu_jammy:
+    name: Wait for Ubuntu Jammy
+    needs: check_build_trigger
+    if: needs.check_build_trigger.outputs.build == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for Ubuntu Jammy workflow
+        uses: actions/checkout@v4
+
+      - name: Check Ubuntu Jammy workflow status
+        id: check_jammy
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const branch = context.ref.replace('refs/heads/', '');
+            
+            // Look for the most recent run of the Ubuntu Jammy workflow on this branch/PR
+            const workflowName = "Ubuntu Jammy Jellyfish";
+            const workflows = await github.rest.actions.listRepoWorkflows({
+              owner,
+              repo
+            });
+            
+            const jammy = workflows.data.workflows.find(w => w.name === workflowName);
+            if (!jammy) {
+              core.setFailed(`Could not find workflow: ${workflowName}`);
+              return;
+            }
+            
+            const runs = await github.rest.actions.listWorkflowRuns({
+              owner,
+              repo,
+              workflow_id: jammy.id,
+              branch: branch,
+              status: 'success',
+              per_page: 1
+            });
+            
+            if (runs.data.total_count === 0) {
+              core.setFailed(`No successful runs of the ${workflowName} workflow found for branch: ${branch}`);
+              return;
+            }
+            
+            core.info(`Found successful run of ${workflowName}: ${runs.data.workflow_runs[0].html_url}`);
+            return runs.data.workflow_runs[0];
+
+  ubuntu_atlas:
+    name: Ubuntu Atlas
+    needs: [check_build_trigger, wait_for_ubuntu_jammy]
+    # Only run if the check_build_trigger job determined we should build
+    if: needs.check_build_trigger.outputs.build == 'true'
+    runs-on: ubuntu-22.04
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: ubuntu_atlas
+            lock_file: ./build_tools/azure/ubuntu_atlas_lock.txt
+            global_random_seed: 1
+
+    env:
+      DISTRIB: ubuntu
+      LOCK_FILE: ${{ matrix.lock_file }}
+      SKLEARN_TESTS_GLOBAL_RANDOM_SEED: ${{ matrix.global_random_seed }}
+      SKLEARN_SKIP_NETWORK_TESTS: 1
+      VIRTUALENV: testvenv
+      JUNITXML: test-data.xml
+      TEST_DIR: /tmp/sklearn_test_dir
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
+      CCACHE_COMPRESS: 1
+      PYTEST_XDIST_VERSION: latest
+      COVERAGE: false
+    
+    steps:
+      - name: Checkout scikit-learn
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+      
+      - name: Setup virtualenv
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install virtualenv
+          python -m virtualenv $VIRTUALENV
+      
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1
+        with:
+          key: ${{ matrix.name }}-${{ github.job }}
+          save: ${{ github.ref == 'refs/heads/main' }}
+
+      - name: Install Ubuntu dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install python3-scipy python3-matplotlib libatlas3-base libatlas-base-dev python3-virtualenv ccache
+          
+          source $VIRTUALENV/bin/activate
+          pip install -r "$LOCK_FILE"
+      
+      - name: Install scikit-learn
+        run: |
+          source $VIRTUALENV/bin/activate
+          export PATH="/usr/lib/ccache:$PATH"
+          which ccache
+          ccache -s
+          
+          source build_tools/shared.sh
+          show_installed_libraries
+          
+          export LDFLAGS="$LDFLAGS -Wl,--sysroot=/"
+          pip install --verbose --no-build-isolation --editable .
+          ccache -s
+      
+      - name: Test scikit-learn
+        run: |
+          source $VIRTUALENV/bin/activate
+          mkdir -p $TEST_DIR
+          cd $TEST_DIR
+          
+          # Show system info
+          python -c "import joblib; print(f'Number of cores (physical): {joblib.cpu_count()} ({joblib.cpu_count(only_physical_cores=True)})')"
+          python -c "import sklearn; sklearn.show_versions()"
+          
+          TEST_CMD="python -m pytest --showlocals --durations=20 --junitxml=$JUNITXML"
+          
+          if [[ "$COVERAGE" == "true" ]]; then
+            export COVERAGE_PROCESS_START="$GITHUB_WORKSPACE/.coveragerc"
+            # Use sys.monitoring to make coverage faster for Python >= 3.12
+            HAS_SYSMON=$(python -c 'import sys; print(sys.version_info >= (3, 12))')
+            if [[ "$HAS_SYSMON" == "True" ]]; then
+                export COVERAGE_CORE=sysmon
+            fi
+            TEST_CMD="$TEST_CMD --cov-config='$COVERAGE_PROCESS_START' --cov sklearn --cov-report=xml"
+          fi
+          
+          if [[ "$PYTEST_XDIST_VERSION" != "none" ]]; then
+            XDIST_WORKERS=$(python -c "import joblib; print(joblib.cpu_count(only_physical_cores=True))")
+            TEST_CMD="$TEST_CMD -n$XDIST_WORKERS"
+          fi
+          
+          # Run the tests
+          TEST_CMD="$TEST_CMD --pyargs sklearn"
+          eval "$TEST_CMD"
+      
+      - name: Test documentation
+        run: |
+          source $VIRTUALENV/bin/activate
+          cd $TEST_DIR
+          python -m pytest --doctest-modules --showlocals --durations=20 sklearn
+      
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-results-ubuntu-atlas
+          path: ${{ env.TEST_DIR }}/${{ env.JUNITXML }}
+          retention-days: 7
+
+  update-tracker:
+    uses: ./.github/workflows/update_tracking_issue.yml
+    if: ${{ always() }}
+    needs: [ubuntu_atlas]
+    with:
+      job_status: ${{ needs.ubuntu_atlas.result }}
+    secrets:
+      BOT_GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }} 
