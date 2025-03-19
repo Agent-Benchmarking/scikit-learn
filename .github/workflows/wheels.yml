@@ -1,5 +1,5 @@
 # Workflow to build and test wheels
-name: Wheels
+name: CI Package Wheels
 
 on:
   # Trigger the workflow on push or pull request on main branch or any release branch
@@ -68,7 +68,7 @@ jobs:
             const branch = context.ref.replace('refs/heads/', '');
             
             // Look for the most recent run of the Ubuntu Builds workflow on this branch/PR
-            const workflowName = "Ubuntu Builds";
+            const workflowName = "CI Ubuntu Tests";
             const workflows = await github.rest.actions.listRepoWorkflows({
               owner,
               repo

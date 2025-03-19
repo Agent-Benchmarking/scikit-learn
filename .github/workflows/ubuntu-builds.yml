@@ -1,4 +1,4 @@
-name: Ubuntu Builds
+name: CI Ubuntu Tests
 
 on:
   # Trigger the workflow on push or pull request on main branch or any release branch
