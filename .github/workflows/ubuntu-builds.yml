@@ -94,10 +94,27 @@ jobs:
       
       - name: Install dependencies
         run: |
+          # Install build dependencies for meson-python
           conda install -y numpy scipy cython joblib threadpoolctl pytest pytest-xdist pytest-timeout
+          pip install meson ninja meson-python build setuptools pip wheel
+          
+          # Install testing dependencies
           pip install pytest-cov coverage gast pyamg
+          
+          # Install specific versions for testing
           pip install --progress-bar off --pre --extra-index-url https://pypi.anaconda.org/scientific-python-nightly-wheels/simple --prefer-binary pandas$PANDAS_VERSION scipy matplotlib$MATPLOTLIB_VERSION
-          pip install -e .
+          
+          # Try regular install first
+          pip install -e . || {
+            echo "::warning::Editable install failed, trying alternative installation"
+            # Alternative: build and install without editable mode
+            pip install . --no-build-isolation --no-deps
+          }
+          
+          # Show installed packages for debugging
+          echo "::group::Installed packages"
+          pip list
+          echo "::endgroup::"
       
       - name: Get dependency versions
         id: get_versions
@@ -201,8 +218,24 @@ jobs:
           
           # Install Python dependencies
           conda install -y numpy scipy cython joblib threadpoolctl pytest pytest-xdist pytest-timeout
+          
+          # Install build dependencies for meson-python
+          pip install meson ninja meson-python build setuptools pip wheel
+          
+          # Install testing dependencies
           pip install pytest-cov coverage
-          pip install -e .
+          
+          # Try regular install first
+          pip install -e . || {
+            echo "::warning::Editable install failed, trying alternative installation"
+            # Alternative: build and install without editable mode
+            pip install . --no-build-isolation --no-deps
+          }
+          
+          # Show installed packages for debugging
+          echo "::group::Installed packages"
+          pip list
+          echo "::endgroup::"
       
       - name: Display information from Jammy build
         run: |
