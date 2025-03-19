@@ -54,11 +54,11 @@ jobs:
     runs-on: ubuntu-22.04
     defaults:
       run:
-        shell: bash
+        shell: bash -el {0}
     outputs:
-      numpy_version: ${{ steps.build.outputs.numpy_version }}
-      scipy_version: ${{ steps.build.outputs.scipy_version }}
-      pandas_version: ${{ steps.build.outputs.pandas_version }}
+      numpy_version: ${{ steps.get_versions.outputs.numpy_version }}
+      scipy_version: ${{ steps.get_versions.outputs.scipy_version }}
+      pandas_version: ${{ steps.get_versions.outputs.pandas_version }}
     env:
       # Matplotlib 3.8.0 is incompatible with numpy 2.0.0
       MATPLOTLIB_VERSION: ">=3.9.0"
@@ -72,48 +72,50 @@ jobs:
       OMP_NUM_THREADS: "2"
       OPENBLAS_NUM_THREADS: "2"
       SKLEARN_SKIP_NETWORK_TESTS: "1"
-      CONDA_ENV_NAME: "testvenv"
-      CONDA_PATH: "/usr/share/miniconda"
       # If python executable is not specified, test_parallel can use system's python
       # that has no pytest installed
-      SKLEARN_TESTS_PYTHON_EXECUTABLE: "${{ github.workspace }}/testvenv/bin/python"
+      SKLEARN_TESTS_PYTHON_EXECUTABLE: "python"
       # Set timeout for codecov uploader daemon
       CODECOV_THRESHOLD: "2"
       CODECOV_KILLER_TIMEOUT: "5"
-      PYTHON_VERSION: "3.9"
     steps:
       - name: Checkout scikit-learn
         uses: actions/checkout@v4
         with:
           fetch-depth: 10
       
-      - name: Setup build
+      - name: Setup Miniconda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          auto-update-conda: true
+          python-version: 3.9
+          activate-environment: test-env
+          channels: conda-forge,defaults
+      
+      - name: Install dependencies
         run: |
-          source build_tools/github/setup_conda.sh
-          pip install pytest pytest-xdist coverage pytest-cov gast pyamg threadpoolctl
+          conda install -y numpy scipy cython joblib threadpoolctl pytest pytest-xdist pytest-timeout
+          pip install pytest-cov coverage gast pyamg
           pip install --progress-bar off --pre --extra-index-url https://pypi.anaconda.org/scientific-python-nightly-wheels/simple --prefer-binary pandas$PANDAS_VERSION scipy matplotlib$MATPLOTLIB_VERSION
+          pip install -e .
+      
+      - name: Get dependency versions
+        id: get_versions
+        run: |
+          echo "numpy_version=$(python -c "import numpy; print(numpy.__version__)")" >> $GITHUB_OUTPUT
+          echo "scipy_version=$(python -c "import scipy; print(scipy.__version__)")" >> $GITHUB_OUTPUT
+          echo "pandas_version=$(python -c "import pandas; print(pandas.__version__)")" >> $GITHUB_OUTPUT
       
       - name: Build and test
         id: build
         env:
           COVERAGE: "true"
         run: |
-          source $CONDA_PATH/etc/profile.d/conda.sh
-          conda activate $CONDA_ENV_NAME
-          
           # Create the test directory
           mkdir -p $TEST_DIR
           echo "::group::System information"
           python -c "import sklearn; sklearn._show_versions()"
           echo "::endgroup::"
-          
-          # Get dependency versions for reporting
-          NUMPY_VERSION=$(python -c "import numpy; print(numpy.__version__)")
-          SCIPY_VERSION=$(python -c "import scipy; print(scipy.__version__)")
-          PANDAS_VERSION=$(python -c "import pandas; print(pandas.__version__)")
-          echo "numpy_version=$NUMPY_VERSION" >> $GITHUB_OUTPUT
-          echo "scipy_version=$SCIPY_VERSION" >> $GITHUB_OUTPUT
-          echo "pandas_version=$PANDAS_VERSION" >> $GITHUB_OUTPUT
           
           cd $TEST_DIR
           
@@ -162,7 +164,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        shell: bash
+        shell: bash -el {0}
     env:
       DEBIAN_FRONTEND: "noninteractive"
       TEST_DIR: "/tmp/sklearn_test_dir"
@@ -173,7 +175,7 @@ jobs:
       COVERAGE: "true"
       OMP_NUM_THREADS: "2"
       OPENBLAS_NUM_THREADS: "2"
-      SKLEARN_TESTS_PYTHON_EXECUTABLE: "/usr/bin/python3"
+      SKLEARN_TESTS_PYTHON_EXECUTABLE: "python"
       # Set timeout for codecov uploader daemon
       CODECOV_THRESHOLD: "2"
       CODECOV_KILLER_TIMEOUT: "5"
@@ -183,11 +185,24 @@ jobs:
         with:
           fetch-depth: 10
       
-      - name: Setup build
+      - name: Setup Miniconda with Atlas
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          auto-update-conda: true
+          python-version: 3.9
+          activate-environment: atlas-env
+          channels: conda-forge,defaults
+      
+      - name: Install Atlas and dependencies
         run: |
-          build_tools/github/setup_atlas_ubuntu.sh
-          # Ensure pytest-cov is installed
-          pip3 install pytest-cov
+          # Install system packages for Atlas
+          sudo apt-get update
+          sudo apt-get install -y libatlas-base-dev gfortran libopenblas-dev
+          
+          # Install Python dependencies
+          conda install -y numpy scipy cython joblib threadpoolctl pytest pytest-xdist pytest-timeout
+          pip install pytest-cov coverage
+          pip install -e .
       
       - name: Display information from Jammy build
         run: |
@@ -200,7 +215,7 @@ jobs:
           # Create the test directory
           mkdir -p $TEST_DIR
           echo "::group::System information"
-          python3 -c "import sklearn; sklearn._show_versions()"
+          python -c "import sklearn; sklearn._show_versions()"
           echo "::endgroup::"
           
           # Configure coverage
@@ -211,12 +226,11 @@ jobs:
           # Pytest Arguments
           PYTEST_ARGS="-xvs --durations=10 --timeout=1800 --timeout-method=thread --log-level=DEBUG --color=yes --junitxml=$GITHUB_WORKSPACE/junit/test-results.xml"
           
-          # Run the tests
           if [[ "$COVERAGE" == "true" ]]; then
             # Note: --cov-report= is used to disable the long text output report
-            python3 -m pytest $PYTEST_ARGS --cov-config=$COVERAGE_PROCESS_START --cov sklearn --cov-report=xml $GITHUB_WORKSPACE/sklearn
+            python -m pytest $PYTEST_ARGS --cov-config=$COVERAGE_PROCESS_START --cov sklearn --cov-report=xml $GITHUB_WORKSPACE/sklearn
           else
-            python3 -m pytest $PYTEST_ARGS $GITHUB_WORKSPACE/sklearn
+            python -m pytest $PYTEST_ARGS $GITHUB_WORKSPACE/sklearn
           fi
           
           # Move coverage to workspace for upload
