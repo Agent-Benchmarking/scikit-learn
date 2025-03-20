@@ -127,6 +127,17 @@ class KernelDensity(BaseEstimator):
     >>> log_density = kde.score_samples(X[:3])
     >>> log_density
     array([-1.52955942, -1.51462041, -1.60244657])
+    
+    For more in-depth examples, see:
+    
+    - :ref:`sphx_glr_auto_examples_neighbors_plot_kde_1d.py`: an example of using KernelDensity
+      to visualize the density of points and compare with different kernel shapes.
+      
+    - :ref:`sphx_glr_auto_examples_neighbors_plot_digits_kde_sampling.py`: an example of using 
+      KernelDensity to learn a generative model of digits and sample new data points.
+      
+    - :ref:`sphx_glr_auto_examples_neighbors_plot_species_kde.py`: an example of using KernelDensity
+      for geographic data with the Haversine distance metric.
     """
 
     _parameter_constraints: dict = {
