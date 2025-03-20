@@ -3,7 +3,6 @@
 # tests to make sure estimator_checks works without pytest.
 
 import importlib
-import re
 import sys
 import unittest
 import warnings
@@ -91,6 +90,7 @@ from sklearn.utils.estimator_checks import (
     check_requires_y_none,
     check_sample_weights_pandas_series,
     check_set_params,
+    check_transformer_general,
     estimator_checks_generator,
     set_random_state,
 )
@@ -1650,7 +1650,7 @@ def test_check_mixin_order():
             return self
 
     msg = "TransformerMixin comes before/left side of BaseEstimator"
-    with raises(AssertionError, match=re.escape(msg)):
+    with raises(AssertionError, match=msg):
         check_mixin_order("BadEstimator", BadEstimator())
 
 
@@ -1667,3 +1667,101 @@ def test_check_positive_only_tag_during_fit():
         check_positive_only_tag_during_fit(
             "RequiresPositiveXBadTag", RequiresPositiveXBadTag()
         )
+
+
+def test_check_transformer_error_messages():
+    """Test that _check_transformer raises descriptive error messages."""
+
+    class BadTransformerSamples(TransformerMixin, BaseEstimator):
+        def fit(self, X, y=None):
+            return self
+
+        def transform(self, X):
+            # Return wrong number of samples
+            return np.ones((X.shape[0] + 1, X.shape[1]))
+
+        def fit_transform(self, X, y=None):
+            # Return wrong number of samples
+            return np.ones((X.shape[0] + 1, X.shape[1]))
+
+    # Test error message for inconsistent n_samples in fit_transform
+    transformer = BadTransformerSamples()
+    msg = (
+        "The transformer BadTransformerSamples changes the number of samples in "
+        "fit_transform. Got 31 samples, expected 30."
+    )
+    with raises(AssertionError, match=msg):
+        check_transformer_general("BadTransformerSamples", transformer)
+
+    class InconsistentTransformer(TransformerMixin, BaseEstimator):
+        def fit(self, X, y=None):
+            return self
+
+        def transform(self, X):
+            # Return different values than fit_transform
+            return np.zeros((X.shape[0], X.shape[1]))
+
+        def fit_transform(self, X, y=None):
+            return np.ones((X.shape[0], X.shape[1]))
+
+    # Test error message for inconsistent transform vs fit_transform results
+    transformer = InconsistentTransformer()
+    msg = (
+        r"Not equal to tolerance rtol=\d\.\d+e?-?\d*, atol=\d\.\d+\n"  # Match tolerance line
+        r"fit_transform and transform outcomes not consistent in InconsistentTransformer\. "
+        r"fit_transform result:\n"
+        r"\[\[1\. 1\. 1\.\]\n"  # Match first row exactly
+        r"(?:[ ].*\n)*"  # Match any number of rows with optional content
+        r"transform result:\n"
+        r"\[\[0\. 0\. 0\.\]\n"  # Match first row exactly
+        r"(?:[ ].*\n)*"  # Match any number of rows with optional content
+        r"Mismatched elements: \d+ \/ \d+ \(\d+%\)\n"  # Match mismatched elements line
+        r"Max absolute difference among violations: \d+\.\n"  # Match max absolute difference line
+        r"Max relative difference among violations: inf\n"  # Match max relative difference line
+        r"(?:[ ].*\n)*"  # Match any remaining lines
+    )
+    with raises(AssertionError, match=msg):
+        check_transformer_general("InconsistentTransformer", transformer)
+
+    class WrongFeaturesTransformer(TransformerMixin, BaseEstimator):
+        def fit(self, X, y=None):
+            return self
+
+        def transform(self, X):
+            # Return wrong number of features
+            return X[:, :-1]
+
+    # Test error message for wrong number of features
+    transformer = WrongFeaturesTransformer()
+    msg = (
+        "The transformer WrongFeaturesTransformer does not raise an error when the number "
+        "of features in transform is different from the number of features in fit."
+    )
+    with raises(AssertionError, match=msg):
+        check_transformer_general("WrongFeaturesTransformer", transformer)
+
+    class InconsistentConsecutiveTransformer(TransformerMixin, BaseEstimator):
+        def __init__(self):
+            self.counter = 0
+
+        def fit(self, X, y=None):
+            return self
+
+        def transform(self, X):
+            return X
+
+        def fit_transform(self, X, y=None):
+            # Return different results on consecutive calls
+            self.counter += 1
+            if self.counter == 1:
+                return np.ones((X.shape[0], X.shape[1]))
+            return np.zeros((X.shape[0], X.shape[1]))
+
+    # Test error message for inconsistent consecutive fit_transform results
+    transformer = InconsistentConsecutiveTransformer()
+    msg = (
+        "consecutive fit_transform outcomes not consistent in "
+        "InconsistentConsecutiveTransformer. First result:\n.*\nSecond result:\n.*"
+    )
+    with raises(AssertionError, match=msg):
+        check_transformer_general("InconsistentConsecutiveTransformer", transformer)
