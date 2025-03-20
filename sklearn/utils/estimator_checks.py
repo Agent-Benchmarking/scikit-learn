@@ -2068,18 +2068,24 @@ def _check_transformer(name, transformer_orig, X, y):
 
     if isinstance(X_pred, tuple):
         for x_pred in X_pred:
-            assert x_pred.shape[0] == n_samples
+            assert x_pred.shape[0] == n_samples, (
+                f"The transformer {name} changes the number of samples in "
+                f"fit_transform. Got {x_pred.shape[0]} samples, expected {n_samples}."
+            )
     else:
-        # check for consistent n_samples
-        assert X_pred.shape[0] == n_samples
+        # Check for consistent n_samples
+        assert X_pred.shape[0] == n_samples, (
+            f"The transformer {name} changes the number of samples in "
+            f"fit_transform. Got {X_pred.shape[0]} samples, expected {n_samples}."
+        )
 
     if hasattr(transformer, "transform"):
         if name in CROSS_DECOMPOSITION:
             X_pred2 = transformer.transform(X, y_)
-            X_pred3 = transformer.fit_transform(X, y=y_)
+            X_pred3 = transformer_clone.fit_transform(X, y=y_)
         else:
             X_pred2 = transformer.transform(X)
-            X_pred3 = transformer.fit_transform(X, y=y_)
+            X_pred3 = transformer_clone.fit_transform(X, y=y_)
 
         if get_tags(transformer_orig).non_deterministic:
             msg = name + " is non deterministic"
@@ -2090,33 +2096,51 @@ def _check_transformer(name, transformer_orig, X, y):
                     x_pred,
                     x_pred2,
                     atol=1e-2,
-                    err_msg="fit_transform and transform outcomes not consistent in %s"
-                    % transformer,
+                    err_msg=(
+                        f"fit_transform and transform outcomes not consistent in {name}. "
+                        f"fit_transform result:\n{x_pred}\n"
+                        f"transform result:\n{x_pred2}"
+                    ),
                 )
                 assert_allclose_dense_sparse(
                     x_pred,
                     x_pred3,
                     atol=1e-2,
-                    err_msg="consecutive fit_transform outcomes not consistent in %s"
-                    % transformer,
+                    err_msg=(
+                        f"consecutive fit_transform outcomes not consistent in {name}. "
+                        f"First result:\n{x_pred}\n"
+                        f"Second result:\n{x_pred3}"
+                    ),
                 )
         else:
             assert_allclose_dense_sparse(
                 X_pred,
                 X_pred2,
-                err_msg="fit_transform and transform outcomes not consistent in %s"
-                % transformer,
+                err_msg=(
+                    f"fit_transform and transform outcomes not consistent in {name}. "
+                    f"fit_transform result:\n{X_pred}\n"
+                    f"transform result:\n{X_pred2}"
+                ),
                 atol=1e-2,
             )
             assert_allclose_dense_sparse(
                 X_pred,
                 X_pred3,
                 atol=1e-2,
-                err_msg="consecutive fit_transform outcomes not consistent in %s"
-                % transformer,
+                err_msg=(
+                    f"consecutive fit_transform outcomes not consistent in {name}. "
+                    f"First result:\n{X_pred}\n"
+                    f"Second result:\n{X_pred3}"
+                ),
             )
-            assert _num_samples(X_pred2) == n_samples
-            assert _num_samples(X_pred3) == n_samples
+            assert _num_samples(X_pred2) == n_samples, (
+                f"The transformer {name} changes the number of samples in transform. "
+                f"Got {_num_samples(X_pred2)} samples, expected {n_samples}."
+            )
+            assert _num_samples(X_pred3) == n_samples, (
+                f"The transformer {name} changes the number of samples in second "
+                f"fit_transform. Got {_num_samples(X_pred3)} samples, expected {n_samples}."
+            )
 
         # raises error on malformed input for transform
         if (
@@ -2129,9 +2153,9 @@ def _check_transformer(name, transformer_orig, X, y):
             with raises(
                 ValueError,
                 err_msg=(
-                    f"The transformer {name} does not raise an error "
-                    "when the number of features in transform is different from "
-                    "the number of features in fit."
+                    f"The transformer {name} does not raise an error when the number "
+                    "of features in transform is different from the number of features "
+                    "in fit."
                 ),
             ):
                 transformer.transform(X[:, :-1])
