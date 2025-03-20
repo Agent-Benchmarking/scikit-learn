@@ -171,11 +171,15 @@ jobs:
                             SKLEARN_MESON_OPTIONS="blas=openblas,lapack=openblas"
                             PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/usr/lib64/pkgconfig
           CIBW_BUILD_VERBOSITY: 1
-          CIBW_BEFORE_BUILD: |
-            pip install -U pip wheel setuptools
-            pip install numpy cython "scipy>=1.3.2" pytest
-            pip install pybind11 pythran ninja meson meson-python
+          CIBW_BEFORE_BUILD: bash {project}/build_tools/wheels/cibw_before_build.sh {project}
+          CIBW_BEFORE_TEST: bash {project}/build_tools/wheels/cibw_before_test.sh
           CIBW_REPAIR_WHEEL_COMMAND: ""
+          # Windows-specific configurations
+          CIBW_CONFIG_SETTINGS_WINDOWS: "setup-args=--vsenv"
+          CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: bash build_tools/github/repair_windows_wheels.sh {wheel} {dest_dir}
+          CIBW_BEFORE_TEST_WINDOWS: bash build_tools/github/build_minimal_windows_image.sh ${{ matrix.python }}
+          CIBW_TEST_REQUIRES_WINDOWS: ""
+          CIBW_TEST_COMMAND_WINDOWS: bash {project}/build_tools/github/test_windows_wheels.sh ${{ matrix.python }} {project}
           # System-specific configurations
           CIBW_BEFORE_BUILD_LINUX: |
             if [ -f "/etc/redhat-release" ] || [ -f "/etc/centos-release" ]; then
@@ -187,12 +191,13 @@ jobs:
             fi
           CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET=10.15
           CIBW_BEFORE_ALL_MACOS: brew install libomp openblas
+          CIBW_ENVIRONMENT_PASS_LINUX: RUNNER_OS
 
           # Testing options
           # check because some architectures are emulated and tests would be too slow
           CIBW_TEST_SKIP: "*-macosx_arm64"
           CIBW_TEST_REQUIRES: pytest pandas threadpoolctl
-          CIBW_TEST_COMMAND: cd {project} && mkdir -p {project}/tmp_for_test && cd {project}/tmp_for_test && python -m pytest --pyargs sklearn
+          CIBW_TEST_COMMAND: bash {project}/build_tools/wheels/test_wheels.sh {project}
 
       - name: Store artifacts
         uses: actions/upload-artifact@v4
@@ -242,11 +247,15 @@ jobs:
                             SKLEARN_MESON_OPTIONS="blas=openblas,lapack=openblas"
                             PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/usr/lib64/pkgconfig
           CIBW_BUILD_VERBOSITY: 1
-          CIBW_BEFORE_BUILD: |
-            pip install -U pip wheel setuptools
-            pip install numpy cython "scipy>=1.3.2" pytest
-            pip install pybind11 pythran ninja meson meson-python
+          CIBW_BEFORE_BUILD: bash {project}/build_tools/wheels/cibw_before_build.sh {project}
+          CIBW_BEFORE_TEST: bash {project}/build_tools/wheels/cibw_before_test.sh
           CIBW_REPAIR_WHEEL_COMMAND: ""
+          # Windows-specific configurations
+          CIBW_CONFIG_SETTINGS_WINDOWS: "setup-args=--vsenv"
+          CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: bash build_tools/github/repair_windows_wheels.sh {wheel} {dest_dir}
+          CIBW_BEFORE_TEST_WINDOWS: bash build_tools/github/build_minimal_windows_image.sh ${{ matrix.python }}
+          CIBW_TEST_REQUIRES_WINDOWS: ""
+          CIBW_TEST_COMMAND_WINDOWS: bash {project}/build_tools/github/test_windows_wheels.sh ${{ matrix.python }} {project}
           # System-specific configurations
           CIBW_BEFORE_BUILD_LINUX: |
             if [ -f "/etc/redhat-release" ] || [ -f "/etc/centos-release" ]; then
@@ -258,10 +267,11 @@ jobs:
             fi
           CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET=10.15
           CIBW_BEFORE_ALL_MACOS: brew install libomp openblas
+          CIBW_ENVIRONMENT_PASS_LINUX: RUNNER_OS
 
           # Testing options
           CIBW_TEST_REQUIRES: pytest pandas threadpoolctl
-          CIBW_TEST_COMMAND: cd {project} && mkdir -p {project}/tmp_for_test && cd {project}/tmp_for_test && python -m pytest --pyargs sklearn
+          CIBW_TEST_COMMAND: bash {project}/build_tools/wheels/test_wheels.sh {project}
 
       - name: Store artifacts
         uses: actions/upload-artifact@v4
