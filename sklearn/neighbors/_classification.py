@@ -183,6 +183,12 @@ class KNeighborsClassifier(KNeighborsMixin, ClassifierMixin, NeighborsBase):
     [0]
     >>> print(neigh.predict_proba([[0.9]]))
     [[0.666... 0.333...]]
+
+    For a more detailed introduction to using KNeighborsClassifier with scaling see
+    :ref:`sphx_glr_auto_examples_neighbors_plot_classification.py`.
+
+    For an example of how to cache nearest neighbors for efficient reuse see
+    :ref:`sphx_glr_auto_examples_neighbors_plot_caching_nearest_neighbors.py`.
     """
 
     _parameter_constraints: dict = {**NeighborsBase._parameter_constraints}
@@ -607,6 +613,9 @@ class RadiusNeighborsClassifier(RadiusNeighborsMixin, ClassifierMixin, Neighbors
     [0]
     >>> print(neigh.predict_proba([[1.0]]))
     [[0.66666667 0.33333333]]
+
+    For a detailed example of nearest neighbors classification, see
+    :ref:`sphx_glr_auto_examples_neighbors_plot_classification.py`.
     """
 
     _parameter_constraints: dict = {

@@ -159,6 +159,9 @@ class KNeighborsRegressor(KNeighborsMixin, RegressorMixin, NeighborsBase):
     KNeighborsRegressor(...)
     >>> print(neigh.predict([[1.5]]))
     [0.5]
+
+    For a detailed example of KNeighborsRegressor with different weight options see
+    :ref:`sphx_glr_auto_examples_neighbors_plot_regression.py`.
     """
 
     _parameter_constraints: dict = {
@@ -398,6 +401,9 @@ class RadiusNeighborsRegressor(RadiusNeighborsMixin, RegressorMixin, NeighborsBa
     RadiusNeighborsRegressor(...)
     >>> print(neigh.predict([[1.5]]))
     [0.5]
+
+    For a detailed example of nearest neighbors regression, see
+    :ref:`sphx_glr_auto_examples_neighbors_plot_regression.py`.
     """
 
     _parameter_constraints: dict = {
