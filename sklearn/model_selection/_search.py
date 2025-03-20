@@ -432,7 +432,17 @@ def _yield_masked_array_for_each_param(candidate_params):
 
 
 class BaseSearchCV(MetaEstimatorMixin, BaseEstimator, metaclass=ABCMeta):
-    """Abstract base class for hyper parameter search with cross-validation."""
+    """Abstract base class for hyper parameter search with cross-validation.
+
+    This class provides the base functionality for hyperparameter search with
+    cross-validation. It supports both single and multi-metric evaluation, and
+    allows for custom refit strategies through the `refit` parameter.
+
+    See :ref:`sphx_glr_auto_examples_model_selection_plot_grid_search_refit_callable.py`
+    for an example of using a custom refit strategy to balance model
+    complexity with cross-validated score, specifically showing how to select
+    the model with the fewest PCA components while maintaining good accuracy.
+    """
 
     _parameter_constraints: dict = {
         "estimator": [HasMethods(["fit"])],
