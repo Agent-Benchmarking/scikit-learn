@@ -12,6 +12,7 @@ jobs:
     if: contains(github.event.pull_request.labels.*.name, 'CUDA CI')
     runs-on: "ubuntu-latest"
     name: Build wheel for Pull Request
+    needs: [jammy-build]
     steps:
       - uses: actions/checkout@v4
 
@@ -27,6 +28,11 @@ jobs:
         with:
           name: cibw-wheels
           path: ./wheelhouse/*.whl
+
+  jammy-build:
+    if: contains(github.event.pull_request.labels.*.name, 'CUDA CI')
+    name: Depend on Jammy Build
+    uses: ./.github/workflows/jammy-build.yml
 
   tests:
     if: contains(github.event.pull_request.labels.*.name, 'CUDA CI')
