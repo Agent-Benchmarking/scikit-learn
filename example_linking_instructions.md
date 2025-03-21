@@ -100,6 +100,35 @@ Or within an Examples topic section:
 5. **Consistency**: Use the same format for all example links
 6. **Avoiding Duplicate Links**: The script checks for existing example sections to avoid duplication
 
+## Common Issues and Solutions
+
+### Line Length Limitations
+- When adding example links, be mindful of the scikit-learn line length limit (88 characters)
+- For long example references, break the link after `_examples_` or at another logical point:
+  ```python
+  - :ref:`sphx_glr_auto_examples_model_selection_plot_grid_search_text_feature_extraction
+    .py`
+  ```
+
+### Docstring Pattern Matching
+- If the script can't find a class docstring using the specified pattern, verify the actual docstring content
+- Class docstring first lines sometimes differ from what's shown in rendered documentation
+- Check the file directly to see the exact pattern to match
+
+### Handling Pre-commit Hooks
+- When committing changes, pre-commit hooks will check for code style violations
+- If a commit fails due to line length issues in example links, break the lines as described above
+- Run `git commit` again after fixing these issues
+
+### Keeping doc_examples_updater.py Out of Git
+- This script is a tool for our work and not part of the scikit-learn codebase
+- Add it to .gitignore or be careful to not stage it for commits
+- If accidentally staged, use `git restore --staged doc_examples_updater.py` to unstage it
+
+### Identifying Recurring Issues
+- If you identify recurring issues not mentioned in these instructions, update this documentation
+- Add this instruction about updating instructions to the instructions as well
+
 ## Repository Organization
 - Main progress file: `example_links_progress.md` - Tracks overall progress across all modules
 - Current module progress file: `neighbors_links_progress.md` - Tracks detailed progress on the neighbors module

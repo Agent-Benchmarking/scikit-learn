@@ -668,6 +668,11 @@ class TunedThresholdClassifierCV(BaseThresholdClassifier):
        macro avg       0.78      0.80      0.79       250
     weighted avg       0.92      0.92      0.92       250
     <BLANKLINE>
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_model_selection_plot_tuned_decision_threshold.py`
     """
 
     _parameter_constraints: dict = {

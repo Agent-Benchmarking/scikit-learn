@@ -641,7 +641,6 @@ class HalvingGridSearchCV(BaseSuccessiveHalving):
 
     Examples
     --------
-
     >>> from sklearn.datasets import load_iris
     >>> from sklearn.ensemble import RandomForestClassifier
     >>> from sklearn.experimental import enable_halving_search_cv  # noqa
@@ -657,6 +656,26 @@ class HalvingGridSearchCV(BaseSuccessiveHalving):
     ...                              random_state=0).fit(X, y)
     >>> search.best_params_  # doctest: +SKIP
     {'max_depth': None, 'min_samples_split': 10, 'n_estimators': 9}
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_
+          model_selection_plot_successive_halving_heatmap
+          .py`
+        - :ref:`sphx_glr_auto_examples_
+          model_selection_plot_successive_halving_iterations
+          .py`
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_
+          model_selection_plot_successive_halving_heatmap
+          .py`
+        - :ref:`sphx_glr_auto_examples_
+          model_selection_plot_successive_halving_iterations
+          .py`
     """
 
     _parameter_constraints: dict = {
@@ -988,7 +1007,6 @@ class HalvingRandomSearchCV(BaseSuccessiveHalving):
 
     Examples
     --------
-
     >>> from sklearn.datasets import load_iris
     >>> from sklearn.ensemble import RandomForestClassifier
     >>> from sklearn.experimental import enable_halving_search_cv  # noqa
@@ -1008,6 +1026,16 @@ class HalvingRandomSearchCV(BaseSuccessiveHalving):
     ...                                random_state=0).fit(X, y)
     >>> search.best_params_  # doctest: +SKIP
     {'max_depth': None, 'min_samples_split': 10, 'n_estimators': 9}
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_
+          model_selection_plot_successive_halving_heatmap
+          .py`
+        - :ref:`sphx_glr_auto_examples_
+          model_selection_plot_successive_halving_iterations
+          .py`
     """
 
     _parameter_constraints: dict = {

@@ -339,6 +339,18 @@ def cross_validate(
     [-3635.5... -3573.3... -6114.7...]
     >>> print(scores['train_r2'])
     [0.28009951 0.3908844  0.22784907]
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_
+          model_selection_plot_nested_cross_validation_iris.py`
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_
+          model_selection_plot_nested_cross_validation_iris.py`
     """
     _check_groups_routing_disabled(groups)
 
@@ -682,7 +694,19 @@ def cross_val_score(
     >>> lasso = linear_model.Lasso()
     >>> print(cross_val_score(lasso, X, y, cv=3))
     [0.3315057  0.08022103 0.03531816]
-    """
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_model_selection_plot_cv_predict.py`
+        - :ref:`sphx_glr_auto_examples_model_selection_plot_learning_curve.py`
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_model_selection_plot_cv_predict.py`
+        - :ref:`sphx_glr_auto_examples_model_selection_plot_learning_curve.py`
+"""
     # To ensure multimetric format is not supported
     scorer = check_scoring(estimator, scoring=scoring)
 
@@ -1174,7 +1198,17 @@ def cross_val_predict(
     >>> y = diabetes.target[:150]
     >>> lasso = linear_model.Lasso()
     >>> y_pred = cross_val_predict(lasso, X, y, cv=3)
-    """
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_model_selection_plot_cv_predict.py`
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_model_selection_plot_cv_predict.py`
+"""
     _check_groups_routing_disabled(groups)
     X, y = indexable(X, y)
     params = {} if params is None else params
@@ -1986,7 +2020,21 @@ def learning_curve(
     72 samples were used to train the model
     The average train accuracy is 1.00
     The average test accuracy is 0.93
-    """
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_model_selection_plot_learning_curve.py`
+        - :ref:`sphx_glr_auto_examples_
+          model_selection_plot_train_error_vs_test_error.py`
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_model_selection_plot_learning_curve.py`
+        - :ref:`sphx_glr_auto_examples_
+          model_selection_plot_train_error_vs_test_error.py`
+"""
     if exploit_incremental_learning and not hasattr(estimator, "partial_fit"):
         raise ValueError(
             "An estimator must support the partial_fit interface "
@@ -2436,7 +2484,8 @@ def validation_curve(
 
     Notes
     -----
-    See :ref:`sphx_glr_auto_examples_model_selection_plot_train_error_vs_test_error.py`
+    See :ref:`sphx_glr_auto_examples_
+          model_selection_plot_train_error_vs_test_error.py`
 
     Examples
     --------
@@ -2454,6 +2503,18 @@ def validation_curve(
     The average train accuracy is 0.81
     >>> print(f"The average test accuracy is {test_scores.mean():.2f}")
     The average test accuracy is 0.81
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_
+          model_selection_plot_underfitting_overfitting.py`
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_
+          model_selection_plot_underfitting_overfitting.py`
     """
     params = _check_params_groups_deprecation(fit_params, params, groups, "1.8")
     X, y, groups = indexable(X, y, groups)
