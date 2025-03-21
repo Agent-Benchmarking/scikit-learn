@@ -9,9 +9,9 @@ This document tracks progress on adding example links to scikit-learn documentat
 - [x] decomposition - Added example links for NMF, MiniBatchNMF, and LatentDirichletAllocation
 - [x] ensemble - Added example links for all ensemble classes including StackingRegressor, VotingClassifier, and VotingRegressor
 - [x] linear_model - Added example links for MultiTaskLassoCV, MultiTaskElasticNet, MultiTaskElasticNetCV, RidgeClassifierCV, and PassiveAggressiveRegressor
+- [x] svm - Added example links for SVC, LinearSVC, SVR, and OneClassSVM
 
 ## In Progress
-- [ ] svm
 - [ ] neighbors
 - [ ] preprocessing
 - [ ] feature_extraction
@@ -21,7 +21,6 @@ This document tracks progress on adding example links to scikit-learn documentat
 - [ ] etc.
 
 ## To Do
-- [ ] svm
 - [ ] neighbors
 - [ ] preprocessing
 - [ ] feature_extraction
