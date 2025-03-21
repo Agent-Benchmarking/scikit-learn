@@ -2068,10 +2068,18 @@ def _check_transformer(name, transformer_orig, X, y):
 
     if isinstance(X_pred, tuple):
         for x_pred in X_pred:
-            assert x_pred.shape[0] == n_samples
+            assert x_pred.shape[0] == n_samples, (
+                f"Transformer {name}.fit_transform output inside tuple has wrong "
+                f"number of samples. Expected {n_samples}, got {x_pred.shape[0]}. "
+                f"Transformers must preserve sample count."
+            )
     else:
         # check for consistent n_samples
-        assert X_pred.shape[0] == n_samples
+        assert X_pred.shape[0] == n_samples, (
+            f"Transformer {name}.fit_transform output has wrong number of samples. "
+            f"Expected {n_samples}, got {X_pred.shape[0]}. Transformers must "
+            f"preserve sample count."
+        )
 
     if hasattr(transformer, "transform"):
         if name in CROSS_DECOMPOSITION:
@@ -2115,8 +2123,16 @@ def _check_transformer(name, transformer_orig, X, y):
                 err_msg="consecutive fit_transform outcomes not consistent in %s"
                 % transformer,
             )
-            assert _num_samples(X_pred2) == n_samples
-            assert _num_samples(X_pred3) == n_samples
+            assert _num_samples(X_pred2) == n_samples, (
+                f"Transformer {name}.transform output has wrong number of samples. "
+                f"Expected {n_samples}, got {_num_samples(X_pred2)}. Transformers "
+                f"must preserve sample count."
+            )
+            assert _num_samples(X_pred3) == n_samples, (
+                f"Transformer {name}.fit_transform output has wrong number of "
+                f"samples. Expected {n_samples}, got {_num_samples(X_pred3)}. "
+                f"Transformers must preserve sample count."
+            )
 
         # raises error on malformed input for transform
         if (
