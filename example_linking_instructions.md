@@ -13,6 +13,19 @@ Scikit-Learn's documentation is improved when classes include links to relevant 
 ## Task Overview
 We're working module by module, adding example links to class docstrings. Our progress is tracked in the main progress file (`example_links_progress.md`).
 
+## Completed Modules
+The following modules have been completed:
+- gaussian_process.kernels - All kernel classes have been linked to appropriate examples
+- kernel_approximation - Added links where appropriate examples exist
+- cluster - All clustering classes have example links where appropriate
+- decomposition - Added example links for specified classes
+- ensemble - Added example links for all ensemble classes
+- linear_model - Added example links for specified classes
+- svm - Added example links for SVC, LinearSVC, SVR, and OneClassSVM
+
+## Current In-Progress Module
+- neighbors - Working on adding links to all relevant classes
+
 ## Workflow
 
 1. **Identify Classes Needing Examples**
@@ -25,15 +38,15 @@ We're working module by module, adding example links to class docstrings. Our pr
 
 3. **Adding Example Links**
    - For smaller files: Edit docstrings directly
-   - For larger files: Use the `doc_examples_updater.py` script to avoid timeout issues
+   - For larger files: Use the `doc_examples_updater.py` script (located in `~/tools/`)
 
 4. **Track Progress**
-   - Update the main progress file (`example_links_progress.md`) as each module is completed
+   - Update the main progress file (`example_links_progress.md`) as modules are completed
    - Create module-specific tracking files for modules currently being worked on
 
 ## Using the Automation Script
 
-The `doc_examples_updater.py` script is designed to add example links to docstrings in large files. This approach avoids timeout issues when editing large files directly.
+The `doc_examples_updater.py` script (located in `~/tools/`) is designed to add example links to docstrings in large files. This approach avoids timeout issues when editing large files directly.
 
 ### How to Use the Script
 
@@ -51,12 +64,12 @@ The `doc_examples_updater.py` script is designed to add example links to docstri
 
 2. Run the script for a specific file:
    ```bash
-   python doc_examples_updater.py path/to/file.py
+   python ~/tools/doc_examples_updater.py path/to/file.py
    ```
 
 3. Run the script for all configured files:
    ```bash
-   python doc_examples_updater.py
+   python ~/tools/doc_examples_updater.py
    ```
 
 ## Example Link Format
@@ -86,6 +99,11 @@ Or within an Examples topic section:
 4. **Completeness**: Try to find examples for all classes in a module
 5. **Consistency**: Use the same format for all example links
 6. **Avoiding Duplicate Links**: The script checks for existing example sections to avoid duplication
+
+## Repository Organization
+- Main progress file: `example_links_progress.md` - Tracks overall progress across all modules
+- Current module progress file: `neighbors_links_progress.md` - Tracks detailed progress on the neighbors module
+- Helper script: `doc_examples_updater.py` - Located in `~/tools/` (not tracked in the repository)
 
 ## Commit and Push Changes
 
