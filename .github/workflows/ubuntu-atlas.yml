@@ -245,7 +245,7 @@ jobs:
             if [[ "$HAS_SYSMON" == "True" ]]; then
                 export COVERAGE_CORE=sysmon
             fi
-            TEST_CMD="$TEST_CMD --cov-config='$COVERAGE_PROCESS_START' --cov sklearn --cov-report=xml"
+            TEST_CMD="$TEST_CMD --cov-config=$COVERAGE_PROCESS_START --cov sklearn --cov-report=xml"
           fi
           
           if [[ "$PYTEST_XDIST_VERSION" != "none" ]]; then
