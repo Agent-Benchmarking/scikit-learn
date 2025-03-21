@@ -19,10 +19,10 @@ import numpy as np
 from scipy.special import comb
 
 from ..utils import (
-    _safe_indexing,
     check_random_state,
     indexable,
     metadata_routing,
+    safe_indexing,
 )
 from ..utils._array_api import (
     _convert_to_numpy,
@@ -2943,7 +2943,7 @@ def train_test_split(
 
     return list(
         chain.from_iterable(
-            (_safe_indexing(a, train), _safe_indexing(a, test)) for a in arrays
+            (safe_indexing(a, train), safe_indexing(a, test)) for a in arrays
         )
     )
 

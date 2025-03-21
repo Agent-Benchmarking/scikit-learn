@@ -177,8 +177,102 @@ def _determine_key_type(key, accept_slice=True):
     raise ValueError(err_msg)
 
 
+def safe_indexing(X, indices, *, axis=0):
+    """Return rows, items or columns of X using indices.
+
+    Parameters
+    ----------
+    X : array-like, sparse-matrix, list, pandas.DataFrame, pandas.Series
+        Data from which to sample rows, items or columns. `list` are only
+        supported when `axis=0`.
+    indices : bool, int, str, slice, array-like
+        - If `axis=0`, boolean and integer array-like, integer slice,
+          and scalar integer are supported.
+        - If `axis=1`:
+            - to select a single column, `indices` can be of `int` type for
+              all `X` types and `str` only for dataframe. The selected subset
+              will be 1D, unless `X` is a sparse matrix in which case it will
+              be 2D.
+            - to select multiples columns, `indices` can be one of the
+              following: `list`, `array`, `slice`. The type used in
+              these containers can be one of the following: `int`, 'bool' and
+              `str`. However, `str` is only supported when `X` is a dataframe.
+              The selected subset will be 2D.
+    axis : int, default=0
+        The axis along which `X` will be subsampled. `axis=0` will select
+        rows while `axis=1` will select columns.
+
+    Returns
+    -------
+    subset
+        Subset of X on axis 0 or 1.
+
+    Notes
+    -----
+    CSR, CSC, and LIL sparse matrices are supported. COO sparse matrices are
+    not supported.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from sklearn.utils import safe_indexing
+    >>> data = np.array([[1, 2], [3, 4], [5, 6]])
+    >>> safe_indexing(data, 0, axis=0)  # select the first row
+    array([1, 2])
+    >>> safe_indexing(data, 0, axis=1)  # select the first column
+    array([1, 3, 5])
+    """
+    if indices is None:
+        return X
+
+    if axis not in (0, 1):
+        raise ValueError(
+            "'axis' should be either 0 (to index rows) or 1 (to index "
+            " column). Got {} instead.".format(axis)
+        )
+
+    indices_dtype = _determine_key_type(indices)
+
+    if axis == 0 and indices_dtype == "str":
+        raise ValueError("String indexing is not supported with 'axis=0'")
+
+    if axis == 1 and isinstance(X, list):
+        raise ValueError("axis=1 is not supported for lists")
+
+    if axis == 1 and hasattr(X, "shape") and len(X.shape) != 2:
+        raise ValueError(
+            "'X' should be a 2D NumPy array, 2D sparse matrix or "
+            "dataframe when indexing the columns (i.e. 'axis=1'). "
+            "Got {} instead with {} dimension(s).".format(type(X), len(X.shape))
+        )
+
+    if (
+        axis == 1
+        and indices_dtype == "str"
+        and not (_is_pandas_df(X) or _use_interchange_protocol(X))
+    ):
+        raise ValueError(
+            "Specifying the columns using strings is only supported for dataframes."
+        )
+
+    if hasattr(X, "iloc"):
+        # TODO: we should probably use _is_pandas_df_or_series(X) instead but this
+        # would require updating some tests such as test_train_test_split_mock_pandas.
+        return _pandas_indexing(X, indices, indices_dtype, axis=axis)
+    elif _is_polars_df_or_series(X):
+        return _polars_indexing(X, indices, indices_dtype, axis=axis)
+    elif hasattr(X, "shape"):
+        return _array_indexing(X, indices, indices_dtype, axis=axis)
+    else:
+        return _list_indexing(X, indices, indices_dtype)
+
+
 def _safe_indexing(X, indices, *, axis=0):
     """Return rows, items or columns of X using indices.
+
+    .. deprecated:: 1.6
+       `_safe_indexing` is deprecated in 1.6 and will be removed in 1.8.
+       Use `safe_indexing` instead.
 
     .. warning::
 
@@ -228,49 +322,12 @@ def _safe_indexing(X, indices, *, axis=0):
     >>> _safe_indexing(data, 0, axis=1)  # select the first column
     array([1, 3, 5])
     """
-    if indices is None:
-        return X
-
-    if axis not in (0, 1):
-        raise ValueError(
-            "'axis' should be either 0 (to index rows) or 1 (to index "
-            " column). Got {} instead.".format(axis)
-        )
-
-    indices_dtype = _determine_key_type(indices)
-
-    if axis == 0 and indices_dtype == "str":
-        raise ValueError("String indexing is not supported with 'axis=0'")
-
-    if axis == 1 and isinstance(X, list):
-        raise ValueError("axis=1 is not supported for lists")
-
-    if axis == 1 and hasattr(X, "shape") and len(X.shape) != 2:
-        raise ValueError(
-            "'X' should be a 2D NumPy array, 2D sparse matrix or "
-            "dataframe when indexing the columns (i.e. 'axis=1'). "
-            "Got {} instead with {} dimension(s).".format(type(X), len(X.shape))
-        )
-
-    if (
-        axis == 1
-        and indices_dtype == "str"
-        and not (_is_pandas_df(X) or _use_interchange_protocol(X))
-    ):
-        raise ValueError(
-            "Specifying the columns using strings is only supported for dataframes."
-        )
-
-    if hasattr(X, "iloc"):
-        # TODO: we should probably use _is_pandas_df_or_series(X) instead but this
-        # would require updating some tests such as test_train_test_split_mock_pandas.
-        return _pandas_indexing(X, indices, indices_dtype, axis=axis)
-    elif _is_polars_df_or_series(X):
-        return _polars_indexing(X, indices, indices_dtype, axis=axis)
-    elif hasattr(X, "shape"):
-        return _array_indexing(X, indices, indices_dtype, axis=axis)
-    else:
-        return _list_indexing(X, indices, indices_dtype)
+    warnings.warn(
+        "'_safe_indexing' is deprecated in 1.6 and will be removed in 1.8. "
+        "Use 'safe_indexing' instead.",
+        FutureWarning,
+    )
+    return safe_indexing(X, indices, axis=axis)
 
 
 def _safe_assign(X, values, *, row_indexer=None, column_indexer=None):
@@ -313,7 +370,7 @@ def _safe_assign(X, values, *, row_indexer=None, column_indexer=None):
 def _get_column_indices_for_bool_or_int(key, n_columns):
     # Convert key into list of positive integer indexes
     try:
-        idx = _safe_indexing(np.arange(n_columns), key)
+        idx = safe_indexing(np.arange(n_columns), key)
     except IndexError as e:
         raise ValueError(
             f"all features must be in [0, {n_columns - 1}] or [-{n_columns}, 0]"
@@ -325,7 +382,7 @@ def _get_column_indices(X, key):
     """Get feature column indices for input data X and key.
 
     For accepted values of `key`, see the docstring of
-    :func:`_safe_indexing`.
+    :func:`safe_indexing`.
     """
     key_dtype = _determine_key_type(key)
     if _use_interchange_protocol(X):
@@ -598,7 +655,7 @@ def resample(
 
     # convert sparse matrices to CSR for row-based indexing
     arrays = [a.tocsr() if issparse(a) else a for a in arrays]
-    resampled_arrays = [_safe_indexing(a, indices) for a in arrays]
+    resampled_arrays = [safe_indexing(a, indices) for a in arrays]
     if len(resampled_arrays) == 1:
         # syntactic sugar for the unit argument case
         return resampled_arrays[0]

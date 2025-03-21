@@ -34,7 +34,7 @@ from ..base import (
 )
 from ..metrics import accuracy_score, r2_score
 from ..tree import DecisionTreeClassifier, DecisionTreeRegressor
-from ..utils import _safe_indexing, check_random_state
+from ..utils import check_random_state, safe_indexing
 from ..utils._param_validation import HasMethods, Hidden, Interval, StrOptions
 from ..utils.extmath import softmax, stable_cumsum
 from ..utils.metadata_routing import (
@@ -1063,8 +1063,8 @@ class AdaBoostRegressor(_RoutingNotSupportedMixin, RegressorMixin, BaseWeightBoo
 
         # Fit on the bootstrapped sample and obtain a prediction
         # for all samples in the training set
-        X_ = _safe_indexing(X, bootstrap_idx)
-        y_ = _safe_indexing(y, bootstrap_idx)
+        X_ = safe_indexing(X, bootstrap_idx)
+        y_ = safe_indexing(y, bootstrap_idx)
         estimator.fit(X_, y_)
         y_predict = estimator.predict(X)
 

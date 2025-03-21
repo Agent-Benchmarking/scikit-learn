@@ -22,7 +22,7 @@ from ..metrics._scorer import (
     _CurveScorer,
     _threshold_scores_to_class_labels,
 )
-from ..utils import _safe_indexing, get_tags
+from ..utils import get_tags, safe_indexing
 from ..utils._param_validation import HasMethods, Interval, RealNotInt, StrOptions
 from ..utils._response import _get_response_values_binary
 from ..utils.metadata_routing import (
@@ -467,8 +467,8 @@ def _fit_and_score_over_thresholds(
     """
 
     if train_idx is not None:
-        X_train, X_val = _safe_indexing(X, train_idx), _safe_indexing(X, val_idx)
-        y_train, y_val = _safe_indexing(y, train_idx), _safe_indexing(y, val_idx)
+        X_train, X_val = safe_indexing(X, train_idx), safe_indexing(X, val_idx)
+        y_train, y_val = safe_indexing(y, train_idx), safe_indexing(y, val_idx)
         fit_params_train = _check_method_params(X, fit_params, indices=train_idx)
         score_params_val = _check_method_params(X, score_params, indices=val_idx)
         classifier.fit(X_train, y_train, **fit_params_train)
@@ -772,8 +772,8 @@ class TunedThresholdClassifierCV(BaseThresholdClassifier):
             else:
                 # single split cross-validation
                 train_idx, _ = next(cv.split(X, y, **routed_params.splitter.split))
-                X_train = _safe_indexing(X, train_idx)
-                y_train = _safe_indexing(y, train_idx)
+                X_train = safe_indexing(X, train_idx)
+                y_train = safe_indexing(y, train_idx)
                 fit_params_train = _check_method_params(
                     X, routed_params.estimator.fit, indices=train_idx
                 )
