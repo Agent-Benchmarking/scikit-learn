@@ -167,6 +167,17 @@ class BayesianRidge(RegressorMixin, LinearModel):
     BayesianRidge()
     >>> clf.predict([[1, 1]])
     array([1.])
+
+    .. topic:: Examples:
+
+        * :ref:`plot_bayesian_ridge_curvefit`
+          Bayesian Ridge Regression for curve fitting.
+        * :ref:`plot_ard`
+          Comparison of BayesianRidge with ARDRegression.
+        * :ref:`plot_feature_agglomeration_vs_univariate_selection`
+          Feature agglomeration vs. univariate selection with BayesianRidge.
+        * :ref:`plot_iterative_imputer_variants_comparison`
+          Imputation of missing values with BayesianRidge.
     """
 
     _parameter_constraints: dict = {
@@ -584,6 +595,13 @@ class ARDRegression(RegressorMixin, LinearModel):
     ARDRegression()
     >>> clf.predict([[1, 1]])
     array([1.])
+
+    .. topic:: Examples:
+
+        * :ref:`plot_ard`
+          Automatic Relevance Determination Regression (ARD) on a toy dataset.
+        * :ref:`plot_lasso_and_elasticnet`
+          Comparison of ARD with Lasso and ElasticNet on a synthetic dataset.
     """
 
     _parameter_constraints: dict = {

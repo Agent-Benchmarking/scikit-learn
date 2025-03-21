@@ -116,6 +116,9 @@ class PolynomialCountSketch(
 
     For a more detailed example of usage, see
     :ref:`sphx_glr_auto_examples_kernel_approximation_plot_scalable_poly_kernels.py`
+    This example demonstrates how to use PolynomialCountSketch to approximate
+    the polynomial kernel for classification tasks.
+
     """
 
     _parameter_constraints: dict = {
@@ -308,6 +311,9 @@ class RBFSampler(ClassNamePrefixFeaturesOutMixin, TransformerMixin, BaseEstimato
     minimization with randomization in learning" by A. Rahimi and
     Benjamin Recht.
     (https://people.eecs.berkeley.edu/~brecht/papers/08.rah.rec.nips.pdf)
+
+    For a more detailed example comparing RBFSampler with Nystroem, see
+    :ref:`sphx_glr_auto_examples_miscellaneous_plot_kernel_approximation.py`
 
     Examples
     --------

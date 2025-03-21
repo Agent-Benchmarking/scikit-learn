@@ -324,7 +324,11 @@ class DBSCAN(ClusterMixin, BaseEstimator):
     :ref:`sphx_glr_auto_examples_cluster_plot_dbscan.py`.
 
     For a comparison of DBSCAN with other clustering algorithms, see
-    :ref:`sphx_glr_auto_examples_cluster_plot_cluster_comparison.py`
+    :ref:`sphx_glr_auto_examples_cluster_plot_cluster_comparison.py`.
+
+    For a comparison of DBSCAN with HDBSCAN, which extends DBSCAN to handle
+    varying-density clusters, see :ref:`sphx_glr_auto_examples_cluster_plot_hdbscan.py`.
+
     """
 
     _parameter_constraints: dict = {

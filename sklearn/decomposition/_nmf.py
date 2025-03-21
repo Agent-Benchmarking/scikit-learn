@@ -990,21 +990,25 @@ def non_negative_factorization(
 
     init : {'random', 'nndsvd', 'nndsvda', 'nndsvdar', 'custom'}, default=None
         Method used to initialize the procedure.
-
         Valid options:
 
-        - None: 'nndsvda' if n_components < n_features, otherwise 'random'.
+        - None: 'nndsvda' if n_components <= min(n_samples, n_features),
+            otherwise 'random'.
+
         - 'random': non-negative random matrices, scaled with:
-          `sqrt(X.mean() / n_components)`
+          sqrt(X.mean() / n_components)
+
         - 'nndsvd': Nonnegative Double Singular Value Decomposition (NNDSVD)
           initialization (better for sparseness)
+
         - 'nndsvda': NNDSVD with zeros filled with the average of X
           (better when sparsity is not desired)
+
         - 'nndsvdar': NNDSVD with zeros filled with small random values
           (generally faster, less accurate alternative to NNDSVDa
           for when sparsity is not desired)
-        - 'custom': If `update_H=True`, use custom matrices W and H which must both
-          be provided. If `update_H=False`, then only custom matrix H is used.
+
+        - 'custom': use custom matrices W and H which must both be provided.
 
         .. versionchanged:: 0.23
             The default value of `init` changed from 'random' to None in 0.23.
@@ -1374,164 +1378,12 @@ class NMF(_BaseNMF):
     Note that the transformed data is named W and the components matrix is named H. In
     the NMF literature, the naming convention is usually the opposite since the data
     matrix X is transposed.
+    For a usage example, see
+    :ref:`sphx_glr_auto_examples_decomposition_plot_faces_decomposition.py`
 
-    Read more in the :ref:`User Guide <NMF>`.
-
-    Parameters
-    ----------
-    n_components : int or {'auto'} or None, default='auto'
-        Number of components. If `None`, all features are kept.
-        If `n_components='auto'`, the number of components is automatically inferred
-        from W or H shapes.
-
-        .. versionchanged:: 1.4
-            Added `'auto'` value.
-
-        .. versionchanged:: 1.6
-            Default value changed from `None` to `'auto'`.
-
-    init : {'random', 'nndsvd', 'nndsvda', 'nndsvdar', 'custom'}, default=None
-        Method used to initialize the procedure.
-        Valid options:
-
-        - `None`: 'nndsvda' if n_components <= min(n_samples, n_features),
-          otherwise random.
-
-        - `'random'`: non-negative random matrices, scaled with:
-          `sqrt(X.mean() / n_components)`
-
-        - `'nndsvd'`: Nonnegative Double Singular Value Decomposition (NNDSVD)
-          initialization (better for sparseness)
-
-        - `'nndsvda'`: NNDSVD with zeros filled with the average of X
-          (better when sparsity is not desired)
-
-        - `'nndsvdar'` NNDSVD with zeros filled with small random values
-          (generally faster, less accurate alternative to NNDSVDa
-          for when sparsity is not desired)
-
-        - `'custom'`: Use custom matrices `W` and `H` which must both be provided.
-
-        .. versionchanged:: 1.1
-            When `init=None` and n_components is less than n_samples and n_features
-            defaults to `nndsvda` instead of `nndsvd`.
-
-    solver : {'cd', 'mu'}, default='cd'
-        Numerical solver to use:
-
-        - 'cd' is a Coordinate Descent solver.
-        - 'mu' is a Multiplicative Update solver.
-
-        .. versionadded:: 0.17
-           Coordinate Descent solver.
-
-        .. versionadded:: 0.19
-           Multiplicative Update solver.
-
-    beta_loss : float or {'frobenius', 'kullback-leibler', \
-            'itakura-saito'}, default='frobenius'
-        Beta divergence to be minimized, measuring the distance between X
-        and the dot product WH. Note that values different from 'frobenius'
-        (or 2) and 'kullback-leibler' (or 1) lead to significantly slower
-        fits. Note that for beta_loss <= 0 (or 'itakura-saito'), the input
-        matrix X cannot contain zeros. Used only in 'mu' solver.
-
-        .. versionadded:: 0.19
-
-    tol : float, default=1e-4
-        Tolerance of the stopping condition.
-
-    max_iter : int, default=200
-        Maximum number of iterations before timing out.
-
-    random_state : int, RandomState instance or None, default=None
-        Used for initialisation (when ``init`` == 'nndsvdar' or
-        'random'), and in Coordinate Descent. Pass an int for reproducible
-        results across multiple function calls.
-        See :term:`Glossary <random_state>`.
-
-    alpha_W : float, default=0.0
-        Constant that multiplies the regularization terms of `W`. Set it to zero
-        (default) to have no regularization on `W`.
-
-        .. versionadded:: 1.0
-
-    alpha_H : float or "same", default="same"
-        Constant that multiplies the regularization terms of `H`. Set it to zero to
-        have no regularization on `H`. If "same" (default), it takes the same value as
-        `alpha_W`.
-
-        .. versionadded:: 1.0
-
-    l1_ratio : float, default=0.0
-        The regularization mixing parameter, with 0 <= l1_ratio <= 1.
-        For l1_ratio = 0 the penalty is an elementwise L2 penalty
-        (aka Frobenius Norm).
-        For l1_ratio = 1 it is an elementwise L1 penalty.
-        For 0 < l1_ratio < 1, the penalty is a combination of L1 and L2.
-
-        .. versionadded:: 0.17
-           Regularization parameter *l1_ratio* used in the Coordinate Descent
-           solver.
-
-    verbose : int, default=0
-        Whether to be verbose.
-
-    shuffle : bool, default=False
-        If true, randomize the order of coordinates in the CD solver.
-
-        .. versionadded:: 0.17
-           *shuffle* parameter used in the Coordinate Descent solver.
-
-    Attributes
-    ----------
-    components_ : ndarray of shape (n_components, n_features)
-        Factorization matrix, sometimes called 'dictionary'.
-
-    n_components_ : int
-        The number of components. It is same as the `n_components` parameter
-        if it was given. Otherwise, it will be same as the number of
-        features.
-
-    reconstruction_err_ : float
-        Frobenius norm of the matrix difference, or beta-divergence, between
-        the training data ``X`` and the reconstructed data ``WH`` from
-        the fitted model.
-
-    n_iter_ : int
-        Actual number of iterations.
-
-    n_features_in_ : int
-        Number of features seen during :term:`fit`.
-
-        .. versionadded:: 0.24
-
-    feature_names_in_ : ndarray of shape (`n_features_in_`,)
-        Names of features seen during :term:`fit`. Defined only when `X`
-        has feature names that are all strings.
-
-        .. versionadded:: 1.0
-
-    See Also
-    --------
-    DictionaryLearning : Find a dictionary that sparsely encodes data.
-    MiniBatchSparsePCA : Mini-batch Sparse Principal Components Analysis.
-    PCA : Principal component analysis.
-    SparseCoder : Find a sparse representation of data from a fixed,
-        precomputed dictionary.
-    SparsePCA : Sparse Principal Components Analysis.
-    TruncatedSVD : Dimensionality reduction using truncated SVD.
-
-    References
-    ----------
-    .. [1] :doi:`"Fast local algorithms for large scale nonnegative matrix and tensor
-       factorizations" <10.1587/transfun.E92.A.708>`
-       Cichocki, Andrzej, and P. H. A. N. Anh-Huy. IEICE transactions on fundamentals
-       of electronics, communications and computer sciences 92.3: 708-721, 2009.
-
-    .. [2] :doi:`"Algorithms for nonnegative matrix factorization with the
-       beta-divergence" <10.1162/NECO_a_00168>`
-       Fevotte, C., & Idier, J. (2011). Neural Computation, 23(9).
+    For usage examples, see:
+    :ref:`sphx_glr_auto_examples_decomposition_plot_faces_decomposition.py`
+    :ref:`sphx_glr_auto_examples_applications_plot_topics_extraction_with_nmf_lda.py`
 
     Examples
     --------
@@ -1686,7 +1538,7 @@ class NMF(_BaseNMF):
             Factorization matrix, sometimes called 'dictionary'.
 
         n_iter_ : int
-            Actual number of iterations.
+            The number of iterations done by the algorithm.
         """
         # check parameters
         self._check_params(X)
@@ -1802,7 +1654,7 @@ class MiniBatchNMF(_BaseNMF):
                 &+ 0.5 * alpha\\_H * (1 - l1\\_ratio) * n\\_samples * ||H||_{Fro}^2,
 
     where :math:`||A||_{Fro}^2 = \\sum_{i,j} A_{ij}^2` (Frobenius norm) and
-    :math:`||vec(A)||_1 = \\sum_{i,j} abs(A_{ij})` (Elementwise L1 norm).
+    :math:`||vec(A)||_1 = \\sum_{i,j} abs(A_{ij})` (Elementwise L1 norm)
 
     The generic norm :math:`||X - WH||_{loss}^2` may represent
     the Frobenius norm or another supported beta-divergence loss.
@@ -1970,6 +1822,9 @@ class MiniBatchNMF(_BaseNMF):
     .. [3] :doi:`"Online algorithms for nonnegative matrix factorization with the
        Itakura-Saito divergence" <10.1109/ASPAA.2011.6082314>`
        Lefevre, A., Bach, F., Fevotte, C. (2011). WASPA.
+
+    For usage examples, see:
+    :ref:`sphx_glr_auto_examples_applications_plot_topics_extraction_with_nmf_lda.py`
 
     Examples
     --------

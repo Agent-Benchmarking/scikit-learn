@@ -130,6 +130,10 @@ class NearestNeighbors(KNeighborsMixin, RadiusNeighborsMixin, NeighborsBase):
     ... )
     >>> np.asarray(nbrs[0][0])
     array(2)
+
+    For an example of using NearestNeighbors for approximate nearest neighbors
+    search see :ref:`sphx_glr_auto_examples_neighbors_approximate_nearest_neighbors.py`.
+
     """
 
     def __init__(

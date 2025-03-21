@@ -526,9 +526,9 @@ class HDBSCAN(ClusterMixin, BaseEstimator):
     copy : bool, default=False
         If `copy=True` then any time an in-place modifications would be made
         that would overwrite data passed to :term:`fit`, a copy will first be
-        made, guaranteeing that the original data will be unchanged.
-        Currently, it only applies when `metric="precomputed"`, when passing
-        a dense array or a CSR sparse matrix and when `algorithm="brute"`.
+        made, guaranteeing that the original data will be unchanged. Currently,
+        it only applies when `metric="precomputed"`, when passing a dense array
+        or a CSR sparse matrix and when `algorithm="brute"`.
 
     Attributes
     ----------
@@ -594,7 +594,6 @@ class HDBSCAN(ClusterMixin, BaseEstimator):
 
     References
     ----------
-
     .. [1] :doi:`Campello, R. J., Moulavi, D., & Sander, J. Density-based clustering
       based on hierarchical density estimates.
       <10.1007/978-3-642-37456-2_14>`
@@ -616,6 +615,10 @@ class HDBSCAN(ClusterMixin, BaseEstimator):
 
     Examples
     --------
+    For a demonstration of HDBSCAN clustering with a comparison to DBSCAN, scale
+    invariance, and multi-scale clustering capabilities, see
+    :ref:`sphx_glr_auto_examples_cluster_plot_hdbscan.py`.
+
     >>> import numpy as np
     >>> from sklearn.cluster import HDBSCAN
     >>> from sklearn.datasets import load_digits
@@ -628,7 +631,6 @@ class HDBSCAN(ClusterMixin, BaseEstimator):
     >>> np.unique(hdb.labels_).tolist()
     [-1, 0, 1, 2, 3, 4, 5, 6, 7]
     """
-
     _parameter_constraints = {
         "min_cluster_size": [Interval(Integral, left=2, right=None, closed="left")],
         "min_samples": [Interval(Integral, left=1, right=None, closed="left"), None],

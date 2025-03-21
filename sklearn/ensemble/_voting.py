@@ -323,6 +323,13 @@ class VotingClassifier(ClassifierMixin, _BaseVoting):
     [1 1 1 2 2 2]
     >>> print(eclf3.transform(X).shape)
     (6, 6)
+
+    .. topic:: Examples:
+
+        * :ref:`plot_voting_decision_regions`
+          Plotting the decision boundaries of a VotingClassifier.
+        * :ref:`plot_voting_probas`
+          Plotting class probabilities of a VotingClassifier.
     """
 
     _parameter_constraints: dict = {
@@ -645,6 +652,11 @@ class VotingRegressor(RegressorMixin, _BaseVoting):
     >>> er = er.fit(X, y)
     >>> len(er.estimators_)
     2
+
+    .. topic:: Examples:
+
+        * :ref:`plot_voting_regressor`
+          Example of using VotingRegressor to combine different regressors.
     """
 
     def __init__(self, estimators, *, weights=None, n_jobs=None, verbose=False):

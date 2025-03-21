@@ -13,6 +13,9 @@
 # rectangular). Instead of specifying bounds, hyperparameters can also be
 # declared to be "fixed", which causes these hyperparameters to be excluded from
 # optimization.
+#
+# See :ref:`sphx_glr_auto_examples_gaussian_process_plot_gpr_prior_posterior.py`
+# for an example illustrating different kernels and their parameters.
 
 
 # Authors: The scikit-learn developers
@@ -173,6 +176,13 @@ class Kernel(metaclass=ABCMeta):
     >>> print(kernel(X))
     [[ 25 121]
      [121 625]]
+
+    See :ref:`sphx_glr_auto_examples_gaussian_process_plot_gpr_prior_posterior.py`
+    for an example illustrating different kernels and their behavior.
+
+    See :ref:`sphx_glr_auto_examples_gaussian_process_plot_gpr_on_structured_data.py`
+    for an example demonstrating how to create custom kernels by extending this base
+    class for structured data like variable-length sequences.
     """
 
     def get_params(self, deep=True):
@@ -501,6 +511,10 @@ class GenericKernelMixin:
     length sequences, trees, and graphs.
 
     .. versionadded:: 0.22
+
+    See :ref:`sphx_glr_auto_examples_gaussian_process_plot_gpr_on_structured_data.py`
+    for an example demonstrating how to use this mixin to create custom kernels
+    for variable-length sequence data.
     """
 
     @property
@@ -828,6 +842,14 @@ class Sum(KernelOperator):
     1.0
     >>> kernel
     1.41**2 + RBF(length_scale=1)
+
+    See :ref:`sphx_glr_auto_examples_gaussian_process_plot_gpr_prior_posterior.py`
+    for an example illustrating how the Sum kernel can be used to combine
+    different kernels to create more complex covariance functions.
+
+    See :ref:`sphx_glr_auto_examples_gaussian_process_plot_gpr_co2.py`
+    for an example showing how combining multiple kernels with the Sum operator
+    can model time series with both long-term trends and seasonality.
     """
 
     def __call__(self, X, Y=None, eval_gradient=False):
@@ -846,6 +868,7 @@ class Sum(KernelOperator):
         eval_gradient : bool, default=False
             Determines whether the gradient with respect to the log of
             the kernel hyperparameter is computed.
+            Only supported when Y is None.
 
         Returns
         -------
@@ -868,7 +891,7 @@ class Sum(KernelOperator):
     def diag(self, X):
         """Returns the diagonal of the kernel k(X, X).
 
-        The result of this method is identical to `np.diag(self(X))`; however,
+        The result of this method is identical to np.diag(self(X)); however,
         it can be evaluated more efficiently since only the diagonal is
         evaluated.
 
@@ -926,6 +949,10 @@ class Product(KernelOperator):
     1.0
     >>> kernel
     1.41**2 * RBF(length_scale=1)
+
+    See :ref:`sphx_glr_auto_examples_gaussian_process_plot_gpr_prior_posterior.py`
+    for an example illustrating how the Product kernel can be used to combine
+    different kernels to create more complex covariance functions.
     """
 
     def __call__(self, X, Y=None, eval_gradient=False):
@@ -1027,6 +1054,9 @@ class Exponentiation(Kernel):
     0.419...
     >>> gpr.predict(X[:1,:], return_std=True)
     (array([635.5...]), array([0.559...]))
+
+    See :ref:`sphx_glr_auto_examples_gaussian_process_plot_gpr_prior_posterior.py`
+    for an example illustrating different kernels and their behavior.
     """
 
     def __init__(self, kernel, exponent):
@@ -1127,6 +1157,7 @@ class Exponentiation(Kernel):
         eval_gradient : bool, default=False
             Determines whether the gradient with respect to the log of
             the kernel hyperparameter is computed.
+            Only supported when Y is None.
 
         Returns
         -------
@@ -1226,6 +1257,10 @@ class ConstantKernel(StationaryKernelMixin, GenericKernelMixin, Kernel):
     0.3696...
     >>> gpr.predict(X[:1,:], return_std=True)
     (array([606.1...]), array([0.24...]))
+
+    See :ref:`sphx_glr_auto_examples_gaussian_process_plot_gpr_prior_posterior.py`
+    for an example illustrating how ConstantKernel can be used as part of a
+    product kernel to scale the magnitude of other kernels.
     """
 
     def __init__(self, constant_value=1.0, constant_value_bounds=(1e-5, 1e5)):
@@ -1250,8 +1285,8 @@ class ConstantKernel(StationaryKernelMixin, GenericKernelMixin, Kernel):
             is evaluated instead.
 
         eval_gradient : bool, default=False
-            Determines whether the gradient with respect to the log of
-            the kernel hyperparameter is computed.
+            Determines whether the gradient with respect to the log of the
+            kernel hyperparameter is computed.
             Only supported when Y is None.
 
         Returns
@@ -1356,6 +1391,14 @@ class WhiteKernel(StationaryKernelMixin, GenericKernelMixin, Kernel):
     0.3680...
     >>> gpr.predict(X[:2,:], return_std=True)
     (array([653.0..., 592.1... ]), array([316.6..., 316.6...]))
+
+    See :ref:`sphx_glr_auto_examples_gaussian_process_plot_gpr_noisy.py`
+    for an example showing the ability of WhiteKernel to estimate the noise level
+    in the data.
+
+    See :ref:`sphx_glr_auto_examples_gaussian_process_plot_gpr_co2.py`
+    for an example demonstrating how WhiteKernel can be combined with other kernels
+    to model noise in time series data.
     """
 
     def __init__(self, noise_level=1.0, noise_level_bounds=(1e-5, 1e5)):
@@ -1392,7 +1435,7 @@ class WhiteKernel(StationaryKernelMixin, GenericKernelMixin, Kernel):
         K_gradient : ndarray of shape (n_samples_X, n_samples_X, n_dims),\
             optional
             The gradient of the kernel k(X, X) with respect to the log of the
-            hyperparameter of the kernel. Only returned when eval_gradient
+            hyperparameter of the kernel. Only returned when `eval_gradient`
             is True.
         """
         if Y is not None and eval_gradient:
@@ -1501,6 +1544,18 @@ class RBF(StationaryKernelMixin, NormalizedKernelMixin, Kernel):
     >>> gpc.predict_proba(X[:2,:])
     array([[0.8354..., 0.03228..., 0.1322...],
            [0.7906..., 0.0652..., 0.1441...]])
+
+    See :ref:`sphx_glr_auto_examples_gaussian_process_plot_gpr_prior_posterior.py`
+    for an example illustrating different RBF kernel parameters and how they affect
+    the resulting Gaussian process.
+
+    See :ref:`sphx_glr_auto_examples_gaussian_process_plot_gpr_noisy.py`
+    for an example demonstrating how RBF kernel is combined with WhiteKernel to
+    model signal with noise.
+
+    See :ref:`sphx_glr_auto_examples_gaussian_process_plot_gpr_co2.py`
+    for an example demonstrating how RBF kernel can be used to model long-term trends
+    in time series data.
     """
 
     def __init__(self, length_scale=1.0, length_scale_bounds=(1e-5, 1e5)):
@@ -1532,7 +1587,7 @@ class RBF(StationaryKernelMixin, NormalizedKernelMixin, Kernel):
 
         Y : ndarray of shape (n_samples_Y, n_features), default=None
             Right argument of the returned kernel k(X, Y). If None, k(X, X)
-            if evaluated instead.
+            is evaluated instead.
 
         eval_gradient : bool, default=False
             Determines whether the gradient with respect to the log of
@@ -1617,11 +1672,10 @@ class Matern(RBF):
 
 
 
-    where :math:`d(\\cdot,\\cdot)` is the Euclidean distance,
-    :math:`K_{\\nu}(\\cdot)` is a modified Bessel function and
-    :math:`\\Gamma(\\cdot)` is the gamma function.
-    See [1]_, Chapter 4, Section 4.2, for details regarding the different
-    variants of the Matern kernel.
+    where :math:`\\alpha` is the scale mixture parameter, :math:`l` is
+    the length scale of the kernel and :math:`d(\\cdot,\\cdot)` is the
+    Euclidean distance.
+    For advice on how to set the parameters, see e.g. [1]_.
 
     Read more in the :ref:`User Guide <gp_kernels>`.
 
@@ -1671,6 +1725,10 @@ class Matern(RBF):
     >>> gpc.predict_proba(X[:2,:])
     array([[0.8513..., 0.0368..., 0.1117...],
             [0.8086..., 0.0693..., 0.1220...]])
+
+    See :ref:`sphx_glr_auto_examples_gaussian_process_plot_gpr_prior_posterior.py`
+    for an example illustrating different Matern kernel parameters and how they affect
+    the resulting Gaussian process.
     """
 
     def __init__(self, length_scale=1.0, length_scale_bounds=(1e-5, 1e5), nu=1.5):
@@ -1800,12 +1858,12 @@ class RationalQuadratic(StationaryKernelMixin, NormalizedKernelMixin, Kernel):
     sum) of RBF kernels with different characteristic length scales. It is
     parameterized by a length scale parameter :math:`l>0` and a scale
     mixture parameter :math:`\\alpha>0`. Only the isotropic variant
-    where length_scale :math:`l` is a scalar is supported at the moment.
-    The kernel is given by:
+    where length_scale :math:`l` is a scalar is supported at the moment. The
+    kernel is given by:
 
     .. math::
         k(x_i, x_j) = \\left(
-        1 + \\frac{d(x_i, x_j)^2 }{ 2\\alpha  l^2}\\right)^{-\\alpha}
+        1 + \\frac{d(x_i, x_j)^2 }{ 2\\alpha  l^ 2}\\right)^{-\\alpha}
 
     where :math:`\\alpha` is the scale mixture parameter, :math:`l` is
     the length scale of the kernel and :math:`d(\\cdot,\\cdot)` is the
@@ -1853,7 +1911,15 @@ class RationalQuadratic(StationaryKernelMixin, NormalizedKernelMixin, Kernel):
     0.9733...
     >>> gpc.predict_proba(X[:2,:])
     array([[0.8881..., 0.0566..., 0.05518...],
-            [0.8678..., 0.0707... , 0.0614...]])
+           [0.8678..., 0.0707... , 0.0614...]])
+
+    See :ref:`sphx_glr_auto_examples_gaussian_process_plot_gpr_prior_posterior.py`
+    for an example illustrating RationalQuadratic kernel and how it affects the
+    resulting Gaussian process.
+
+    See :ref:`sphx_glr_auto_examples_gaussian_process_plot_gpr_co2.py`
+    for an example demonstrating how RationalQuadratic kernel can be used to model
+    small irregularities in time series data.
     """
 
     def __init__(
@@ -1886,7 +1952,7 @@ class RationalQuadratic(StationaryKernelMixin, NormalizedKernelMixin, Kernel):
 
         Y : ndarray of shape (n_samples_Y, n_features), default=None
             Right argument of the returned kernel k(X, Y). If None, k(X, X)
-            if evaluated instead.
+            is evaluated instead.
 
         eval_gradient : bool, default=False
             Determines whether the gradient with respect to the log of
@@ -1898,9 +1964,10 @@ class RationalQuadratic(StationaryKernelMixin, NormalizedKernelMixin, Kernel):
         K : ndarray of shape (n_samples_X, n_samples_Y)
             Kernel k(X, Y)
 
-        K_gradient : ndarray of shape (n_samples_X, n_samples_X, n_dims)
+        K_gradient : ndarray of shape (n_samples_X, n_samples_X, n_dims), \
+            optional
             The gradient of the kernel k(X, X) with respect to the log of the
-            hyperparameter of the kernel. Only returned when eval_gradient
+            hyperparameter of the kernel. Only returned when `eval_gradient`
             is True.
         """
         if len(np.atleast_1d(self.length_scale)) > 1:
@@ -1928,7 +1995,6 @@ class RationalQuadratic(StationaryKernelMixin, NormalizedKernelMixin, Kernel):
                 length_scale_gradient = length_scale_gradient[:, :, np.newaxis]
             else:  # l is kept fixed
                 length_scale_gradient = np.empty((K.shape[0], K.shape[1], 0))
-
             # gradient with respect to alpha
             if not self.hyperparameter_alpha.fixed:
                 alpha_gradient = K * (
@@ -1953,19 +2019,18 @@ class ExpSineSquared(StationaryKernelMixin, NormalizedKernelMixin, Kernel):
     r"""Exp-Sine-Squared kernel (aka periodic kernel).
 
     The ExpSineSquared kernel allows one to model functions which repeat
-    themselves exactly. It is parameterized by a length scale
-    parameter :math:`l>0` and a periodicity parameter :math:`p>0`.
+    themselves exactly. It is parameterized by a length scale parameter :math:`l>0`
+    and a periodicity parameter :math:`p>0`.
     Only the isotropic variant where :math:`l` is a scalar is
     supported at the moment. The kernel is given by:
 
     .. math::
-        k(x_i, x_j) = \text{exp}\left(-
+        k(x_i, x_j) =  \\exp\\left(-
         \frac{ 2\sin^2(\pi d(x_i, x_j)/p) }{ l^ 2} \right)
 
     where :math:`l` is the length scale of the kernel, :math:`p` the
-    periodicity of the kernel and :math:`d(\cdot,\cdot)` is the
+    periodicity of the kernel and :math:`d(\\cdot,\\cdot)` is the
     Euclidean distance.
-
     Read more in the :ref:`User Guide <gp_kernels>`.
 
     .. versionadded:: 0.18
@@ -2002,6 +2067,14 @@ class ExpSineSquared(StationaryKernelMixin, NormalizedKernelMixin, Kernel):
     0.0144...
     >>> gpr.predict(X[:2,:], return_std=True)
     (array([425.6..., 457.5...]), array([0.3894..., 0.3467...]))
+
+    See :ref:`sphx_glr_auto_examples_gaussian_process_plot_gpr_prior_posterior.py`
+    for an example illustrating the ExpSineSquared kernel and how it models
+    periodic functions.
+
+    See :ref:`sphx_glr_auto_examples_gaussian_process_plot_gpr_co2.py`
+    for an example demonstrating how ExpSineSquared kernel can be used to model
+    seasonal patterns in time series data.
     """
 
     def __init__(
@@ -2035,7 +2108,7 @@ class ExpSineSquared(StationaryKernelMixin, NormalizedKernelMixin, Kernel):
 
         Y : ndarray of shape (n_samples_Y, n_features), default=None
             Right argument of the returned kernel k(X, Y). If None, k(X, X)
-            if evaluated instead.
+            is evaluated instead.
 
         eval_gradient : bool, default=False
             Determines whether the gradient with respect to the log of
@@ -2048,7 +2121,7 @@ class ExpSineSquared(StationaryKernelMixin, NormalizedKernelMixin, Kernel):
             Kernel k(X, Y)
 
         K_gradient : ndarray of shape (n_samples_X, n_samples_X, n_dims), \
-                optional
+            optional
             The gradient of the kernel k(X, X) with respect to the log of the
             hyperparameter of the kernel. Only returned when `eval_gradient`
             is True.
@@ -2100,20 +2173,17 @@ class DotProduct(Kernel):
     The DotProduct kernel is non-stationary and can be obtained from linear
     regression by putting :math:`N(0, 1)` priors on the coefficients
     of :math:`x_d (d = 1, . . . , D)` and a prior of :math:`N(0, \sigma_0^2)`
-    on the bias. The DotProduct kernel is invariant to a rotation of
+    on the bias. The kernel is given by
+
+    .. math::
+        k(x_i, x_j) = \sigma_0 ^ 2 + x_i \cdot x_j
+
+    The DotProduct kernel is invariant to a rotation of
     the coordinates about the origin, but not translations.
     It is parameterized by a parameter sigma_0 :math:`\sigma`
     which controls the inhomogenity of the kernel. For :math:`\sigma_0^2 =0`,
     the kernel is called the homogeneous linear kernel, otherwise
     it is inhomogeneous. The kernel is given by
-
-    .. math::
-        k(x_i, x_j) = \sigma_0 ^ 2 + x_i \cdot x_j
-
-    The DotProduct kernel is commonly combined with exponentiation.
-
-    See [1]_, Chapter 4, Section 4.2, for further details regarding the
-    DotProduct kernel.
 
     Read more in the :ref:`User Guide <gp_kernels>`.
 
@@ -2148,7 +2218,11 @@ class DotProduct(Kernel):
     >>> gpr.score(X, y)
     0.3680...
     >>> gpr.predict(X[:2,:], return_std=True)
-    (array([653.0..., 592.1...]), array([316.6..., 316.6...]))
+    (array([653.0..., 592.1... ]), array([316.6..., 316.6...]))
+
+    See :ref:`sphx_glr_auto_examples_gaussian_process_plot_gpr_noisy.py`
+    for an example demonstrating how DotProduct can be combined with WhiteKernel
+    to model data with noise.
     """
 
     def __init__(self, sigma_0=1.0, sigma_0_bounds=(1e-5, 1e5)):
@@ -2169,7 +2243,7 @@ class DotProduct(Kernel):
 
         Y : ndarray of shape (n_samples_Y, n_features), default=None
             Right argument of the returned kernel k(X, Y). If None, k(X, X)
-            if evaluated instead.
+            is evaluated instead.
 
         eval_gradient : bool, default=False
             Determines whether the gradient with respect to the log of
@@ -2181,8 +2255,8 @@ class DotProduct(Kernel):
         K : ndarray of shape (n_samples_X, n_samples_Y)
             Kernel k(X, Y)
 
-        K_gradient : ndarray of shape (n_samples_X, n_samples_X, n_dims),\
-                optional
+        K_gradient : ndarray of shape (n_samples_X, n_samples_X, n_dims), \
+            optional
             The gradient of the kernel k(X, X) with respect to the log of the
             hyperparameter of the kernel. Only returned when `eval_gradient`
             is True.
@@ -2300,6 +2374,13 @@ class PairwiseKernel(Kernel):
     >>> gpc.predict_proba(X[:2,:])
     array([[0.8880..., 0.05663..., 0.05532...],
            [0.8676..., 0.07073..., 0.06165...]])
+
+    See :ref:`sphx_glr_auto_examples_gaussian_process_plot_gpr_prior_posterior.py`
+    for an example illustrating different kernels and how they can be used with
+    Gaussian processes.
+
+    See :ref:`sphx_glr_auto_examples_gaussian_process_plot_gpr_prior_posterior.py`
+    for an example illustrating the use of PairwiseKernel with a custom metric.
     """
 
     def __init__(
@@ -2328,7 +2409,7 @@ class PairwiseKernel(Kernel):
 
         Y : ndarray of shape (n_samples_Y, n_features), default=None
             Right argument of the returned kernel k(X, Y). If None, k(X, X)
-            if evaluated instead.
+            is evaluated instead.
 
         eval_gradient : bool, default=False
             Determines whether the gradient with respect to the log of
@@ -2340,8 +2421,8 @@ class PairwiseKernel(Kernel):
         K : ndarray of shape (n_samples_X, n_samples_Y)
             Kernel k(X, Y)
 
-        K_gradient : ndarray of shape (n_samples_X, n_samples_X, n_dims),\
-                optional
+        K_gradient : ndarray of shape (n_samples_X, n_samples_X, n_dims), \
+            optional
             The gradient of the kernel k(X, X) with respect to the log of the
             hyperparameter of the kernel. Only returned when `eval_gradient`
             is True.

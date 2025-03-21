@@ -1067,7 +1067,8 @@ class SGDClassifier(BaseSGDClassifier):
         See :term:`Glossary <random_state>`.
         Integer values must be in the range `[0, 2**32 - 1]`.
 
-    learning_rate : str, default='optimal'
+    learning_rate : {'constant', 'optimal', 'invscaling', 'adaptive'},
+                   default='optimal'
         The learning rate schedule:
 
         - 'constant': `eta = eta0`
@@ -1206,9 +1207,18 @@ class SGDClassifier(BaseSGDClassifier):
     ...                     SGDClassifier(max_iter=1000, tol=1e-3))
     >>> clf.fit(X, Y)
     Pipeline(steps=[('standardscaler', StandardScaler()),
-                    ('sgdclassifier', SGDClassifier())])
+                     ('sgdclassifier', SGDClassifier())])
     >>> print(clf.predict([[-0.8, -1]]))
     [1]
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_sgd_comparison.py`
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_sgd_iris.py`
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_sgd_loss_functions.py`
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_sgd_penalties.py`
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_sgd_separating_hyperplane.py`
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_sgd_early_stopping.py`
     """
 
     _parameter_constraints: dict = {
@@ -1635,7 +1645,8 @@ class BaseSGDRegressor(RegressorMixin, BaseSGD):
             The initial intercept to warm-start the optimization.
 
         sample_weight : array-like, shape (n_samples,), default=None
-            Weights applied to individual samples (1. for unweighted).
+            Weights applied to individual samples.
+            If not provided, uniform weights are assumed.
 
         Returns
         -------
@@ -1882,9 +1893,12 @@ class SGDRegressor(BaseSGDRegressor):
         Used for shuffling the data, when ``shuffle`` is set to ``True``.
         Pass an int for reproducible output across multiple function calls.
         See :term:`Glossary <random_state>`.
+        Integer values must be in the range `[0, 2**32 - 1]`.
 
-    learning_rate : str, default='invscaling'
-        The learning rate schedule:
+    learning_rate : {'constant', 'optimal', 'invscaling', 'adaptive'},
+                   default='invscaling'
+        The learning rate schedule to use with `fit`. (If using `partial_fit`,
+        learning rate must be controlled directly).
 
         - 'constant': `eta = eta0`
         - 'optimal': `eta = 1.0 / (alpha * (t + t0))`
@@ -1959,6 +1973,7 @@ class SGDRegressor(BaseSGDRegressor):
         an int greater than 1, averaging will begin once the total number of
         samples seen reaches `average`. So ``average=10`` will begin
         averaging after seeing 10 samples.
+        Integer values must be in the range `[1, n_samples]`.
 
     Attributes
     ----------
@@ -2012,6 +2027,12 @@ class SGDRegressor(BaseSGDRegressor):
     >>> reg.fit(X, y)
     Pipeline(steps=[('standardscaler', StandardScaler()),
                     ('sgdregressor', SGDRegressor())])
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_sgd_comparison.py`
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_sgd_loss_functions.py`
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_sgd_early_stopping.py`
     """
 
     _parameter_constraints: dict = {
@@ -2115,12 +2136,11 @@ class SGDOneClassSVM(OutlierMixin, BaseSGD):
     verbose : int, default=0
         The verbosity level.
 
-    random_state : int, RandomState instance or None, default=None
-        The seed of the pseudo random number generator to use when shuffling
-        the data.  If int, random_state is the seed used by the random number
-        generator; If RandomState instance, random_state is the random number
-        generator; If None, the random number generator is the RandomState
-        instance used by `np.random`.
+    random_state : int, RandomState instance, default=None
+        Used for shuffling the data, when ``shuffle`` is set to ``True``.
+        Pass an int for reproducible output across multiple function calls.
+        See :term:`Glossary <random_state>`.
+        Integer values must be in the range `[0, 2**32 - 1]`.
 
     learning_rate : {'constant', 'optimal', 'invscaling', 'adaptive'}, default='optimal'
         The learning rate schedule to use with `fit`. (If using `partial_fit`,
@@ -2214,6 +2234,10 @@ class SGDOneClassSVM(OutlierMixin, BaseSGD):
 
     >>> print(clf.predict([[4, 4]]))
     [1]
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_sgdocsvm_vs_ocsvm.py`
     """
 
     loss_functions = {"hinge": (Hinge, 1.0)}
@@ -2601,12 +2625,13 @@ class SGDOneClassSVM(OutlierMixin, BaseSGD):
         Returns
         -------
         dec : array-like, shape (n_samples,)
-            Decision function values of the samples.
+           Decision function values of the samples.
         """
 
         check_is_fitted(self, "coef_")
 
         X = validate_data(self, X, accept_sparse="csr", reset=False)
+
         decisions = safe_sparse_dot(X, self.coef_.T, dense_output=True) - self.offset_
 
         return decisions.ravel()
@@ -2622,7 +2647,7 @@ class SGDOneClassSVM(OutlierMixin, BaseSGD):
         Returns
         -------
         score_samples : array-like, shape (n_samples,)
-            Unshiffted scoring function values of the samples.
+           Unshiffted scoring function values of the samples.
         """
         score_samples = self.decision_function(X) + self.offset_
         return score_samples
@@ -2638,7 +2663,7 @@ class SGDOneClassSVM(OutlierMixin, BaseSGD):
         Returns
         -------
         y : array, shape (n_samples,)
-            Labels of the samples.
+           Labels of the samples.
         """
         y = (self.decision_function(X) >= 0).astype(np.int32)
         y[y == 0] = -1  # for consistency with outlier detectors

@@ -603,6 +603,9 @@ class RadiusNeighborsTransformer(
     >>> clusters, counts = np.unique(X_clustered, return_counts=True)
     >>> print(counts)
     [ 29  15 111  11  12]
+    
+    For an example of transforming data into a graph of neighbors, see
+    :ref:`sphx_glr_auto_examples_neighbors_approximate_nearest_neighbors.py`.
     """
 
     _parameter_constraints: dict = {

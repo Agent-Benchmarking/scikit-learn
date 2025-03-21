@@ -207,7 +207,17 @@ def lars_path(
            [ 0.     ,  0.     ,  0.     ],
            [ 0.     , 46.96..., 97.99...],
            [ 0.     ,  0.     , 45.70...]])
-    """
+    
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_lasso_lasso_lars_elasticnet_path.py`
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_lasso_model_selection.py`
+"""
     if X is None and Gram is not None:
         raise ValueError(
             "X cannot be None if Gram is not None"
@@ -2178,7 +2188,13 @@ class LassoLarsIC(LassoLars):
     LassoLarsIC(criterion='bic')
     >>> print(reg.coef_)
     [ 0.  -1.11...]
-    """
+    
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_lasso_lars_ic.py`
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_lasso_model_selection.py`
+"""
 
     _parameter_constraints: dict = {
         **LassoLars._parameter_constraints,

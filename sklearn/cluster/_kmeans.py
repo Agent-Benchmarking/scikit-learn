@@ -763,7 +763,7 @@ def _labels_inertia(X, sample_weight, centers, n_threads=1, return_inertia=True)
         The input samples to assign to the labels. If sparse matrix, must
         be in CSR format.
 
-    sample_weight : ndarray of shape (n_samples,)
+    sample_weight : array-like of shape (n_samples,)
         The weights for each observation in X.
 
     x_squared_norms : ndarray of shape (n_samples,)
@@ -1324,38 +1324,19 @@ class KMeans(_BaseKMeans):
     samples and T is the number of iteration.
 
     The worst case complexity is given by O(n^(k+2/p)) with
-    n = n_samples, p = n_features.
-    Refer to :doi:`"How slow is the k-means method?" D. Arthur and S. Vassilvitskii -
-    SoCG2006.<10.1145/1137856.1137880>` for more details.
+    n = n_samples, p = n_features. (D. Arthur and S. Vassilvitskii,
+    'How slow is the k-means method?' SoCG2006)
 
     In practice, the k-means algorithm is very fast (one of the fastest
     clustering algorithms available), but it falls in local minima. That's why
     it can be useful to restart it several times.
 
-    If the algorithm stops before fully converging (because of ``tol`` or
-    ``max_iter``), ``labels_`` and ``cluster_centers_`` will not be consistent,
-    i.e. the ``cluster_centers_`` will not be the means of the points in each
-    cluster. Also, the estimator will reassign ``labels_`` after the last
-    iteration to make ``labels_`` consistent with ``predict`` on the training
-    set.
+    The k-means problem. K-means clustering aims to partition n observations
+    into k clusters, where each observation belongs to the cluster with the
+    nearest mean (cluster centroid or cluster center), serving as a prototype
+    of the cluster.
 
-    Examples
-    --------
-
-    >>> from sklearn.cluster import KMeans
-    >>> import numpy as np
-    >>> X = np.array([[1, 2], [1, 4], [1, 0],
-    ...               [10, 2], [10, 4], [10, 0]])
-    >>> kmeans = KMeans(n_clusters=2, random_state=0, n_init="auto").fit(X)
-    >>> kmeans.labels_
-    array([1, 1, 1, 0, 0, 0], dtype=int32)
-    >>> kmeans.predict([[0, 0], [12, 3]])
-    array([1, 0], dtype=int32)
-    >>> kmeans.cluster_centers_
-    array([[10.,  2.],
-           [ 1.,  2.]])
-
-    For examples of common problems with K-Means and how to address them see
+    For an example of how it works, see the example:
     :ref:`sphx_glr_auto_examples_cluster_plot_kmeans_assumptions.py`.
 
     For a demonstration of how K-Means can be used to cluster text documents see
@@ -1366,6 +1347,21 @@ class KMeans(_BaseKMeans):
 
     For a comparison between K-Means and BisectingKMeans refer to example
     :ref:`sphx_glr_auto_examples_cluster_plot_bisect_kmeans.py`.
+
+    To see a comparison of different initialization methods for K-means on the
+    digits dataset see :ref:`sphx_glr_auto_examples_cluster_plot_kmeans_digits.py`.
+
+    For an example of using silhouette analysis to determine the optimal number
+    of clusters see
+    :ref:`sphx_glr_auto_examples_cluster_plot_kmeans_silhouette_analysis.py`.
+
+    For a visualization of how the k-means++ initialization works see
+    :ref:`sphx_glr_auto_examples_cluster_plot_kmeans_plusplus.py`.
+    For an evaluation of the impact of initialization and stability of k-means see
+    :ref:`sphx_glr_auto_examples_cluster_plot_kmeans_stability_low_dim_dense.py`.
+
+    For a comparison of various clustering algorithms including k-means see
+    :ref:`sphx_glr_auto_examples_cluster_plot_cluster_comparison.py`.
     """
 
     _parameter_constraints: dict = {
@@ -1431,8 +1427,8 @@ class KMeans(_BaseKMeans):
         ----------
         X : {array-like, sparse matrix} of shape (n_samples, n_features)
             Training instances to cluster. It must be noted that the data
-            will be converted to C ordering, which will cause a memory
-            copy if the given data is not C-contiguous.
+            will be converted to C ordering, which will cause a memory copy
+            if the given data is not C-contiguous.
             If a sparse matrix is passed, a copy will be made if it's not in
             CSR format.
 
@@ -1708,6 +1704,9 @@ class MiniBatchKMeans(_BaseKMeans):
         If a callable is passed, it should take arguments X, n_clusters and a
         random state and return an initialization.
 
+        For an example of how to use the different `init` strategies, see
+        :ref:`sphx_glr_auto_examples_cluster_plot_kmeans_digits.py`.
+
         For an evaluation of the impact of initialization, see the example
         :ref:`sphx_glr_auto_examples_cluster_plot_kmeans_stability_low_dim_dense.py`.
 
@@ -1755,12 +1754,7 @@ class MiniBatchKMeans(_BaseKMeans):
 
     init_size : int, default=None
         Number of samples to randomly sample for speeding up the
-        initialization (sometimes at the expense of accuracy): the
-        only algorithm is initialized by running a batch KMeans on a
-        random subset of the data. This needs to be larger than n_clusters.
-
-        If `None`, the heuristic is `init_size = 3 * batch_size` if
-        `3 * batch_size < n_clusters`, else `init_size = 3 * n_clusters`.
+        initialization (sometimes at the expense of accuracy).
 
     n_init : 'auto' or int, default="auto"
         Number of random initializations that are tried.
@@ -1777,7 +1771,7 @@ class MiniBatchKMeans(_BaseKMeans):
            Added 'auto' option for `n_init`.
 
         .. versionchanged:: 1.4
-           Default value for `n_init` changed to `'auto'` in version.
+           Default value for `n_init` changed to `'auto'`.
 
     reassignment_ratio : float, default=0.01
         Control the fraction of the maximum number of counts for a center to
@@ -1789,7 +1783,6 @@ class MiniBatchKMeans(_BaseKMeans):
 
     Attributes
     ----------
-
     cluster_centers_ : ndarray of shape (n_clusters, n_features)
         Coordinates of cluster centers.
 
@@ -1842,14 +1835,16 @@ class MiniBatchKMeans(_BaseKMeans):
     See :ref:`sphx_glr_auto_examples_cluster_plot_birch_vs_minibatchkmeans.py` for a
     comparison with :class:`~sklearn.cluster.BIRCH`.
 
+    For a direct comparison between :class:`~sklearn.cluster.KMeans` and
+    :class:`~sklearn.cluster.MiniBatchKMeans`, see
+    :ref:`sphx_glr_auto_examples_cluster_plot_mini_batch_kmeans.py`.
+
     Examples
     --------
     >>> from sklearn.cluster import MiniBatchKMeans
     >>> import numpy as np
     >>> X = np.array([[1, 2], [1, 4], [1, 0],
-    ...               [4, 2], [4, 0], [4, 4],
-    ...               [4, 5], [0, 1], [2, 2],
-    ...               [3, 2], [5, 5], [1, -1]])
+    ...               [10, 2], [10, 4], [10, 0]])
     >>> # manually fit on batches
     >>> kmeans = MiniBatchKMeans(n_clusters=2,
     ...                          random_state=0,
@@ -1875,7 +1870,7 @@ class MiniBatchKMeans(_BaseKMeans):
     array([1, 0], dtype=int32)
 
     For a comparison of Mini-Batch K-Means clustering with other clustering algorithms,
-    see :ref:`sphx_glr_auto_examples_cluster_plot_cluster_comparison.py`
+    see :ref:`sphx_glr_auto_examples_cluster_plot_cluster_comparison.py`.
     """
 
     _parameter_constraints: dict = {
@@ -2194,8 +2189,8 @@ class MiniBatchKMeans(_BaseKMeans):
                 self.cluster_centers_,
                 n_threads=self._n_threads,
             )
-        else:
-            self.inertia_ = self._ewa_inertia * n_samples
+
+        self.inertia_ = self._ewa_inertia * n_samples
 
         return self
 

@@ -1333,10 +1333,6 @@ class GridSearchCV(BaseSearchCV):
         See ``scoring`` parameter to know more about multiple metric
         evaluation.
 
-        See :ref:`sphx_glr_auto_examples_model_selection_plot_grid_search_digits.py`
-        to see how to design a custom selection strategy using a callable
-        via `refit`.
-
         .. versionchanged:: 0.20
             Support for callable added.
 
@@ -1472,13 +1468,25 @@ class GridSearchCV(BaseSearchCV):
         For multi-metric evaluation, this is present only if ``refit`` is
         specified.
 
-        This attribute is not available if ``refit`` is a function.
+        See :ref:`sphx_glr_auto_examples_model_selection_plot_grid_search_digits.py`
+        to see how to design a custom selection strategy using a callable
+        via `refit`.
+
+        .. versionchanged:: 0.20
+            Support for callable added.
 
     best_params_ : dict
         Parameter setting that gave the best results on the hold out data.
 
         For multi-metric evaluation, this is present only if ``refit`` is
         specified.
+
+        See :ref:`sphx_glr_auto_examples_model_selection_plot_grid_search_digits.py`
+        to see how to design a custom selection strategy using a callable
+        via `refit`.
+
+        .. versionchanged:: 0.20
+            Support for callable added.
 
     best_index_ : int
         The index (of the ``cv_results_`` arrays) which corresponds to the best
@@ -1490,6 +1498,13 @@ class GridSearchCV(BaseSearchCV):
 
         For multi-metric evaluation, this is present only if ``refit`` is
         specified.
+
+        See :ref:`sphx_glr_auto_examples_model_selection_plot_grid_search_digits.py`
+        to see how to design a custom selection strategy using a callable
+        via `refit`.
+
+        .. versionchanged:: 0.20
+            Support for callable added.
 
     scorer_ : function or a dict
         Scorer function used on the held out data to choose the best
@@ -1570,6 +1585,30 @@ class GridSearchCV(BaseSearchCV):
      'rank_test_score', 'split0_test_score',...
      'split2_test_score', ...
      'std_fit_time', 'std_score_time', 'std_test_score']
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_model_selection_plot_grid_search_digits.py`
+        - :ref:`sphx_glr_auto_examples_
+          model_selection_plot_grid_search_text_feature_extraction
+          .py`
+        - :ref:`sphx_glr_auto_examples_
+          model_selection_plot_grid_search_refit_callable
+          .py`
+        - :ref:`sphx_glr_auto_examples_model_selection_plot_grid_search_stats.py`
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_model_selection_plot_grid_search_digits.py`
+        - :ref:`sphx_glr_auto_examples_
+          model_selection_plot_grid_search_text_feature_extraction
+          .py`
+        - :ref:`sphx_glr_auto_examples_
+          model_selection_plot_grid_search_refit_callable
+          .py`
+        - :ref:`sphx_glr_auto_examples_model_selection_plot_grid_search_stats.py`
     """
 
     _parameter_constraints: dict = {
@@ -1946,6 +1985,16 @@ class RandomizedSearchCV(BaseSearchCV):
     >>> search = clf.fit(iris.data, iris.target)
     >>> search.best_params_
     {'C': np.float64(2...), 'penalty': 'l1'}
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_model_selection_plot_randomized_search.py`
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_model_selection_plot_randomized_search.py`
     """
 
     _parameter_constraints: dict = {

@@ -545,7 +545,53 @@ def enet_path(
             [-0.        , -2.12..., -1.12...],
             [ 0.        , 23.04..., 88.93...],
             [ 0.        , 10.63..., 41.56...]])
-    """
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_lasso_and_elasticnet.py`
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_elastic_net_precomputed_gram_matrix_with_weighted_samples.py`
+        - :ref:`sphx_glr_auto_examples_inspection_plot_train_error_vs_test_error.py`
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_lasso_model_selection.py`
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_lasso_and_elasticnet.py`
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_elastic_net_precomputed_gram_matrix_with_weighted_samples.py`
+        - :ref:`sphx_glr_auto_examples_inspection_plot_train_error_vs_test_error.py`
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_lasso_model_selection.py`
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_multi_task_lasso_support.py`
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_lasso_and_elasticnet.py`
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_elastic_net_precomputed_gram_matrix_with_weighted_samples.py`
+        - :ref:`sphx_glr_auto_examples_inspection_plot_train_error_vs_test_error.py`
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_lasso_model_selection.py`
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_multi_task_lasso_support.py`
+"""
     X_offset_param = params.pop("X_offset", None)
     X_scale_param = params.pop("X_scale", None)
     sample_weight = params.pop("sample_weight", None)
@@ -875,7 +921,21 @@ class ElasticNet(MultiOutputMixin, RegressorMixin, LinearModel):
     1.451...
     >>> print(regr.predict([[0, 0]]))
     [1.451...]
-    """
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_lasso_and_elasticnet.py`
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_elastic_net_precomputed_gram_matrix_with_weighted_samples.py`
+        - :ref:`sphx_glr_auto_examples_inspection_plot_train_error_vs_test_error.py`
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_lasso_and_elasticnet.py`
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_elastic_net_precomputed_gram_matrix_with_weighted_samples.py`
+        - :ref:`sphx_glr_auto_examples_inspection_plot_train_error_vs_test_error.py`
+"""
 
     # "check_input" is used for optimisation and isn't something to be passed
     # around in a pipeline.
@@ -1304,7 +1364,31 @@ class Lasso(ElasticNet):
     [0.85 0.  ]
     >>> print(clf.intercept_)
     0.15...
-    """
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_lasso_and_elasticnet.py`
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_lasso_model_selection.py`
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_lasso_lars_ic.py`
+        - :ref:`sphx_glr_auto_examples_applications_plot_tomography_l1_reconstruction.py`
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_lasso_and_elasticnet.py`
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_lasso_model_selection.py`
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_lasso_lars_ic.py`
+        - :ref:`sphx_glr_auto_examples_applications_plot_tomography_l1_reconstruction.py`
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_lasso_and_elasticnet.py`
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_lasso_model_selection.py`
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_lasso_lars_ic.py`
+        - :ref:`sphx_glr_auto_examples_applications_plot_tomography_l1_reconstruction.py`
+"""
 
     _parameter_constraints: dict = {
         **ElasticNet._parameter_constraints,
@@ -2041,7 +2125,25 @@ class LassoCV(RegressorMixin, LinearModelCV):
     0.9993...
     >>> reg.predict(X[:1,])
     array([-78.4951...])
-    """
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_lasso_model_selection.py`
+        - :ref:`sphx_glr_auto_examples_inspection_plot_linear_model_coefficient_interpretation.py`
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_lasso_model_selection.py`
+        - :ref:`sphx_glr_auto_examples_inspection_plot_linear_model_coefficient_interpretation.py`
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_lasso_model_selection.py`
+        - :ref:`sphx_glr_auto_examples_inspection_plot_linear_model_coefficient_interpretation.py`
+"""
 
     path = staticmethod(lasso_path)
 
@@ -2530,7 +2632,17 @@ class MultiTaskElasticNet(Lasso):
      [0.45663524 0.45612256]]
     >>> print(clf.intercept_)
     [0.0872422 0.0872422]
-    """
+    
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_multi_task_lasso_support.py`
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_multi_task_lasso_support.py`
+"""
 
     _parameter_constraints: dict = {
         **ElasticNet._parameter_constraints,
@@ -2773,7 +2885,22 @@ class MultiTaskLasso(MultiTaskElasticNet):
     [0.         0.94592424]]
     >>> print(clf.intercept_)
     [-0.41888636 -0.87382323]
-    """
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_multi_task_lasso_support.py`
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_multi_task_lasso_support.py`
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_multi_task_lasso_support.py`
+"""
 
     _parameter_constraints: dict = {
         **MultiTaskElasticNet._parameter_constraints,
@@ -3216,7 +3343,12 @@ class MultiTaskLassoCV(RegressorMixin, LinearModelCV):
     np.float64(0.5713...)
     >>> reg.predict(X[:1,])
     array([[153.7971...,  94.9015...]])
-    """
+    
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_multi_task_lasso_support.py`
+"""
 
     _parameter_constraints: dict = {
         **LinearModelCV._parameter_constraints,

@@ -245,6 +245,10 @@ class HuberRegressor(LinearModel, RegressorMixin, BaseEstimator):
     Huber coefficients: [17.7906... 31.0106...]
     >>> print("Linear Regression coefficients:", linear.coef_)
     Linear Regression coefficients: [-1.9221...  7.0226...]
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_huber_vs_ridge.py`
     """
 
     _parameter_constraints: dict = {

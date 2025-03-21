@@ -230,7 +230,7 @@ class SpectralCoclustering(BaseSpectral):
     n_svd_vecs : int, default=None
         Number of vectors to use in calculating the SVD. Corresponds
         to `ncv` when `svd_method=arpack` and `n_oversamples` when
-        `svd_method` is 'randomized`.
+        `svd_method` is 'randomized'.
 
     mini_batch : bool, default=False
         Whether to use mini-batch k-means, which is faster but may get
@@ -307,6 +307,12 @@ class SpectralCoclustering(BaseSpectral):
     array([0, 0], dtype=int32)
     >>> clustering
     SpectralCoclustering(n_clusters=2, random_state=0)
+
+    For a more detailed example, see
+    :ref:`sphx_glr_auto_examples_bicluster_plot_spectral_coclustering.py`.
+
+    For an example of biclustering text data, see
+    :ref:`sphx_glr_auto_examples_bicluster_plot_bicluster_newsgroups.py`.
     """
 
     _parameter_constraints: dict = {
@@ -400,7 +406,7 @@ class SpectralBiclustering(BaseSpectral):
     n_svd_vecs : int, default=None
         Number of vectors to use in calculating the SVD. Corresponds
         to `ncv` when `svd_method=arpack` and `n_oversamples` when
-        `svd_method` is 'randomized`.
+        `svd_method` is 'randomized'.
 
     mini_batch : bool, default=False
         Whether to use mini-batch k-means, which is faster but may get

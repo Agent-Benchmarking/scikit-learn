@@ -212,6 +212,36 @@ class LeaveOneOut(_UnsupportedGroupCVMixin, BaseCrossValidator):
     LeaveOneGroupOut : For splitting the data according to explicit,
         domain-specific stratification of the dataset.
     GroupKFold : K-fold iterator variant with non-overlapping groups.
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_model_selection_plot_cv_indices.py`
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_model_selection_plot_cv_indices.py`
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_model_selection_plot_cv_indices.py`
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_model_selection_plot_cv_indices.py`
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_model_selection_plot_cv_indices.py`
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_model_selection_plot_cv_indices.py`
     """
 
     def _iter_test_indices(self, X, y=None, groups=None):
@@ -303,6 +333,21 @@ class LeavePOut(_UnsupportedGroupCVMixin, BaseCrossValidator):
     Fold 5:
       Train: index=[0 1]
       Test:  index=[2 3]
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_model_selection_plot_cv_indices.py`
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_model_selection_plot_cv_indices.py`
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_model_selection_plot_cv_indices.py`
     """
 
     def __init__(self, p):
@@ -340,7 +385,12 @@ class LeavePOut(_UnsupportedGroupCVMixin, BaseCrossValidator):
 
 
 class _BaseKFold(BaseCrossValidator, metaclass=ABCMeta):
-    """Base class for K-Fold cross-validators and TimeSeriesSplit."""
+    """Base class for K-Fold cross-validators and TimeSeriesSplit.
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_model_selection_plot_cv_indices.py`
+    """
 
     @abstractmethod
     def __init__(self, n_splits, *, shuffle, random_state):
@@ -765,6 +815,13 @@ class StratifiedKFold(_BaseKFold):
     See Also
     --------
     RepeatedStratifiedKFold : Repeats Stratified K-Fold n times.
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_model_selection_plot_cv_indices.py`
+        - :ref:`sphx_glr_auto_examples_model_selection_plot_grid_search_digits.py`
+        - :ref:`sphx_glr_auto_examples_model_selection_plot_roc_crossval.py`
     """
 
     def __init__(self, n_splits=5, *, shuffle=False, random_state=None):
@@ -1220,6 +1277,21 @@ class TimeSeriesSplit(_BaseKFold):
     where ``n_samples`` is the number of samples. Note that this
     formula is only valid when ``test_size`` and ``max_train_size`` are
     left to their default values.
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_model_selection_plot_cv_indices.py`
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_model_selection_plot_cv_indices.py`
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_model_selection_plot_cv_indices.py`
     """
 
     def __init__(self, n_splits=5, *, max_train_size=None, test_size=None, gap=0):
@@ -2061,6 +2133,21 @@ class ShuffleSplit(_UnsupportedGroupCVMixin, BaseShuffleSplit):
     Fold 4:
       Train: index=[3 5 1]
       Test:  index=[2 4]
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_model_selection_plot_cv_indices.py`
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_model_selection_plot_cv_indices.py`
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_model_selection_plot_cv_indices.py`
     """
 
     def __init__(
@@ -2161,6 +2248,21 @@ class GroupShuffleSplit(GroupsConsumerMixin, BaseShuffleSplit):
     ShuffleSplit : Shuffles samples to create independent test/train sets.
 
     LeavePGroupsOut : Train set leaves out all possible subsets of `p` groups.
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_model_selection_plot_cv_indices.py`
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_model_selection_plot_cv_indices.py`
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_model_selection_plot_cv_indices.py`
     """
 
     def __init__(
@@ -2300,6 +2402,16 @@ class StratifiedShuffleSplit(BaseShuffleSplit):
     Fold 4:
       Train: index=[0 5 1]
       Test:  index=[3 4 2]
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_model_selection_plot_cv_indices.py`
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_model_selection_plot_cv_indices.py`
     """
 
     def __init__(
@@ -2545,6 +2657,21 @@ class PredefinedSplit(BaseCrossValidator):
     Fold 1:
       Train: index=[0 2]
       Test:  index=[1 3]
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_model_selection_plot_cv_indices.py`
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_model_selection_plot_cv_indices.py`
+
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_model_selection_plot_cv_indices.py`
     """
 
     def __init__(self, test_fold):

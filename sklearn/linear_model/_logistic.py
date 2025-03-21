@@ -660,7 +660,7 @@ def _log_reg_scoring_path(
 
         The "balanced" mode uses the values of y to automatically adjust
         weights inversely proportional to class frequencies in the input data
-        as ``n_samples / (n_classes * np.bincount(y))``
+        as ``n_samples / (n_classes * np.bincount(y))``.
 
         Note that these weights will be multiplied with sample_weight (passed
         through the fit method) if sample_weight is specified.
@@ -699,6 +699,8 @@ def _log_reg_scoring_path(
         label. For 'multinomial' the loss minimised is the multinomial loss fit
         across the entire probability distribution, *even when the data is
         binary*. 'multinomial' is unavailable when solver='liblinear'.
+        'auto' selects 'ovr' if the data is binary, or if solver='liblinear',
+        and otherwise selects 'multinomial'.
 
     random_state : int, RandomState instance
         Used when ``solver`` == 'sag', 'saga' or 'liblinear' to shuffle the
@@ -951,8 +953,6 @@ class LogisticRegression(LinearClassifierMixin, SparseCoefMixin, BaseEstimator):
            Stochastic Average Gradient descent solver.
         .. versionadded:: 0.19
            SAGA solver.
-        .. versionchanged:: 0.22
-            The default solver changed from 'liblinear' to 'lbfgs' in 0.22.
         .. versionadded:: 1.2
            newton-cholesky solver.
 
@@ -976,7 +976,7 @@ class LogisticRegression(LinearClassifierMixin, SparseCoefMixin, BaseEstimator):
            From then on, the recommended 'multinomial' will always be used for
            `n_classes >= 3`.
            Solvers that do not support 'multinomial' will raise an error.
-           Use `sklearn.multiclass.OneVsRestClassifier(LogisticRegression())` if you
+           Use `sklearn.multiclass.OneVsRestClassifier(LogisticRegression(..))` if you
            still want to use OvR.
 
     verbose : int, default=0
@@ -996,8 +996,8 @@ class LogisticRegression(LinearClassifierMixin, SparseCoefMixin, BaseEstimator):
         multi_class='ovr'". This parameter is ignored when the ``solver`` is
         set to 'liblinear' regardless of whether 'multi_class' is specified or
         not. ``None`` means 1 unless in a :obj:`joblib.parallel_backend`
-        context. ``-1`` means using all processors.
-        See :term:`Glossary <n_jobs>` for more details.
+        context. ``-1`` means using all processors. See :term:`Glossary <n_jobs>`
+        for more details.
 
     l1_ratio : float, default=None
         The Elastic-Net mixing parameter, with ``0 <= l1_ratio <= 1``. Only
@@ -1105,6 +1105,13 @@ class LogisticRegression(LinearClassifierMixin, SparseCoefMixin, BaseEstimator):
 
     For a comparison of the LogisticRegression with other classifiers see:
     :ref:`sphx_glr_auto_examples_classification_plot_classification_probability.py`.
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_logistic.py`
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_logistic_path.py`
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_logistic_l1_l2_sparsity.py`
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_logistic_multinomial.py`
     """
 
     _parameter_constraints: dict = {
@@ -1607,8 +1614,8 @@ class LogisticRegressionCV(LogisticRegression, LinearClassifierMixin, BaseEstima
 
     n_jobs : int, default=None
         Number of CPU cores used during the cross-validation loop.
-        ``None`` means 1 unless in a :obj:`joblib.parallel_backend` context.
-        ``-1`` means using all processors. See :term:`Glossary <n_jobs>`
+        ``None`` means 1 unless in a :obj:`joblib.parallel_backend`
+        context. ``-1`` means using all processors. See :term:`Glossary <n_jobs>`
         for more details.
 
     verbose : int, default=0
@@ -1661,11 +1668,11 @@ class LogisticRegressionCV(LogisticRegression, LinearClassifierMixin, BaseEstima
         generator. See :term:`Glossary <random_state>` for details.
 
     l1_ratios : list of float, default=None
-        The list of Elastic-Net mixing parameter, with ``0 <= l1_ratio <= 1``.
-        Only used if ``penalty='elasticnet'``. A value of 0 is equivalent to
+        The list of Elastic-Net mixing parameter, with ``0 <= l1_ratio <= 1``. Only
+        used if ``penalty='elasticnet'``. A value of 0 is equivalent to
         using ``penalty='l2'``, while 1 is equivalent to using
-        ``penalty='l1'``. For ``0 < l1_ratio <1``, the penalty is a combination
-        of L1 and L2.
+        ``penalty='l1'``. For ``0 < l1_ratio <1``, the penalty is a
+        combination of L1 and L2.
 
     Attributes
     ----------
@@ -1760,6 +1767,11 @@ class LogisticRegressionCV(LogisticRegression, LinearClassifierMixin, BaseEstima
     (2, 3)
     >>> clf.score(X, y)
     0.98...
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_calibration_plot_compare_calibration.py`
+        - :ref:`sphx_glr_auto_examples_preprocessing_plot_scaling_importance.py`
     """
 
     _parameter_constraints: dict = {**LogisticRegression._parameter_constraints}

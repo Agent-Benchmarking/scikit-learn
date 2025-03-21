@@ -1672,6 +1672,17 @@ class HistGradientBoostingRegressor(RegressorMixin, BaseHistGradientBoosting):
     >>> est = HistGradientBoostingRegressor().fit(X, y)
     >>> est.score(X, y)
     0.92...
+
+    .. topic:: Examples:
+
+        * :ref:`sphx_glr_auto_examples_ensemble_plot_hgbt_regression.py`
+          Features in Histogram Gradient Boosting Trees.
+        * :ref:`sphx_glr_auto_examples_ensemble_plot_forest_hist_grad_boosting_comparison.py`  # noqa: E501
+          Comparison of Random Forests and Histogram Gradient Boosting models.
+        * :ref:`sphx_glr_auto_examples_applications_plot_time_series_lagged_features.py`
+          Using lagged features for time series forecasting.
+        * :ref:`sphx_glr_auto_examples_inspection_plot_partial_dependence.py`
+          Partial dependence plots with HistGradientBoostingRegressor.
     """
 
     _parameter_constraints: dict = {
@@ -2072,6 +2083,15 @@ class HistGradientBoostingClassifier(ClassifierMixin, BaseHistGradientBoosting):
     >>> clf = HistGradientBoostingClassifier().fit(X, y)
     >>> clf.score(X, y)
     1.0
+
+    .. topic:: Examples:
+
+        * :ref:`sphx_glr_auto_examples_ensemble_plot_forest_hist_grad_boosting_comparison.py`  # noqa: E501
+          Comparison of Random Forests and Histogram Gradient Boosting models.
+        * :ref:`sphx_glr_auto_examples_ensemble_plot_feature_transformation.py`
+          Feature transformations with ensembles of trees.
+        * :ref:`sphx_glr_auto_examples_model_selection_plot_cost_sensitive_learning.py`
+          Cost-sensitive learning for imbalanced classification.
     """
 
     _parameter_constraints: dict = {

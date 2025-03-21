@@ -558,6 +558,11 @@ class LinearRegression(MultiOutputMixin, RegressorMixin, LinearModel):
     np.float64(3.0...)
     >>> reg.predict(np.array([[3, 5]]))
     array([16.])
+
+    .. topic:: Examples:
+
+        * :ref:`plot_ols_ridge`
+          Ordinary Least Squares and Ridge Regression comparison.
     """
 
     _parameter_constraints: dict = {

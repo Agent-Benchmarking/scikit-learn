@@ -22,7 +22,6 @@ class Perceptron(BaseSGDClassifier):
 
     Parameters
     ----------
-
     penalty : {'l2','l1','elasticnet'}, default=None
         The penalty (aka regularization term) to be used.
 
@@ -169,6 +168,12 @@ class Perceptron(BaseSGDClassifier):
     Perceptron()
     >>> clf.score(X, y)
     0.939...
+
+    .. topic:: Examples:
+
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_sgd_comparison.py`
+        - :ref:`sphx_glr_auto_examples_linear_model_plot_sgd_loss_functions.py`
+        - :ref:`sphx_glr_auto_examples_applications_plot_out_of_core_classification.py`
     """
 
     _parameter_constraints: dict = {**BaseSGDClassifier._parameter_constraints}

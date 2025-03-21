@@ -324,6 +324,9 @@ class LatentDirichletAllocation(
     .. [2] "Stochastic Variational Inference", Matthew D. Hoffman,
            David M. Blei, Chong Wang, John Paisley, 2013
 
+    For usage examples, see:
+    :ref:`sphx_glr_auto_examples_applications_plot_topics_extraction_with_nmf_lda.py`
+
     Examples
     --------
     >>> from sklearn.decomposition import LatentDirichletAllocation
@@ -516,7 +519,7 @@ class LatentDirichletAllocation(
         Returns
         -------
         doc_topic_distr : ndarray of shape (n_samples, n_components)
-            Unnormalized document topic distribution.
+            Document topic distribution for X.
         """
 
         # E-step

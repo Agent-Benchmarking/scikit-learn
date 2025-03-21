@@ -565,6 +565,13 @@ class PoissonRegressor(_GeneralizedLinearRegressor):
     np.float64(2.088...)
     >>> clf.predict([[1, 1], [3, 4]])
     array([10.676..., 21.875...])
+
+    .. topic:: Examples:
+
+        * :ref:`plot_poisson_regression_non_normal_loss`
+          Comparison of Poisson regression with other regression models on count data.
+        * :ref:`plot_tweedie_regression_insurance_claims`
+          Modeling insurance claims using Poisson regression.
     """
 
     _parameter_constraints: dict = {
@@ -697,6 +704,11 @@ class GammaRegressor(_GeneralizedLinearRegressor):
     np.float64(2.896...)
     >>> clf.predict([[1, 0], [2, 8]])
     array([19.483..., 35.795...])
+
+    .. topic:: Examples:
+
+        * :ref:`plot_tweedie_regression_insurance_claims`
+          Modeling insurance claims using GammaRegressor.
     """
 
     _parameter_constraints: dict = {
@@ -859,6 +871,11 @@ class TweedieRegressor(_GeneralizedLinearRegressor):
     np.float64(1.600...)
     >>> clf.predict([[1, 1], [3, 4]])
     array([2.500..., 4.599...])
+
+    .. topic:: Examples:
+
+        * :ref:`plot_tweedie_regression_insurance_claims`
+          Modeling insurance claims using TweedieRegressor.
     """
 
     _parameter_constraints: dict = {
