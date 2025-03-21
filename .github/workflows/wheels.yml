@@ -1,273 +1,320 @@
 # Workflow to build and test wheels
-name: Wheel builder
-permissions:
-  contents: read
+name: CI Package Wheels
 
 on:
-  schedule:
-    # Nightly build at 3:42 A.M.
-    - cron: "42 3 */1 * *"
+  # Trigger the workflow on push or pull request on main branch or any release branch
   push:
     branches:
       - main
-      # Release branches
-      - "[0-9]+.[0-9]+.X"
+      - '[0-9]+.[0-9]+.X'
   pull_request:
     branches:
       - main
-      - "[0-9]+.[0-9]+.X"
-  # Manual run
+      - '[0-9]+.[0-9]+.X'
+  # Also trigger on workflow_dispatch
   workflow_dispatch:
 
+# Set default permissions to read-only
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  # Check whether to build the wheels and the source tarball
   check_build_trigger:
-    name: Check build trigger
+    name: Check if workflow should be run
     runs-on: ubuntu-latest
-    if: github.repository == 'scikit-learn/scikit-learn'
     outputs:
-      build: ${{ steps.check_build_trigger.outputs.build }}
-
+      build: ${{ steps.check.outputs.build }}
     steps:
-      - name: Checkout scikit-learn
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Check if workflow should be run
+        id: check
+        env:
+          # We run the full workflow for github.repository == scikit-learn/scikit-learn 
+          # or the Agent-Benchmarking/scikit-learn repo
+          REPO_NAME: ${{ github.repository }}
+        run: |
+          # Run if this is the main scikit-learn repo or the Agent-Benchmarking repo
+          if [[ "$REPO_NAME" == "scikit-learn/scikit-learn" || "$REPO_NAME" == "Agent-Benchmarking/scikit-learn" ]]; then
+            echo "build=true" >> $GITHUB_OUTPUT
+            echo "::notice::Building on repository $REPO_NAME"
+          else
+            echo "build=false" >> $GITHUB_OUTPUT
+            echo "::notice::Skipping build on fork repository $REPO_NAME"
+          fi
 
-      - id: check_build_trigger
-        name: Check build trigger
-        run: bash build_tools/github/check_build_trigger.sh
+  # This job checks if the ubuntu-builds workflow has completed
+  check_ubuntu_builds:
+    name: Check Ubuntu Builds
+    needs: check_build_trigger
+    if: needs.check_build_trigger.outputs.build == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      ubuntu_build_status: ${{ steps.check_status.outputs.status }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check Ubuntu Builds workflow status
+        id: check_status
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const branch = context.ref.replace('refs/heads/', '');
+            
+            // Look for the most recent run of the Ubuntu Builds workflow on this branch/PR
+            const workflowName = "CI Ubuntu Tests";
+            const workflows = await github.rest.actions.listRepoWorkflows({
+              owner,
+              repo
+            });
+            
+            const ubuntuWorkflow = workflows.data.workflows.find(w => w.name === workflowName);
+            if (!ubuntuWorkflow) {
+              core.warning(`Could not find workflow: ${workflowName}. Will continue anyway.`);
+              core.setOutput('status', 'not_found');
+              return;
+            }
+            
+            // Check for recent runs (completed, in progress, or queued)
+            const runs = await github.rest.actions.listWorkflowRuns({
+              owner,
+              repo,
+              workflow_id: ubuntuWorkflow.id,
+              branch: branch,
+              per_page: 1
+            });
+            
+            if (runs.data.total_count === 0) {
+              core.notice(`No runs found for Ubuntu Builds workflow on branch '${branch}'`);
+              core.setOutput('status', 'no_runs');
+              return;
+            }
+            
+            const latestRun = runs.data.workflow_runs[0];
+            const status = latestRun.status;
+            const conclusion = latestRun.conclusion;
+            
+            core.notice(`Latest Ubuntu Builds run: Status=${status}, Conclusion=${conclusion || 'N/A'}`);
+            core.notice(`Run URL: ${latestRun.html_url}`);
+            
+            if (status === 'completed' && conclusion === 'success') {
+              core.notice('Ubuntu Builds workflow completed successfully');
+              core.setOutput('status', 'success');
+            } else if (status === 'in_progress' || status === 'queued') {
+              core.notice('Ubuntu Builds workflow is still running, will continue anyway');
+              core.setOutput('status', 'in_progress');
+            } else if (status === 'completed' && conclusion !== 'success') {
+              core.warning('Ubuntu Builds workflow finished but did not succeed. Will continue anyway.');
+              core.setOutput('status', 'failed');
+            } else {
+              core.warning(`Unexpected status: ${status}/${conclusion}`);
+              core.setOutput('status', 'unknown');
+            }
 
   # Build the wheels for Linux, Windows and macOS for Python 3.9 and newer
   build_wheels:
-    name: Build wheel for cp${{ matrix.python }}-${{ matrix.platform_id }}-${{ matrix.manylinux_image }}
+    name: Build wheels on ${{ matrix.os }} for ${{ matrix.python }}
+    needs: [check_build_trigger, check_ubuntu_builds]
+    if: needs.check_build_trigger.outputs.build == 'true'
     runs-on: ${{ matrix.os }}
-
-    # For conda-incubator/setup-miniconda to work
-    defaults:
-      run:
-        shell: bash -el {0}
-    needs: check_build_trigger
-    if: needs.check_build_trigger.outputs.build
-
     strategy:
       # Ensure that a wheel builder finishes even if another fails
       fail-fast: false
       matrix:
-        include:
-          # Window 64 bit
-          - os: windows-latest
-            python: 310
-            platform_id: win_amd64
-          - os: windows-latest
-            python: 311
-            platform_id: win_amd64
-          - os: windows-latest
-            python: 312
-            platform_id: win_amd64
-          - os: windows-latest
-            python: 313
-            platform_id: win_amd64
-          - os: windows-latest
-            python: 313t
-            platform_id: win_amd64
-            free_threaded_support: True
-
-          # Linux 64 bit manylinux2014
-          - os: ubuntu-latest
-            python: 310
-            platform_id: manylinux_x86_64
-            manylinux_image: manylinux2014
-          - os: ubuntu-latest
-            python: 311
-            platform_id: manylinux_x86_64
-            manylinux_image: manylinux2014
-          - os: ubuntu-latest
-            python: 312
-            platform_id: manylinux_x86_64
-            manylinux_image: manylinux2014
-          - os: ubuntu-latest
-            python: 313
-            platform_id: manylinux_x86_64
-            manylinux_image: manylinux2014
-          - os: ubuntu-latest
-            python: 313t
-            platform_id: manylinux_x86_64
-            manylinux_image: manylinux2014
-            free_threaded_support: True
-
-          # # Linux 64 bit manylinux2014
-          - os: ubuntu-24.04-arm
-            python: 310
-            platform_id: manylinux_aarch64
-            manylinux_image: manylinux2014
-          - os: ubuntu-24.04-arm
-            python: 311
-            platform_id: manylinux_aarch64
-            manylinux_image: manylinux2014
-          - os: ubuntu-24.04-arm
-            python: 312
-            platform_id: manylinux_aarch64
-            manylinux_image: manylinux2014
-          - os: ubuntu-24.04-arm
-            python: 313
-            platform_id: manylinux_aarch64
-            manylinux_image: manylinux2014
-
-          # MacOS x86_64
-          - os: macos-13
-            python: 310
-            platform_id: macosx_x86_64
-          - os: macos-13
-            python: 311
-            platform_id: macosx_x86_64
-          - os: macos-13
-            python: 312
-            platform_id: macosx_x86_64
-          - os: macos-13
-            python: 313
-            platform_id: macosx_x86_64
-          - os: macos-13
-            python: 313t
-            platform_id: macosx_x86_64
-            free_threaded_support: True
-
-          # MacOS arm64
-          - os: macos-14
-            python: 310
-            platform_id: macosx_arm64
-          - os: macos-14
-            python: 311
-            platform_id: macosx_arm64
-          - os: macos-14
-            python: 312
-            platform_id: macosx_arm64
-          - os: macos-14
-            python: 313
-            platform_id: macosx_arm64
-          - os: macos-14
-            python: 313t
-            platform_id: macosx_arm64
-            free_threaded_support: True
+        os: [ubuntu-22.04, windows-latest, macos-13]
+        python: [cp310, cp311, cp312]
 
     steps:
+      - name: Display Ubuntu Builds Status
+        run: |
+          echo "Ubuntu Builds Status: ${{ needs.check_ubuntu_builds.outputs.ubuntu_build_status }}"
+        shell: bash
+
       - name: Checkout scikit-learn
         uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
         with:
-          python-version: "3.11" # update once build dependencies are available
+          fetch-depth: 10
 
-      - uses: conda-incubator/setup-miniconda@v3
-        if: ${{ startsWith(matrix.platform_id, 'macosx') }}
+      - name: Setup MSVC (Windows 64bit)
+        if: matrix.os == 'windows-latest'
+        uses: ilammy/msvc-dev-cmd@v1
 
-      - name: Build and test wheels
+      - name: Install OpenBLAS and other dependencies (Linux)
+        if: matrix.os == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libopenblas-dev gfortran
+
+      - name: Build and test wheels and sdist
+        uses: pypa/cibuildwheel@v2.16.5
         env:
-          CIBW_PRERELEASE_PYTHONS: ${{ matrix.prerelease_pythons }}
-          CIBW_FREE_THREADED_SUPPORT: ${{ matrix.free_threaded_support }}
-          CIBW_ENVIRONMENT: SKLEARN_SKIP_NETWORK_TESTS=1
-          CIBW_BUILD: cp${{ matrix.python }}-${{ matrix.platform_id }}
-          CIBW_ARCHS: all
-          CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.manylinux_image }}
-          CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.manylinux_image }}
-          # Needed on Windows CI to compile with Visual Studio compiler
-          # otherwise Meson detects a MINGW64 platform and use MINGW64
-          # toolchain
+          CIBW_BUILD: ${{ matrix.python }}-*
+          CIBW_ARCHS: auto64
+          CIBW_SKIP: "*musllinux*"
+          CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
+          CIBW_ENVIRONMENT: OMP_NUM_THREADS=2
+                            OPENBLAS_NUM_THREADS=2
+                            SKLEARN_SKIP_NETWORK_TESTS=1
+                            SKLEARN_BUILD_PARALLEL=3
+                            SKLEARN_MESON_OPTIONS="blas=openblas,lapack=openblas"
+                            PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/usr/lib64/pkgconfig
+                            RUNNER_OS=${{ runner.os }}
+          CIBW_BUILD_VERBOSITY: 1
+          CIBW_BEFORE_BUILD: bash {project}/build_tools/wheels/cibw_before_build.sh {project}
+          CIBW_BEFORE_TEST: bash {project}/build_tools/wheels/cibw_before_test.sh
+          CIBW_REPAIR_WHEEL_COMMAND: ""
+          # Windows-specific configurations
           CIBW_CONFIG_SETTINGS_WINDOWS: "setup-args=--vsenv"
           CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: bash build_tools/github/repair_windows_wheels.sh {wheel} {dest_dir}
-          CIBW_BEFORE_BUILD: bash {project}/build_tools/wheels/cibw_before_build.sh {project}
           CIBW_BEFORE_TEST_WINDOWS: bash build_tools/github/build_minimal_windows_image.sh ${{ matrix.python }}
-          CIBW_BEFORE_TEST: bash {project}/build_tools/wheels/cibw_before_test.sh
-          CIBW_ENVIRONMENT_PASS_LINUX: RUNNER_OS
-          CIBW_TEST_REQUIRES: pytest pandas
-          # On Windows, we use a custom Docker image and CIBW_TEST_REQUIRES_WINDOWS
-          # does not make sense because it would install dependencies in the host
-          # rather than inside the Docker image
           CIBW_TEST_REQUIRES_WINDOWS: ""
-          CIBW_TEST_COMMAND: bash {project}/build_tools/wheels/test_wheels.sh {project}
           CIBW_TEST_COMMAND_WINDOWS: bash {project}/build_tools/github/test_windows_wheels.sh ${{ matrix.python }} {project}
-          CIBW_BUILD_VERBOSITY: 1
+          # System-specific configurations
+          CIBW_BEFORE_BUILD_LINUX: |
+            if [ -f "/etc/redhat-release" ] || [ -f "/etc/centos-release" ]; then
+              # For manylinux, use yum but with local repos only
+              yum install -y --disablerepo=* --enablerepo=base,updates openblas-devel || echo "Could not install openblas-devel, will try to use pre-installed libraries"
+            else
+              # For Ubuntu/Debian systems
+              apt-get update && apt-get install -y libopenblas-dev gfortran
+            fi
+          CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET=10.15
+          CIBW_BEFORE_ALL_MACOS: brew install libomp openblas
+          CIBW_ENVIRONMENT_PASS_LINUX: RUNNER_OS
 
-        run: bash build_tools/wheels/build_wheels.sh
+          # Testing options
+          # check because some architectures are emulated and tests would be too slow
+          CIBW_TEST_SKIP: "*-macosx_arm64"
+          CIBW_TEST_REQUIRES: pytest pandas threadpoolctl
+          CIBW_TEST_COMMAND: bash {project}/build_tools/wheels/test_wheels.sh {project}
 
       - name: Store artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: cibw-wheels-cp${{ matrix.python }}-${{ matrix.platform_id }}
-          path: wheelhouse/*.whl
+          name: "sklearn-${{ matrix.python }}-${{ matrix.os }}"
+          path: ./wheelhouse/*.whl
 
-  update-tracker:
-    uses: ./.github/workflows/update_tracking_issue.yml
-    if: ${{ always() }}
-    needs: [build_wheels]
-    with:
-      job_status: ${{ needs.build_wheels.result }}
-    secrets:
-      BOT_GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
+  # Build the wheels for PyPy 3.9 on Linux
+  build_wheels_pypy:
+    name: Build wheels on ubuntu-22.04 for PyPy
+    needs: [check_build_trigger, check_ubuntu_builds]
+    if: needs.check_build_trigger.outputs.build == 'true'
+    runs-on: ubuntu-22.04
+    strategy:
+      # Ensure that a wheel builder finishes even if another fails
+      fail-fast: false
+      matrix:
+        python: [pp310]
 
-  # Build the source distribution under Linux
+    steps:
+      - name: Display Ubuntu Builds Status
+        run: |
+          echo "Ubuntu Builds Status: ${{ needs.check_ubuntu_builds.outputs.ubuntu_build_status }}"
+        shell: bash
+
+      - name: Checkout scikit-learn
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 10
+
+      - name: Install OpenBLAS and other dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libopenblas-dev gfortran
+
+      - name: Build and test wheels and sdist
+        uses: pypa/cibuildwheel@v2.16.5
+        env:
+          CIBW_BUILD: ${{ matrix.python }}-*
+          CIBW_ARCHS: auto64
+          CIBW_SKIP: "*musllinux*"
+          CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
+          CIBW_ENVIRONMENT: OMP_NUM_THREADS=2
+                            OPENBLAS_NUM_THREADS=2
+                            SKLEARN_SKIP_NETWORK_TESTS=1
+                            SKLEARN_BUILD_PARALLEL=3
+                            SKLEARN_MESON_OPTIONS="blas=openblas,lapack=openblas"
+                            PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/usr/lib64/pkgconfig
+                            RUNNER_OS=${{ runner.os }}
+          CIBW_BUILD_VERBOSITY: 1
+          CIBW_BEFORE_BUILD: bash {project}/build_tools/wheels/cibw_before_build.sh {project}
+          CIBW_BEFORE_TEST: bash {project}/build_tools/wheels/cibw_before_test.sh
+          CIBW_REPAIR_WHEEL_COMMAND: ""
+          # Windows-specific configurations
+          CIBW_CONFIG_SETTINGS_WINDOWS: "setup-args=--vsenv"
+          CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: bash build_tools/github/repair_windows_wheels.sh {wheel} {dest_dir}
+          CIBW_BEFORE_TEST_WINDOWS: bash build_tools/github/build_minimal_windows_image.sh ${{ matrix.python }}
+          CIBW_TEST_REQUIRES_WINDOWS: ""
+          CIBW_TEST_COMMAND_WINDOWS: bash {project}/build_tools/github/test_windows_wheels.sh ${{ matrix.python }} {project}
+          # System-specific configurations
+          CIBW_BEFORE_BUILD_LINUX: |
+            if [ -f "/etc/redhat-release" ] || [ -f "/etc/centos-release" ]; then
+              # For manylinux, use yum but with local repos only
+              yum install -y --disablerepo=* --enablerepo=base,updates openblas-devel || echo "Could not install openblas-devel, will try to use pre-installed libraries"
+            else
+              # For Ubuntu/Debian systems
+              apt-get update && apt-get install -y libopenblas-dev gfortran
+            fi
+          CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET=10.15
+          CIBW_BEFORE_ALL_MACOS: brew install libomp openblas
+          CIBW_ENVIRONMENT_PASS_LINUX: RUNNER_OS
+
+          # Testing options
+          CIBW_TEST_REQUIRES: pytest pandas threadpoolctl
+          CIBW_TEST_COMMAND: bash {project}/build_tools/wheels/test_wheels.sh {project}
+
+      - name: Store artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: "sklearn-${{ matrix.python }}-${{ matrix.os }}"
+          path: ./wheelhouse/*.whl
+
+  # Build the source distribution
   build_sdist:
     name: Source distribution
-    runs-on: ubuntu-latest
     needs: check_build_trigger
-    if: needs.check_build_trigger.outputs.build
-
+    if: needs.check_build_trigger.outputs.build == 'true'
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout scikit-learn
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 10
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: '3.9'
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libopenblas-dev gfortran
+          python -m pip install --upgrade pip
+          python -m pip install numpy cython build
 
       - name: Build source distribution
-        run: bash build_tools/github/build_source.sh
+        run: |
+          python -m build --sdist
 
-      - name: Test source distribution
-        run: bash build_tools/github/test_source.sh
-        env:
-          SKLEARN_SKIP_NETWORK_TESTS: 1
+      - name: Test install source distribution
+        run: |
+          mkdir tmp_for_test
+          cd tmp_for_test
+          pip install pytest numpy scipy threadpoolctl
+          pip install ../dist/scikit-learn-*.tar.gz
+          pytest --pyargs sklearn
+          cd ..
+          rm -rf tmp_for_test
 
       - name: Store artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: cibw-sdist
-          path: dist/*.tar.gz
-
-  # Upload the wheels and the source distribution
-  upload_anaconda:
-    name: Upload to Anaconda
-    runs-on: ubuntu-latest
-    environment: upload_anaconda
-    needs: [build_wheels, build_sdist]
-    # The artifacts cannot be uploaded on PRs
-    if: github.event_name != 'pull_request'
-
-    steps:
-      - name: Checkout scikit-learn
-        uses: actions/checkout@v4
-
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
-        with:
-          pattern: cibw-*
-          path: dist
-          merge-multiple: true
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-
-      - name: Upload artifacts
-        env:
-          # Secret variables need to be mapped to environment variables explicitly
-          SCIKIT_LEARN_NIGHTLY_UPLOAD_TOKEN: ${{ secrets.SCIKIT_LEARN_NIGHTLY_UPLOAD_TOKEN }}
-          SCIKIT_LEARN_STAGING_UPLOAD_TOKEN: ${{ secrets.SCIKIT_LEARN_STAGING_UPLOAD_TOKEN }}
-          ARTIFACTS_PATH: dist
-        # Force a replacement if the remote file already exists
-        run: bash build_tools/github/upload_anaconda.sh
+          name: "sklearn-sdist"
+          path: dist/scikit-learn-*.tar.gz

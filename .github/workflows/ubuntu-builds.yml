@@ -1,0 +1,294 @@
+name: CI Ubuntu Tests
+
+on:
+  # Trigger the workflow on push or pull request on main branch or any release branch
+  push:
+    branches:
+      - main
+      - '[0-9]+.[0-9]+.X'
+  pull_request:
+    branches:
+      - main
+      - '[0-9]+.[0-9]+.X'
+  # Also trigger on workflow_dispatch
+  workflow_dispatch:
+
+# Set default permissions to read-only
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check_build_trigger:
+    name: Check if workflow should be run
+    runs-on: ubuntu-latest
+    outputs:
+      build: ${{ steps.check.outputs.build }}
+    steps:
+      - name: Check if workflow should be run
+        id: check
+        env:
+          # We run the full workflow for github.repository == scikit-learn/scikit-learn 
+          # or the Agent-Benchmarking/scikit-learn repo
+          REPO_NAME: ${{ github.repository }}
+        run: |
+          # Run if this is the main scikit-learn repo or the Agent-Benchmarking repo
+          if [[ "$REPO_NAME" == "scikit-learn/scikit-learn" || "$REPO_NAME" == "Agent-Benchmarking/scikit-learn" ]]; then
+            echo "build=true" >> $GITHUB_OUTPUT
+            echo "::notice::Building on repository $REPO_NAME"
+          else
+            echo "build=false" >> $GITHUB_OUTPUT
+            echo "::notice::Skipping build on fork repository $REPO_NAME"
+          fi
+
+  # Jammy Jellyfish workflow jobs
+  jammy_linux:
+    name: Ubuntu Jammy Jellyfish
+    needs: check_build_trigger
+    if: needs.check_build_trigger.outputs.build == 'true'
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        shell: bash -el {0}
+    outputs:
+      numpy_version: ${{ steps.get_versions.outputs.numpy_version }}
+      scipy_version: ${{ steps.get_versions.outputs.scipy_version }}
+      pandas_version: ${{ steps.get_versions.outputs.pandas_version }}
+    env:
+      # Matplotlib 3.8.0 is incompatible with numpy 2.0.0
+      MATPLOTLIB_VERSION: ">=3.9.0"
+      PANDAS_VERSION: ">=2.0.3"
+      TEST_DIR: "/tmp/sklearn_test_dir"
+      # Force matplotlib to build font cache in /tmp and not $HOME/.matplolib
+      MPLCONFIGDIR: "/tmp/matplotlib"
+      PYTHONUNBUFFERED: "1"
+      DEBIAN_FRONTEND: "noninteractive"
+      COVERAGE: "true"
+      OMP_NUM_THREADS: "2"
+      OPENBLAS_NUM_THREADS: "2"
+      SKLEARN_SKIP_NETWORK_TESTS: "1"
+      # If python executable is not specified, test_parallel can use system's python
+      # that has no pytest installed
+      SKLEARN_TESTS_PYTHON_EXECUTABLE: "python"
+      # Set timeout for codecov uploader daemon
+      CODECOV_THRESHOLD: "2"
+      CODECOV_KILLER_TIMEOUT: "5"
+    steps:
+      - name: Checkout scikit-learn
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 10
+      
+      - name: Setup Miniconda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          auto-update-conda: true
+          python-version: 3.9
+          activate-environment: test-env
+          channels: conda-forge,defaults
+      
+      - name: Install dependencies
+        run: |
+          # Install build dependencies for meson-python
+          conda install -y numpy scipy cython joblib threadpoolctl pytest pytest-xdist pytest-timeout
+          # Explicitly install ninja and ensure it's available before meson
+          pip install --force-reinstall ninja
+          pip install meson meson-python build setuptools pip wheel
+          
+          # Install testing dependencies
+          pip install pytest-cov coverage gast pyamg
+          
+          # Install specific versions for testing
+          pip install --progress-bar off --pre --extra-index-url https://pypi.anaconda.org/scientific-python-nightly-wheels/simple --prefer-binary pandas$PANDAS_VERSION scipy matplotlib$MATPLOTLIB_VERSION
+          
+          # Try editable install with proper flags to prevent meson-python issues
+          pip install -e . --verbose --no-build-isolation --config-settings editable-verbose=true || {
+            echo "::warning::Editable install failed, trying alternative installation"
+            # Alternative: build and install without editable mode
+            pip install . --no-build-isolation --no-deps
+          }
+          
+          # Show installed packages for debugging
+          echo "::group::Installed packages"
+          pip list
+          echo "::endgroup::"
+      
+      - name: Get dependency versions
+        id: get_versions
+        run: |
+          echo "numpy_version=$(python -c "import numpy; print(numpy.__version__)")" >> $GITHUB_OUTPUT
+          echo "scipy_version=$(python -c "import scipy; print(scipy.__version__)")" >> $GITHUB_OUTPUT
+          echo "pandas_version=$(python -c "import pandas; print(pandas.__version__)")" >> $GITHUB_OUTPUT
+      
+      - name: Build and test
+        id: build
+        env:
+          COVERAGE: "true"
+        run: |
+          # Create the test directory
+          mkdir -p $TEST_DIR
+          echo "::group::System information"
+          python -c "import sklearn; sklearn.show_versions()"
+          echo "::endgroup::"
+          
+          cd $TEST_DIR
+          
+          # Configure coverage
+          export COVERAGE_PROCESS_START="$GITHUB_WORKSPACE/.coveragerc"
+          
+          # Pytest Arguments
+          PYTEST_ARGS="-xvs --durations=10 --timeout=1800 --timeout-method=thread --log-level=DEBUG --color=yes --junitxml=$GITHUB_WORKSPACE/junit/test-results.xml"
+          
+          # Run the tests
+          if [[ "$COVERAGE" == "true" ]]; then
+            # Note: --cov-report= is used to disable the long text output report
+            python -m pytest $PYTEST_ARGS --cov-config=$COVERAGE_PROCESS_START --cov sklearn --cov-report=xml $GITHUB_WORKSPACE/sklearn
+          else
+            python -m pytest $PYTEST_ARGS $GITHUB_WORKSPACE/sklearn
+          fi
+          
+          # Move coverage XML report
+          if [[ -f coverage.xml ]]; then
+            mv coverage.xml $GITHUB_WORKSPACE
+          fi
+          cd $GITHUB_WORKSPACE
+      
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jammy-pytest-results
+          path: junit/test-results.xml
+      
+      - name: Upload coverage
+        if: success()
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: coverage.xml
+          flags: ubuntu,cp39,numpy-dev,scipy-dev
+          name: ubuntu-latest-coverage
+          fail_ci_if_error: false
+
+  # Atlas workflow jobs
+  atlas_linux:
+    name: Ubuntu Atlas
+    needs: [check_build_trigger, jammy_linux]
+    if: needs.check_build_trigger.outputs.build == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -el {0}
+    env:
+      DEBIAN_FRONTEND: "noninteractive"
+      TEST_DIR: "/tmp/sklearn_test_dir"
+      PYTHONUNBUFFERED: "1"
+      SKLEARN_SKIP_NETWORK_TESTS: "1"
+      # Force matplotlib to build font cache in /tmp and not $HOME/.matplolib
+      MPLCONFIGDIR: "/tmp/matplotlib"
+      COVERAGE: "true"
+      OMP_NUM_THREADS: "2"
+      OPENBLAS_NUM_THREADS: "2"
+      SKLEARN_TESTS_PYTHON_EXECUTABLE: "python"
+      # Set timeout for codecov uploader daemon
+      CODECOV_THRESHOLD: "2"
+      CODECOV_KILLER_TIMEOUT: "5"
+    steps:
+      - name: Checkout scikit-learn
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 10
+      
+      - name: Setup Miniconda with Atlas
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          auto-update-conda: true
+          python-version: 3.9
+          activate-environment: atlas-env
+          channels: conda-forge,defaults
+      
+      - name: Install Atlas and dependencies
+        run: |
+          # Install system packages for Atlas
+          sudo apt-get update
+          sudo apt-get install -y libatlas-base-dev gfortran libopenblas-dev
+          
+          # Install Python dependencies
+          conda install -y numpy scipy cython joblib threadpoolctl pytest pytest-xdist pytest-timeout
+          
+          # Install build dependencies for meson-python
+          # Explicitly install ninja and ensure it's available before meson
+          pip install --force-reinstall ninja
+          pip install meson meson-python build setuptools pip wheel
+          
+          # Install testing dependencies
+          pip install pytest-cov coverage
+          
+          # Try editable install with proper flags to prevent meson-python issues
+          pip install -e . --verbose --no-build-isolation --config-settings editable-verbose=true || {
+            echo "::warning::Editable install failed, trying alternative installation"
+            # Alternative: build and install without editable mode
+            pip install . --no-build-isolation --no-deps
+          }
+          
+          # Show installed packages for debugging
+          echo "::group::Installed packages"
+          pip list
+          echo "::endgroup::"
+      
+      - name: Display information from Jammy build
+        run: |
+          echo "::notice::Numpy version from Jammy build: ${{ needs.jammy_linux.outputs.numpy_version }}"
+          echo "::notice::Scipy version from Jammy build: ${{ needs.jammy_linux.outputs.scipy_version }}"
+          echo "::notice::Pandas version from Jammy build: ${{ needs.jammy_linux.outputs.pandas_version }}"
+
+      - name: Build and test
+        run: |
+          # Create the test directory
+          mkdir -p $TEST_DIR
+          echo "::group::System information"
+          python -c "import sklearn; sklearn.show_versions()"
+          echo "::endgroup::"
+          
+          # Configure coverage
+          export COVERAGE_PROCESS_START="$GITHUB_WORKSPACE/.coveragerc"
+          
+          cd $TEST_DIR
+          
+          # Pytest Arguments
+          PYTEST_ARGS="-xvs --durations=10 --timeout=1800 --timeout-method=thread --log-level=DEBUG --color=yes --junitxml=$GITHUB_WORKSPACE/junit/test-results.xml"
+          
+          if [[ "$COVERAGE" == "true" ]]; then
+            # Note: --cov-report= is used to disable the long text output report
+            python -m pytest $PYTEST_ARGS --cov-config=$COVERAGE_PROCESS_START --cov sklearn --cov-report=xml $GITHUB_WORKSPACE/sklearn
+          else
+            python -m pytest $PYTEST_ARGS $GITHUB_WORKSPACE/sklearn
+          fi
+          
+          # Move coverage to workspace for upload
+          if [[ -f coverage.xml ]]; then
+            mv coverage.xml $GITHUB_WORKSPACE
+          fi
+          cd $GITHUB_WORKSPACE
+      
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: atlas-pytest-results
+          path: junit/test-results.xml
+      
+      - name: Upload coverage
+        if: success()
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: coverage.xml
+          flags: ubuntu,atlas
+          name: ubuntu-atlas-coverage
+          fail_ci_if_error: false 

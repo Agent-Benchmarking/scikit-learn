@@ -1,0 +1,187 @@
+name: "Ubuntu Jammy Jellyfish"
+permissions:
+  contents: read
+
+on:
+  schedule:
+    # Nightly build at 2:30 A.M.
+    - cron: "30 2 * * *"
+  push:
+    branches:
+      - main
+      # Release branches
+      - "[0-9]+.[0-9]+.X"
+  pull_request:
+    branches:
+      - main
+      - "[0-9]+.[0-9]+.X"
+  # Manual run
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  check_build_trigger:
+    name: Check build trigger
+    runs-on: ubuntu-latest
+    if: github.repository == 'scikit-learn/scikit-learn' || github.repository == 'Agent-Benchmarking/scikit-learn'
+    outputs:
+      build: ${{ steps.check_build_trigger.outputs.build }}
+
+    steps:
+      - name: Checkout scikit-learn
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - id: check_build_trigger
+        name: Check build trigger
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            echo "build=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "build=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          COMMIT_MESSAGE=$(git log -1 --pretty=%B)
+          if [[ "$COMMIT_MESSAGE" =~ \[ci\ skip\] ]]; then
+            echo "build=false" >> $GITHUB_OUTPUT
+          else
+            echo "build=true" >> $GITHUB_OUTPUT
+          fi
+
+  ubuntu_jammy:
+    name: Ubuntu Jammy Jellyfish
+    needs: check_build_trigger
+    if: needs.check_build_trigger.outputs.build == 'true'
+    runs-on: ubuntu-22.04
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: pymin_conda_forge_openblas_ubuntu_2204
+            lock_file: ./build_tools/azure/pymin_conda_forge_openblas_ubuntu_2204_linux-64_conda.lock
+            warnings_as_errors: 1
+            global_random_seed: 0
+
+    env:
+      DISTRIB: conda
+      LOCK_FILE: ${{ matrix.lock_file }}
+      SKLEARN_WARNINGS_AS_ERRORS: ${{ matrix.warnings_as_errors }}
+      SKLEARN_TESTS_GLOBAL_RANDOM_SEED: ${{ matrix.global_random_seed }}
+      SKLEARN_SKIP_NETWORK_TESTS: 1
+      VIRTUALENV: testvenv
+      JUNITXML: test-data.xml
+      TEST_DIR: /tmp/sklearn_test_dir
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
+      CCACHE_COMPRESS: 1
+      PYTEST_XDIST_VERSION: latest
+      COVERAGE: true
+    
+    steps:
+      - name: Checkout scikit-learn
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+      
+      - name: Setup conda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          python-version: '3.9'
+          channels: conda-forge
+          activate-environment: ${{ env.VIRTUALENV }}
+
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1
+        with:
+          key: ${{ matrix.name }}-${{ github.job }}
+          save: ${{ github.ref == 'refs/heads/main' }}
+
+      - name: Install conda dependencies
+        shell: bash -el {0}
+        run: |
+          source build_tools/shared.sh
+          create_conda_environment_from_lock_file $VIRTUALENV $LOCK_FILE
+      
+      - name: Install scikit-learn
+        shell: bash -el {0}
+        run: |
+          export PATH="/usr/lib/ccache:$PATH"
+          which ccache
+          ccache -s
+          
+          source build_tools/shared.sh
+          show_installed_libraries
+          
+          # Ensure ninja is installed and reinstalled to avoid any version issues
+          pip install --force-reinstall ninja
+          
+          export LDFLAGS="$LDFLAGS -Wl,--sysroot=/"
+          pip install --verbose --no-build-isolation --editable . --config-settings editable-verbose=true
+          ccache -s
+      
+      - name: Test scikit-learn
+        shell: bash -el {0}
+        run: |
+          mkdir -p $TEST_DIR
+          cd $TEST_DIR
+          
+          # Show system info
+          python -c "import joblib; print(f'Number of cores (physical): {joblib.cpu_count()} ({joblib.cpu_count(only_physical_cores=True)})')"
+          python -c "import sklearn; sklearn.show_versions()"
+          
+          TEST_CMD="python -m pytest --showlocals --durations=20 --junitxml=$JUNITXML"
+          
+          if [[ "$COVERAGE" == "true" ]]; then
+            export COVERAGE_PROCESS_START="$GITHUB_WORKSPACE/.coveragerc"
+            # Use sys.monitoring to make coverage faster for Python >= 3.12
+            HAS_SYSMON=$(python -c 'import sys; print(sys.version_info >= (3, 12))')
+            if [[ "$HAS_SYSMON" == "True" ]]; then
+                export COVERAGE_CORE=sysmon
+            fi
+            TEST_CMD="$TEST_CMD --cov-config=$COVERAGE_PROCESS_START --cov sklearn --cov-report=xml"
+          fi
+          
+          if [[ "$PYTEST_XDIST_VERSION" != "none" ]]; then
+            XDIST_WORKERS=$(python -c "import joblib; print(joblib.cpu_count(only_physical_cores=True))")
+            TEST_CMD="$TEST_CMD -n$XDIST_WORKERS"
+          fi
+          
+          # Run the tests
+          TEST_CMD="$TEST_CMD --pyargs sklearn"
+          eval "$TEST_CMD"
+      
+      - name: Test documentation
+        shell: bash -el {0}
+        run: |
+          cd $TEST_DIR
+          python -m pytest --doctest-modules --showlocals --durations=20 sklearn
+      
+      - name: Upload coverage report
+        if: ${{ env.COVERAGE == 'true' }}
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ${{ env.TEST_DIR }}/coverage.xml
+          flags: unittests
+
+  update-tracker:
+    uses: ./.github/workflows/update_tracking_issue.yml
+    if: ${{ always() }}
+    needs: [ubuntu_jammy]
+    with:
+      job_status: ${{ needs.ubuntu_jammy.result }}
+    secrets:
+      BOT_GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }} 
