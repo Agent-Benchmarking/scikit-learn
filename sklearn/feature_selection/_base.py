@@ -11,7 +11,7 @@ import numpy as np
 from scipy.sparse import csc_matrix, issparse
 
 from ..base import TransformerMixin
-from ..utils import _safe_indexing, check_array, safe_sqr
+from ..utils import check_array, safe_indexing, safe_sqr
 from ..utils._set_output import _get_output_config
 from ..utils._tags import get_tags
 from ..utils.validation import (
@@ -129,7 +129,7 @@ class SelectorMixin(TransformerMixin, metaclass=ABCMeta):
             if hasattr(X, "iloc"):
                 return X.iloc[:, :0]
             return np.empty(0, dtype=X.dtype).reshape((X.shape[0], 0))
-        return _safe_indexing(X, mask, axis=1)
+        return safe_indexing(X, mask, axis=1)
 
     def inverse_transform(self, X):
         """Reverse the transformation operation.

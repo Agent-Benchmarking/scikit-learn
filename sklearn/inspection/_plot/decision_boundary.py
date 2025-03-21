@@ -7,7 +7,7 @@ import numpy as np
 
 from ...base import is_regressor
 from ...preprocessing import LabelEncoder
-from ...utils import _safe_indexing
+from ...utils import safe_indexing
 from ...utils._optional_dependencies import check_matplotlib_support
 from ...utils._response import _get_response_values
 from ...utils._set_output import _get_adapter_from_container
@@ -479,7 +479,7 @@ class DecisionBoundaryDisplay:
                         f"Matplotlib colormap. Got: {multiclass_colors}"
                     )
 
-        x0, x1 = _safe_indexing(X, 0, axis=1), _safe_indexing(X, 1, axis=1)
+        x0, x1 = safe_indexing(X, 0, axis=1), safe_indexing(X, 1, axis=1)
 
         x0_min, x0_max = x0.min() - eps, x0.max() + eps
         x1_min, x1_max = x1.min() - eps, x1.max() + eps

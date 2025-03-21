@@ -10,7 +10,7 @@ from scipy.optimize import linprog
 
 from ..base import BaseEstimator, RegressorMixin, _fit_context
 from ..exceptions import ConvergenceWarning
-from ..utils import _safe_indexing
+from ..utils import safe_indexing
 from ..utils._param_validation import Interval, StrOptions
 from ..utils.fixes import parse_version, sp_version
 from ..utils.validation import _check_sample_weight, validate_data
@@ -221,8 +221,8 @@ class QuantileRegressor(LinearModel, RegressorMixin, BaseEstimator):
         n_indices = len(indices)  # use n_mask instead of n_samples
         if n_indices < len(sample_weight):
             sample_weight = sample_weight[indices]
-            X = _safe_indexing(X, indices)
-            y = _safe_indexing(y, indices)
+            X = safe_indexing(X, indices)
+            y = safe_indexing(y, indices)
         c = np.concatenate(
             [
                 np.full(2 * n_params, fill_value=alpha),

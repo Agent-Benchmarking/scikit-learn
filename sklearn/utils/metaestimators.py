@@ -10,7 +10,7 @@ from typing import Any, List
 import numpy as np
 
 from ..base import BaseEstimator
-from ..utils import _safe_indexing
+from ..utils import safe_indexing
 from ..utils._tags import get_tags
 from ._available_if import available_if
 
@@ -153,10 +153,10 @@ def _safe_split(estimator, X, y, indices, train_indices=None):
         else:
             X_subset = X[np.ix_(indices, train_indices)]
     else:
-        X_subset = _safe_indexing(X, indices)
+        X_subset = safe_indexing(X, indices)
 
     if y is not None:
-        y_subset = _safe_indexing(y, indices)
+        y_subset = safe_indexing(y, indices)
     else:
         y_subset = None
 

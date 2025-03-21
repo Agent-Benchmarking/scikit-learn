@@ -9,7 +9,7 @@ from ..base import BaseEstimator, RegressorMixin, _fit_context, clone
 from ..exceptions import NotFittedError
 from ..linear_model import LinearRegression
 from ..preprocessing import FunctionTransformer
-from ..utils import Bunch, _safe_indexing, check_array
+from ..utils import Bunch, check_array, safe_indexing
 from ..utils._metadata_requests import (
     MetadataRouter,
     MethodMapping,
@@ -204,7 +204,7 @@ class TransformedTargetRegressor(RegressorMixin, BaseEstimator):
         self.transformer_.fit(y)
         if self.check_inverse:
             idx_selected = slice(None, None, max(1, y.shape[0] // 10))
-            y_sel = _safe_indexing(y, idx_selected)
+            y_sel = safe_indexing(y, idx_selected)
             y_sel_t = self.transformer_.transform(y_sel)
             if not np.allclose(y_sel, self.transformer_.inverse_transform(y_sel_t)):
                 warnings.warn(

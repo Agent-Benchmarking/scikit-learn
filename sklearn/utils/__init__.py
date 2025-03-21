@@ -15,14 +15,14 @@ from ._bunch import Bunch
 from ._chunking import gen_batches, gen_even_slices
 from ._estimator_html_repr import estimator_html_repr
 
-# Make _safe_indexing importable from here for backward compat as this particular
+# Make safe_indexing importable from here for backward compat as this particular
 # helper is considered semi-private and typically very useful for third-party
 # libraries that want to comply with scikit-learn's estimator API. In particular,
-# _safe_indexing was included in our public API documentation despite the leading
+# safe_indexing was included in our public API documentation despite the leading
 # `_` in its name.
 from ._indexing import (
-    _safe_indexing,  # noqa
     resample,
+    safe_indexing,
     shuffle,
 )
 from ._mask import safe_mask
@@ -96,6 +96,7 @@ __all__ = [
     "parallel_backend",
     "register_parallel_backend",
     "resample",
+    "safe_indexing",
     "safe_mask",
     "safe_sqr",
     "shuffle",

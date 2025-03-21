@@ -12,9 +12,9 @@ from scipy.stats.mstats import mquantiles
 from ...base import is_regressor
 from ...utils import (
     Bunch,
-    _safe_indexing,
     check_array,
     check_random_state,
+    safe_indexing,
 )
 from ...utils._encode import _unique
 from ...utils._optional_dependencies import check_matplotlib_support
@@ -668,7 +668,7 @@ class PartialDependenceDisplay:
             if categorical_features_targeted:
                 min_n_cats = min(
                     [
-                        len(_unique(_safe_indexing(X, idx, axis=1)))
+                        len(_unique(safe_indexing(X, idx, axis=1)))
                         for idx in categorical_features_targeted
                     ]
                 )
@@ -759,7 +759,7 @@ class PartialDependenceDisplay:
         for fxs, cats in zip(features, is_categorical):
             for fx, cat in zip(fxs, cats):
                 if not cat and fx not in deciles:
-                    X_col = _safe_indexing(X, fx, axis=1)
+                    X_col = safe_indexing(X, fx, axis=1)
                     deciles[fx] = mquantiles(X_col, prob=np.arange(0.1, 1.0, 0.1))
 
         display = cls(
