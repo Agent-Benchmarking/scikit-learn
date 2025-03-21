@@ -128,13 +128,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-22.04, windows-latest, macos-13]
-        python: [cp39, cp310, cp311, cp312]
-        exclude:
-          # excludes cp39 on Windows and MacOS
-          - os: windows-latest
-            python: cp39
-          - os: macos-13
-            python: cp39
+        python: [cp310, cp311, cp312]
 
     steps:
       - name: Display Ubuntu Builds Status
@@ -215,7 +209,7 @@ jobs:
       # Ensure that a wheel builder finishes even if another fails
       fail-fast: false
       matrix:
-        python: [pp39]
+        python: [pp310]
 
     steps:
       - name: Display Ubuntu Builds Status
