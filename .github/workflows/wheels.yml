@@ -164,6 +164,7 @@ jobs:
                             SKLEARN_BUILD_PARALLEL=3
                             SKLEARN_MESON_OPTIONS="blas=openblas,lapack=openblas"
                             PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/usr/lib64/pkgconfig
+                            RUNNER_OS=${{ runner.os }}
           CIBW_BUILD_VERBOSITY: 1
           CIBW_BEFORE_BUILD: bash {project}/build_tools/wheels/cibw_before_build.sh {project}
           CIBW_BEFORE_TEST: bash {project}/build_tools/wheels/cibw_before_test.sh
@@ -240,6 +241,7 @@ jobs:
                             SKLEARN_BUILD_PARALLEL=3
                             SKLEARN_MESON_OPTIONS="blas=openblas,lapack=openblas"
                             PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/usr/lib64/pkgconfig
+                            RUNNER_OS=${{ runner.os }}
           CIBW_BUILD_VERBOSITY: 1
           CIBW_BEFORE_BUILD: bash {project}/build_tools/wheels/cibw_before_build.sh {project}
           CIBW_BEFORE_TEST: bash {project}/build_tools/wheels/cibw_before_test.sh
