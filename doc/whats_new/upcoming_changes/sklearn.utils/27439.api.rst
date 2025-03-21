@@ -1,0 +1,7 @@
+:func:`safe_indexing` is now a public function
+----------------------------------------------
+
+The function :func:`~sklearn.utils._safe_indexing` has been renamed to
+:func:`~sklearn.utils.safe_indexing` and is now part of the public API.
+The old name is still available for backward compatibility but is deprecated
+and will be removed in 1.8.
