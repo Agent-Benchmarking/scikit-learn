@@ -96,3 +96,10 @@ jupyterlite_contents
 
 # file recognised by vscode IDEs containing env variables
 .env
+
+# Example link utility scripts
+doc_examples_updater.py
+fix_example_links.py
+fix_example_links_only.py
+fix_line_lengths.py
+fix_links.py

@@ -109,6 +109,10 @@ Or within an Examples topic section:
   - :ref:`sphx_glr_auto_examples_model_selection_plot_grid_search_text_feature_extraction
     .py`
   ```
+- Our updated `doc_examples_updater.py` script now automatically handles line breaks for long example links using the following rules:
+  1. For links longer than 75 characters, it breaks them after the `_examples_` part
+  2. If no `_examples_` pattern is found, it breaks them at the halfway point
+  3. The continuation of the link starts with 10 spaces of indentation (matching sphinx formatting)
 
 ### Docstring Pattern Matching
 - If the script can't find a class docstring using the specified pattern, verify the actual docstring content
