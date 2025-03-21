@@ -81,12 +81,18 @@ The `doc_examples_updater.py` script is designed to add example links to docstri
 
 After updating documentation:
 1. Test that the examples are correctly linked by building the documentation locally (if possible)
-2. Commit your changes:
+2. **Review your changes before committing**:
+   ```bash
+   git diff
+   ```
+   This is a crucial step to verify all changes are as expected before committing.
+3. Commit your changes:
    ```bash
    git add path/to/updated/files
    git commit -m "DOC Add example links to [class names]"
    ```
-3. Push your changes:
+   **Important:** Never use the `--no-verify` flag when committing. Allow the pre-commit hooks to run as they help catch errors and maintain code quality standards.
+4. Push your changes:
    ```bash
    git push origin your-branch-name
    ```
