@@ -87,7 +87,7 @@ class BaseSGD(SparseCoefMixin, BaseEstimator, metaclass=ABCMeta):
         "verbose": ["verbose"],
         "random_state": ["random_state"],
         "warm_start": ["boolean"],
-        "average": [Interval(Integral, 0, None, closed="left"), "boolean"],
+        "average": [Interval(Integral, 1, None, closed="left"), "boolean"],
     }
 
     def __init__(
@@ -598,15 +598,7 @@ class BaseSGDClassifier(LinearClassifierMixin, BaseSGD, metaclass=ABCMeta):
         )
 
         if first_call:
-            # TODO(1.7) remove 0 from average parameter constraint
-            if not isinstance(self.average, (bool, np.bool_)) and self.average == 0:
-                warnings.warn(
-                    (
-                        "Passing average=0 to disable averaging is deprecated and will"
-                        " be removed in 1.7. Please use average=False instead."
-                    ),
-                    FutureWarning,
-                )
+            pass
 
         n_samples, n_features = X.shape
 
@@ -682,16 +674,6 @@ class BaseSGDClassifier(LinearClassifierMixin, BaseSGD, metaclass=ABCMeta):
         if hasattr(self, "classes_"):
             # delete the attribute otherwise _partial_fit thinks it's not the first call
             delattr(self, "classes_")
-
-        # TODO(1.7) remove 0 from average parameter constraint
-        if not isinstance(self.average, (bool, np.bool_)) and self.average == 0:
-            warnings.warn(
-                (
-                    "Passing average=0 to disable averaging is deprecated and will be "
-                    "removed in 1.7. Please use average=False instead."
-                ),
-                FutureWarning,
-            )
 
         # labels can be encoded as float, int, or string literals
         # np.unique sorts in asc order; largest class id is positive class
@@ -2388,15 +2370,7 @@ class SGDOneClassSVM(OutlierMixin, BaseSGD):
         )
 
         if first_call:
-            # TODO(1.7) remove 0 from average parameter constraint
-            if not isinstance(self.average, (bool, np.bool_)) and self.average == 0:
-                warnings.warn(
-                    (
-                        "Passing average=0 to disable averaging is deprecated and will"
-                        " be removed in 1.7. Please use average=False instead."
-                    ),
-                    FutureWarning,
-                )
+            pass
 
         n_features = X.shape[1]
 
@@ -2488,15 +2462,6 @@ class SGDOneClassSVM(OutlierMixin, BaseSGD):
         offset_init=None,
         sample_weight=None,
     ):
-        # TODO(1.7) remove 0 from average parameter constraint
-        if not isinstance(self.average, (bool, np.bool_)) and self.average == 0:
-            warnings.warn(
-                (
-                    "Passing average=0 to disable averaging is deprecated and will be "
-                    "removed in 1.7. Please use average=False instead."
-                ),
-                FutureWarning,
-            )
 
         if self.warm_start and hasattr(self, "coef_"):
             if coef_init is None:
