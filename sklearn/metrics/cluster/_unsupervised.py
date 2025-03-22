@@ -11,7 +11,7 @@ import numpy as np
 from scipy.sparse import issparse
 
 from ...preprocessing import LabelEncoder
-from ...utils import _safe_indexing, check_random_state, check_X_y
+from ...utils import check_random_state, check_X_y, safe_indexing
 from ...utils._array_api import _atol_for_type
 from ...utils._param_validation import (
     Interval,
@@ -448,7 +448,7 @@ def davies_bouldin_score(X, labels):
     intra_dists = np.zeros(n_labels)
     centroids = np.zeros((n_labels, len(X[0])), dtype=float)
     for k in range(n_labels):
-        cluster_k = _safe_indexing(X, labels == k)
+        cluster_k = safe_indexing(X, labels == k)
         centroid = cluster_k.mean(axis=0)
         centroids[k] = centroid
         intra_dists[k] = np.average(pairwise_distances(cluster_k, [centroid]))

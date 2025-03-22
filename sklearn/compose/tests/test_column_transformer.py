@@ -34,7 +34,7 @@ from sklearn.tests.metadata_routing_common import (
     _Registry,
     check_recorded_metadata,
 )
-from sklearn.utils._indexing import _safe_indexing
+from sklearn.utils._indexing import safe_indexing
 from sklearn.utils._testing import (
     _convert_container,
     assert_allclose_dense_sparse,
@@ -2590,7 +2590,7 @@ def test_column_transformer_column_renaming(dataframe_lib):
             # special case of a transformer returning 0-columns, e.g feature selector
             (
                 "D",
-                FunctionTransformer(lambda x: _safe_indexing(x, [], axis=1)),
+                FunctionTransformer(lambda x: safe_indexing(x, [], axis=1)),
                 ["x1", "x2", "x3"],
             ),
         ],
@@ -2624,7 +2624,7 @@ def test_column_transformer_error_with_duplicated_columns(dataframe_lib):
             # special case of a transformer returning 0-columns, e.g feature selector
             (
                 "D",
-                FunctionTransformer(lambda x: _safe_indexing(x, [], axis=1)),
+                FunctionTransformer(lambda x: safe_indexing(x, [], axis=1)),
                 ["x1", "x2", "x3"],
             ),
         ],

@@ -23,10 +23,10 @@ from ..metrics import accuracy_score, r2_score
 from ..model_selection import train_test_split
 from ..preprocessing import LabelBinarizer
 from ..utils import (
-    _safe_indexing,
     check_random_state,
     column_or_1d,
     gen_batches,
+    safe_indexing,
     shuffle,
 )
 from ..utils._param_validation import Interval, Options, StrOptions
@@ -696,7 +696,7 @@ class BaseMultilayerPerceptron(BaseEstimator, ABC):
                 for batch_slice in gen_batches(n_samples, batch_size):
                     if self.shuffle:
                         batch_idx = sample_idx[batch_slice]
-                        X_batch = _safe_indexing(X_train, batch_idx)
+                        X_batch = safe_indexing(X_train, batch_idx)
                     else:
                         batch_idx = batch_slice
                         X_batch = X_train[batch_idx]

@@ -15,14 +15,12 @@ from ._bunch import Bunch
 from ._chunking import gen_batches, gen_even_slices
 from ._estimator_html_repr import estimator_html_repr
 
-# Make _safe_indexing importable from here for backward compat as this particular
-# helper is considered semi-private and typically very useful for third-party
-# libraries that want to comply with scikit-learn's estimator API. In particular,
-# _safe_indexing was included in our public API documentation despite the leading
-# `_` in its name.
+# Make safe_indexing (formerly _safe_indexing) importable from here for
+# backward compatibility. This helper is useful for third-party libraries
+# that want to comply with scikit-learn's estimator API.
 from ._indexing import (
-    _safe_indexing,  # noqa
     resample,
+    safe_indexing,
     shuffle,
 )
 from ._mask import safe_mask
@@ -58,7 +56,8 @@ msg = "deprecated in 1.5 to be removed in 1.7. Use joblib.{} instead."
 register_parallel_backend = deprecated(msg)(_joblib.register_parallel_backend)
 
 
-# if a class, deprecated will change the object in _joblib module so we need to subclass
+# if a class, deprecated will change the object in _joblib module
+# so we need to subclass
 @deprecated(msg)
 class parallel_backend(_joblib.parallel_backend):
     pass
@@ -96,6 +95,7 @@ __all__ = [
     "parallel_backend",
     "register_parallel_backend",
     "resample",
+    "safe_indexing",
     "safe_mask",
     "safe_sqr",
     "shuffle",
@@ -136,3 +136,14 @@ def tosequence(x):
         return x
     else:
         return list(x)
+
+
+# For backward compatibility
+def _safe_indexing(*args, **kwargs):
+    """Deprecated. Use safe_indexing instead."""
+    warnings.warn(
+        "_safe_indexing is deprecated and will be removed in a future "
+        "version. Use safe_indexing instead.",
+        FutureWarning,
+    )
+    return safe_indexing(*args, **kwargs)

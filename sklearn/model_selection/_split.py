@@ -19,10 +19,11 @@ import numpy as np
 from scipy.special import comb
 
 from ..utils import (
-    _safe_indexing,
+    check_array,
     check_random_state,
     indexable,
     metadata_routing,
+    safe_indexing,
 )
 from ..utils._array_api import (
     _convert_to_numpy,
@@ -33,7 +34,7 @@ from ..utils._param_validation import Interval, RealNotInt, validate_params
 from ..utils.extmath import _approximate_mode
 from ..utils.metadata_routing import _MetadataRequester
 from ..utils.multiclass import type_of_target
-from ..utils.validation import _num_samples, check_array, column_or_1d
+from ..utils.validation import _num_samples, column_or_1d
 
 __all__ = [
     "BaseCrossValidator",
@@ -2943,7 +2944,7 @@ def train_test_split(
 
     return list(
         chain.from_iterable(
-            (_safe_indexing(a, train), _safe_indexing(a, test)) for a in arrays
+            (safe_indexing(a, train), safe_indexing(a, test)) for a in arrays
         )
     )
 

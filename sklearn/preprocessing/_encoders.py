@@ -9,7 +9,7 @@ import numpy as np
 from scipy import sparse
 
 from ..base import BaseEstimator, OneToOneFeatureMixin, TransformerMixin, _fit_context
-from ..utils import _safe_indexing, check_array
+from ..utils import check_array, safe_indexing
 from ..utils._encode import _check_unknown, _encode, _get_counts, _unique
 from ..utils._mask import _get_mask
 from ..utils._missing import is_scalar_nan
@@ -61,7 +61,7 @@ class _BaseEncoder(TransformerMixin, BaseEstimator):
         X_columns = []
 
         for i in range(n_features):
-            Xi = _safe_indexing(X, indices=i, axis=1)
+            Xi = safe_indexing(X, indices=i, axis=1)
             Xi = check_array(
                 Xi, ensure_2d=False, dtype=None, ensure_all_finite=needs_validation
             )

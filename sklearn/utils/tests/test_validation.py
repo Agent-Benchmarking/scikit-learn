@@ -27,12 +27,12 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.random_projection import _sparse_random_matrix
 from sklearn.svm import SVR
 from sklearn.utils import (
-    _safe_indexing,
     as_float_array,
     check_array,
     check_symmetric,
     check_X_y,
     deprecated,
+    safe_indexing,
 )
 from sklearn.utils._array_api import yield_namespace_device_dtype_combinations
 from sklearn.utils._mocking import (
@@ -1735,10 +1735,10 @@ def test_check_method_params(indices):
     for key in ["sparse-row", "scalar-int", "scalar-str", "None"]:
         assert result[key] is _params[key]
 
-    assert result["list"] == _safe_indexing(_params["list"], indices_)
-    assert_array_equal(result["array"], _safe_indexing(_params["array"], indices_))
+    assert result["list"] == safe_indexing(_params["list"], indices_)
+    assert_array_equal(result["array"], safe_indexing(_params["array"], indices_))
     assert_allclose_dense_sparse(
-        result["sparse-col"], _safe_indexing(_params["sparse-col"], indices_)
+        result["sparse-col"], safe_indexing(_params["sparse-col"], indices_)
     )
 
 
