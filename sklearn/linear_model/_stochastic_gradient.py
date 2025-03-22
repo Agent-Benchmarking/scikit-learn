@@ -597,9 +597,6 @@ class BaseSGDClassifier(LinearClassifierMixin, BaseSGD, metaclass=ABCMeta):
             reset=first_call,
         )
 
-        if first_call:
-            pass
-
         n_samples, n_features = X.shape
 
         _check_partial_fit_first_call(self, classes)
@@ -2368,9 +2365,6 @@ class SGDOneClassSVM(OutlierMixin, BaseSGD):
             accept_large_sparse=False,
             reset=first_call,
         )
-
-        if first_call:
-            pass
 
         n_features = X.shape[1]
 
