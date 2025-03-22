@@ -62,7 +62,7 @@ from ..model_selection import LeaveOneGroupOut, ShuffleSplit, train_test_split
 from ..model_selection._validation import _safe_split
 from ..pipeline import make_pipeline
 from ..preprocessing import StandardScaler, scale
-from ..utils import _safe_indexing
+from ..utils import safe_indexing
 from ..utils._array_api import (
     _atol_for_type,
     _convert_to_numpy,
@@ -1880,8 +1880,8 @@ def check_methods_sample_order_invariance(name, estimator_orig):
 
         if hasattr(estimator, method):
             assert_allclose_dense_sparse(
-                _safe_indexing(getattr(estimator, method)(X), idx),
-                getattr(estimator, method)(_safe_indexing(X, idx)),
+                safe_indexing(getattr(estimator, method)(X), idx),
+                getattr(estimator, method)(safe_indexing(X, idx)),
                 atol=1e-9,
                 err_msg=msg,
             )

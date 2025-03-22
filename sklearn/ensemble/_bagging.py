@@ -18,9 +18,9 @@ from ..metrics import accuracy_score, r2_score
 from ..tree import DecisionTreeClassifier, DecisionTreeRegressor
 from ..utils import (
     Bunch,
-    _safe_indexing,
     check_random_state,
     column_or_1d,
+    safe_indexing,
 )
 from ..utils._mask import indices_to_mask
 from ..utils._param_validation import HasMethods, Interval, RealNotInt
@@ -189,8 +189,8 @@ def _parallel_build_estimators(
             estimator_fit(X_, y, **fit_params_)
         else:
             # cannot use sample_weight, so use indexing
-            y_ = _safe_indexing(y, indices)
-            X_ = _safe_indexing(X, indices)
+            y_ = safe_indexing(y, indices)
+            X_ = safe_indexing(X, indices)
             fit_params_ = _check_method_params(X, params=fit_params_, indices=indices)
             if requires_feature_indexing:
                 X_ = X_[:, features]

@@ -17,7 +17,7 @@ from ..ensemble._hist_gradient_boosting.gradient_boosting import (
     BaseHistGradientBoosting,
 )
 from ..tree import DecisionTreeRegressor
-from ..utils import Bunch, _safe_indexing, check_array
+from ..utils import Bunch, check_array, safe_indexing
 from ..utils._indexing import _determine_key_type, _get_column_indices, _safe_assign
 from ..utils._optional_dependencies import check_matplotlib_support  # noqa
 from ..utils._param_validation import (
@@ -119,7 +119,7 @@ def _grid_from_X(X, percentiles, is_categorical, grid_resolution, custom_values)
             axis = custom_values[feature]
         else:
             try:
-                uniques = np.unique(_safe_indexing(X, feature, axis=1))
+                uniques = np.unique(safe_indexing(X, feature, axis=1))
             except TypeError as exc:
                 # `np.unique` will fail in the presence of `np.nan` and `str` categories
                 # due to sorting. Temporary, we reraise an error explaining the problem.
@@ -138,7 +138,7 @@ def _grid_from_X(X, percentiles, is_categorical, grid_resolution, custom_values)
             else:
                 # create axis based on percentiles and grid resolution
                 emp_percentiles = mquantiles(
-                    _safe_indexing(X, feature, axis=1), prob=percentiles, axis=0
+                    safe_indexing(X, feature, axis=1), prob=percentiles, axis=0
                 )
                 if np.allclose(emp_percentiles[0], emp_percentiles[1]):
                     raise ValueError(
@@ -706,7 +706,7 @@ def partial_dependence(
         if is_cat:
             continue
 
-        if _safe_indexing(X, feature_idx, axis=1).dtype.kind in "iu":
+        if safe_indexing(X, feature_idx, axis=1).dtype.kind in "iu":
             # TODO(1.9): raise a ValueError instead.
             warnings.warn(
                 f"The column {feature!r} contains integer data. Partial "
@@ -720,7 +720,7 @@ def partial_dependence(
             # Do not warn again for other features to avoid spamming the caller.
             break
 
-    X_subset = _safe_indexing(X, features_indices, axis=1)
+    X_subset = safe_indexing(X, features_indices, axis=1)
 
     custom_values_for_X_subset = {
         index: custom_values.get(feature)

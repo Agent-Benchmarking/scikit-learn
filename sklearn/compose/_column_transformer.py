@@ -21,7 +21,7 @@ from ..pipeline import _fit_transform_one, _name_estimators, _transform_one
 from ..preprocessing import FunctionTransformer
 from ..utils import Bunch
 from ..utils._estimator_html_repr import _VisualBlock
-from ..utils._indexing import _determine_key_type, _get_column_indices, _safe_indexing
+from ..utils._indexing import _determine_key_type, _get_column_indices, safe_indexing
 from ..utils._metadata_requests import METHODS
 from ..utils._param_validation import HasMethods, Hidden, Interval, StrOptions
 from ..utils._set_output import (
@@ -899,7 +899,7 @@ class ColumnTransformer(TransformerMixin, _BaseComposition):
                 jobs.append(
                     delayed(func)(
                         transformer=clone(trans) if not fitted else trans,
-                        X=_safe_indexing(X, columns, axis=1),
+                        X=safe_indexing(X, columns, axis=1),
                         y=y,
                         weight=weight,
                         **extra_args,

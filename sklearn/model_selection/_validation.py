@@ -25,7 +25,7 @@ from ..exceptions import FitFailedWarning, UnsetMetadataPassedError
 from ..metrics import check_scoring, get_scorer_names
 from ..metrics._scorer import _MultimetricScorer
 from ..preprocessing import LabelEncoder
-from ..utils import Bunch, _safe_indexing, check_random_state, indexable
+from ..utils import Bunch, check_random_state, indexable, safe_indexing
 from ..utils._array_api import device, get_namespace
 from ..utils._param_validation import (
     HasMethods,
@@ -1759,7 +1759,7 @@ def _shuffle(y, groups, random_state):
         for group in np.unique(groups):
             this_mask = groups == group
             indices[this_mask] = random_state.permutation(indices[this_mask])
-    return _safe_indexing(y, indices)
+    return safe_indexing(y, indices)
 
 
 @validate_params(
