@@ -242,13 +242,34 @@ def test_multilabel_accuracy_score_subset_accuracy():
     y1 = np.array([[0, 1, 1], [1, 0, 1]])
     y2 = np.array([[0, 0, 1], [1, 0, 1]])
 
-    assert accuracy_score(y1, y2) == 0.5
-    assert accuracy_score(y1, y1) == 1
-    assert accuracy_score(y2, y2) == 1
-    assert accuracy_score(y2, np.logical_not(y2)) == 0
-    assert accuracy_score(y1, np.logical_not(y1)) == 0
-    assert accuracy_score(y1, np.zeros(y1.shape)) == 0
-    assert accuracy_score(y2, np.zeros(y1.shape)) == 0
+    score = accuracy_score(y1, y2)
+    assert score == 0.5, "Accuracy failure: partial match case"
+
+    score = accuracy_score(y1, y1)
+    assert (
+        score == 1
+    ), "Accuracy failure: identical label arrays should have perfect score"
+
+    score = accuracy_score(y2, y2)
+    assert (
+        score == 1
+    ), "Accuracy failure: identical label arrays should have perfect score"
+
+    score = accuracy_score(y2, np.logical_not(y2))
+    assert (
+        score == 0
+    ), "Accuracy failure: completely opposite predictions should have zero score"
+
+    score = accuracy_score(y1, np.logical_not(y1))
+    assert (
+        score == 0
+    ), "Accuracy failure: completely opposite predictions should have zero score"
+
+    score = accuracy_score(y1, np.zeros(y1.shape))
+    assert score == 0, "Accuracy failure: all-zero predictions should have zero score"
+
+    score = accuracy_score(y2, np.zeros(y1.shape))
+    assert score == 0, "Accuracy failure: all-zero predictions should have zero score"
 
 
 def test_precision_recall_f1_score_binary():
@@ -257,10 +278,10 @@ def test_precision_recall_f1_score_binary():
 
     # detailed measures for each class
     p, r, f, s = precision_recall_fscore_support(y_true, y_pred, average=None)
-    assert_array_almost_equal(p, [0.73, 0.85], 2)
-    assert_array_almost_equal(r, [0.88, 0.68], 2)
-    assert_array_almost_equal(f, [0.80, 0.76], 2)
-    assert_array_equal(s, [25, 25])
+    assert_array_almost_equal(p, [0.73, 0.85], 2, "Incorrect precision values")
+    assert_array_almost_equal(r, [0.88, 0.68], 2, "Incorrect recall values")
+    assert_array_almost_equal(f, [0.80, 0.76], 2, "Incorrect F1 score values")
+    assert_array_equal(s, [25, 25], "Incorrect support values")
 
     # individual scoring function that can be used for grid search: in the
     # binary class case the score is the value of the measure for the positive
@@ -270,19 +291,17 @@ def test_precision_recall_f1_score_binary():
             warnings.simplefilter("error")
 
             ps = precision_score(y_true, y_pred, **kwargs)
-            assert_array_almost_equal(ps, 0.85, 2)
+            assert_array_almost_equal(ps, 0.85, 2, "Incorrect precision score")
 
             rs = recall_score(y_true, y_pred, **kwargs)
-            assert_array_almost_equal(rs, 0.68, 2)
+            assert_array_almost_equal(rs, 0.68, 2, "Incorrect recall score")
 
             fs = f1_score(y_true, y_pred, **kwargs)
-            assert_array_almost_equal(fs, 0.76, 2)
+            assert_array_almost_equal(fs, 0.76, 2, "Incorrect F1 score")
 
-            assert_almost_equal(
-                fbeta_score(y_true, y_pred, beta=2, **kwargs),
-                (1 + 2**2) * ps * rs / (2**2 * ps + rs),
-                2,
-            )
+            beta_score = fbeta_score(y_true, y_pred, beta=2, **kwargs)
+            expected_beta = (1 + 2**2) * ps * rs / (2**2 * ps + rs)
+            assert_almost_equal(beta_score, expected_beta, 2, "Incorrect F-beta score")
 
 
 @pytest.mark.filterwarnings(r"ignore::sklearn.exceptions.UndefinedMetricWarning")
@@ -485,7 +504,7 @@ def test_confusion_matrix_binary():
 
     def test(y_true, y_pred):
         cm = confusion_matrix(y_true, y_pred)
-        assert_array_equal(cm, [[22, 3], [8, 17]])
+        assert_array_equal(cm, [[22, 3], [8, 17]], "Incorrect confusion matrix")
 
         tp, fp, fn, tn = cm.flatten()
         num = tp * tn - fp * fn
@@ -493,8 +512,13 @@ def test_confusion_matrix_binary():
 
         true_mcc = 0 if den == 0 else num / den
         mcc = matthews_corrcoef(y_true, y_pred)
-        assert_array_almost_equal(mcc, true_mcc, decimal=2)
-        assert_array_almost_equal(mcc, 0.57, decimal=2)
+        assert_array_almost_equal(
+            mcc,
+            true_mcc,
+            decimal=2,
+            err_msg="MCC inconsistent with manually calculated value",
+        )
+        assert_array_almost_equal(mcc, 0.57, decimal=2, err_msg="Incorrect MCC value")
 
     test(y_true, y_pred)
     test([str(y) for y in y_true], [str(y) for y in y_pred])
@@ -506,7 +530,8 @@ def test_multilabel_confusion_matrix_binary():
 
     def test(y_true, y_pred):
         cm = multilabel_confusion_matrix(y_true, y_pred)
-        assert_array_equal(cm, [[[17, 8], [3, 22]], [[22, 3], [8, 17]]])
+        expected_cm = [[[17, 8], [3, 22]], [[22, 3], [8, 17]]]
+        assert_array_equal(cm, expected_cm, "Incorrect multilabel confusion matrix")
 
     test(y_true, y_pred)
     test([str(y) for y in y_true], [str(y) for y in y_pred])
@@ -519,8 +544,11 @@ def test_multilabel_confusion_matrix_multiclass():
     def test(y_true, y_pred, string_type=False):
         # compute confusion matrix with default labels introspection
         cm = multilabel_confusion_matrix(y_true, y_pred)
+        expected_cm = [[[47, 4], [5, 19]], [[38, 6], [28, 3]], [[30, 25], [2, 18]]]
         assert_array_equal(
-            cm, [[[47, 4], [5, 19]], [[38, 6], [28, 3]], [[30, 25], [2, 18]]]
+            cm,
+            expected_cm,
+            "Incorrect multilabel confusion matrix for multiclass",
         )
 
         # compute confusion matrix with explicit label ordering
@@ -1024,27 +1052,34 @@ def test_matthews_corrcoef(global_random_seed):
     y_true = ["a" if i == 0 else "b" for i in rng.randint(0, 2, size=20)]
 
     # corrcoef of same vectors must be 1
-    assert_almost_equal(matthews_corrcoef(y_true, y_true), 1.0)
+    mcc_identical = matthews_corrcoef(y_true, y_true)
+    assert_almost_equal(mcc_identical, 1.0, "Incorrect MCC for identical vectors")
 
     # corrcoef, when the two vectors are opposites of each other, should be -1
     y_true_inv = ["b" if i == "a" else "a" for i in y_true]
-    assert_almost_equal(matthews_corrcoef(y_true, y_true_inv), -1)
+    mcc = matthews_corrcoef(y_true, y_true_inv)
+    assert_almost_equal(mcc, -1, "Incorrect MCC for opposite vectors")
 
     y_true_inv2 = label_binarize(y_true, classes=["a", "b"])
     y_true_inv2 = np.where(y_true_inv2, "a", "b")
-    assert_almost_equal(matthews_corrcoef(y_true, y_true_inv2), -1)
+    mcc = matthews_corrcoef(y_true, y_true_inv2)
+    assert_almost_equal(mcc, -1, "Incorrect MCC for inverse binary vectors")
 
     # For the zero vector case, the corrcoef cannot be calculated and should
     # output 0
-    assert_almost_equal(matthews_corrcoef([0, 0, 0, 0], [0, 0, 0, 0]), 0.0)
+    mcc = matthews_corrcoef([0, 0, 0, 0], [0, 0, 0, 0])
+    assert_almost_equal(mcc, 0.0, "Incorrect MCC for zero vectors")
 
     # And also for any other vector with 0 variance
-    assert_almost_equal(matthews_corrcoef(y_true, ["a"] * len(y_true)), 0.0)
+    constant_pred = ["a"] * len(y_true)
+    mcc = matthews_corrcoef(y_true, constant_pred)
+    assert_almost_equal(mcc, 0.0, "Incorrect MCC for constant prediction")
 
     # These two vectors have 0 correlation and hence mcc should be 0
     y_1 = [1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1]
     y_2 = [1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1]
-    assert_almost_equal(matthews_corrcoef(y_1, y_2), 0.0)
+    mcc = matthews_corrcoef(y_1, y_2)
+    assert_almost_equal(mcc, 0.0, "Incorrect MCC for zero-correlated vectors")
 
     # Check that sample weight is able to selectively exclude
     mask = [1] * 10 + [0] * 10
@@ -1224,14 +1259,26 @@ def test_precision_recall_f1_score_binary_averaged():
     # compute scores with default labels introspection
     ps, rs, fs, _ = precision_recall_fscore_support(y_true, y_pred, average=None)
     p, r, f, _ = precision_recall_fscore_support(y_true, y_pred, average="macro")
-    assert p == np.mean(ps)
-    assert r == np.mean(rs)
-    assert f == np.mean(fs)
+
+    expected_p = np.mean(ps)
+    assert p == expected_p, "Incorrect macro-averaged precision"
+
+    expected_r = np.mean(rs)
+    assert r == expected_r, "Incorrect macro-averaged recall"
+
+    expected_f = np.mean(fs)
+    assert f == expected_f, "Incorrect macro-averaged F-score"
+
     p, r, f, _ = precision_recall_fscore_support(y_true, y_pred, average="weighted")
     support = np.bincount(y_true)
-    assert p == np.average(ps, weights=support)
-    assert r == np.average(rs, weights=support)
-    assert f == np.average(fs, weights=support)
+
+    expected_p_weighted = np.average(ps, weights=support)
+    assert p == expected_p_weighted, "Incorrect weighted precision"
+
+    expected_r_weighted = np.average(rs, weights=support)
+    assert r == expected_r_weighted, "Incorrect weighted recall"
+    expected_f_weighted = np.average(fs, weights=support)
+    assert f == expected_f_weighted, "Incorrect weighted F-score"
 
 
 def test_zero_precision_recall():
@@ -1243,9 +1290,29 @@ def test_zero_precision_recall():
         y_true = np.array([0, 1, 2, 0, 1, 2])
         y_pred = np.array([2, 0, 1, 1, 2, 0])
 
-        assert_almost_equal(precision_score(y_true, y_pred, average="macro"), 0.0, 2)
-        assert_almost_equal(recall_score(y_true, y_pred, average="macro"), 0.0, 2)
-        assert_almost_equal(f1_score(y_true, y_pred, average="macro"), 0.0, 2)
+        p_score = precision_score(y_true, y_pred, average="macro")
+        assert_almost_equal(
+            p_score,
+            0.0,
+            2,
+            "Incorrect macro-averaged precision for wrong predictions",
+        )
+
+        r_score = recall_score(y_true, y_pred, average="macro")
+        assert_almost_equal(
+            r_score,
+            0.0,
+            2,
+            "Incorrect macro-averaged recall for wrong predictions",
+        )
+
+        f_score = f1_score(y_true, y_pred, average="macro")
+        assert_almost_equal(
+            f_score,
+            0.0,
+            2,
+            "Incorrect macro-averaged F1 score for wrong predictions",
+        )
 
     finally:
         np.seterr(**old_error_settings)
@@ -1291,7 +1358,7 @@ def test_confusion_matrix_on_zero_length_input(labels):
     expected_n_classes = len(labels) if labels else 0
     expected = np.zeros((expected_n_classes, expected_n_classes), dtype=int)
     cm = confusion_matrix([], [], labels=labels)
-    assert_array_equal(cm, expected)
+    assert_array_equal(cm, expected, "Incorrect confusion matrix for empty input")
 
 
 def test_confusion_matrix_dtype():
