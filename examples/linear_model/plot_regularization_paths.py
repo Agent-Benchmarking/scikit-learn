@@ -5,8 +5,9 @@ Regularization Paths for Linear Models
 
 This example illustrates the regularization paths for different linear models:
 
-1. **Ridge Regularization Path**: Shows how Ridge coefficients change with regularization
-   strength and demonstrates the effect of regularization on ill-conditioned matrices.
+1. **Ridge Regularization Path**: Shows how Ridge coefficients change with
+   regularization strength and demonstrates the effect of regularization on
+   ill-conditioned matrices.
 
 2. **Lasso, Lasso-LARS, and Elastic Net Paths**: Compares the regularization paths of
    these models, showing how coefficients change with regularization strength.
@@ -25,20 +26,20 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from sklearn.datasets import load_diabetes
-from sklearn.linear_model import enet_path, lars_path, lasso_path, Ridge
+from sklearn.linear_model import Ridge, enet_path, lars_path, lasso_path
 
 # %%
 # Part 1: Ridge Regularization Path
 # ---------------------------------
 #
-# This section shows the effect of collinearity in the coefficients of a Ridge estimator.
-# Each color represents a different feature of the coefficient vector, and this is
-# displayed as a function of the regularization parameter.
+# This section shows the effect of collinearity in the coefficients of a Ridge
+# estimator. Each color represents a different feature of the coefficient vector,
+# and this is displayed as a function of the regularization parameter.
 #
-# When alpha is very large, the regularization effect dominates the squared loss function
-# and the coefficients tend to zero. At the end of the path, as alpha tends toward zero
-# and the solution tends towards the ordinary least squares, coefficients exhibit big
-# oscillations.
+# When alpha is very large, the regularization effect dominates the squared loss
+# function and the coefficients tend to zero. At the end of the path, as alpha tends
+# toward zero and the solution tends towards the ordinary least squares, coefficients
+# exhibit big oscillations.
 
 plt.figure(figsize=(10, 5))
 
