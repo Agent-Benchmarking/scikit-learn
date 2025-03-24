@@ -21,7 +21,7 @@ from ..pipeline import _fit_transform_one, _name_estimators, _transform_one
 from ..preprocessing import FunctionTransformer
 from ..utils import Bunch
 from ..utils._estimator_html_repr import _VisualBlock
-from ..utils._indexing import _determine_key_type, _get_column_indices, _safe_indexing
+from ..utils._indexing import _determine_key_type, _get_column_indices, safe_indexing
 from ..utils._metadata_requests import METHODS
 from ..utils._param_validation import HasMethods, Hidden, Interval, StrOptions
 from ..utils._set_output import (
@@ -899,7 +899,7 @@ class ColumnTransformer(TransformerMixin, _BaseComposition):
                 jobs.append(
                     delayed(func)(
                         transformer=clone(trans) if not fitted else trans,
-                        X=_safe_indexing(X, columns, axis=1),
+                        X=safe_indexing(X, columns, axis=1),
                         y=y,
                         weight=weight,
                         **extra_args,
@@ -1406,7 +1406,7 @@ def make_column_transformer(
                 array-like of bool or callable
             Indexes the data on its second axis. Integers are interpreted as
             positional columns, while strings can reference DataFrame columns
-            by name. A scalar string or int should be used where
+            by name.  A scalar string or int should be used where
             ``transformer`` expects X to be a 1d array-like (vector),
             otherwise a 2d array will be passed to the transformer.
             A callable is passed the input data `X` and can return any of the

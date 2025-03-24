@@ -25,7 +25,7 @@ from ..exceptions import FitFailedWarning, UnsetMetadataPassedError
 from ..metrics import check_scoring, get_scorer_names
 from ..metrics._scorer import _MultimetricScorer
 from ..preprocessing import LabelEncoder
-from ..utils import Bunch, _safe_indexing, check_random_state, indexable
+from ..utils import Bunch, check_random_state, indexable, safe_indexing
 from ..utils._array_api import device, get_namespace
 from ..utils._param_validation import (
     HasMethods,
@@ -568,7 +568,7 @@ def cross_val_score(
         The object to use to fit the data.
 
     X : {array-like, sparse matrix} of shape (n_samples, n_features)
-        The data to fit. Can be for example a list, or an array.
+        The data to fit. Can be, for example a list, or an array.
 
     y : array-like of shape (n_samples,) or (n_samples, n_outputs), \
             default=None
@@ -597,9 +597,6 @@ def cross_val_score(
           See :ref:`scoring_callable` for details.
         - `None`: the `estimator`'s
           :ref:`default evaluation criterion <scoring_api_overview>` is used.
-
-        Similar to the use of `scoring` in :func:`cross_validate` but only a
-        single metric is permitted.
 
     cv : int, cross-validation generator or an iterable, default=None
         Determines the cross-validation splitting strategy.
@@ -1209,9 +1206,10 @@ def cross_val_predict(
                     " not explicitly set as requested or not requested for"
                     f" cross_validate's estimator: {estimator.__class__.__name__} Call"
                     " `.set_fit_request({{metadata}}=True)` on the estimator for"
-                    f" each metadata in {unrequested_params} that you want to use and"
-                    " `metadata=False` for not using it. See the Metadata Routing User"
-                    " guide <https://scikit-learn.org/stable/metadata_routing.html>"
+                    f" each metadata in {unrequested_params} that you"
+                    " want to use and `metadata=False` for not using it. See the"
+                    " Metadata Routing User guide"
+                    " <https://scikit-learn.org/stable/metadata_routing.html>"
                     " for more information."
                 ),
                 unrequested_params=e.unrequested_params,
@@ -1572,8 +1570,7 @@ def permutation_test_score(
 
         - str: see :ref:`scoring_string_names` for options.
         - callable: a scorer callable object (e.g., function) with signature
-          ``scorer(estimator, X, y)``, which should return only a single value.
-          See :ref:`scoring_callable` for details.
+          ``scorer(estimator, X, y)``. See :ref:`scoring_callable` for details.
         - `None`: the `estimator`'s
           :ref:`default evaluation criterion <scoring_api_overview>` is used.
 
@@ -1759,7 +1756,7 @@ def _shuffle(y, groups, random_state):
         for group in np.unique(groups):
             this_mask = groups == group
             indices[this_mask] = random_state.permutation(indices[this_mask])
-    return _safe_indexing(y, indices)
+    return safe_indexing(y, indices)
 
 
 @validate_params(
@@ -2145,7 +2142,11 @@ def _translate_train_sizes(train_sizes, n_max_training_samples):
     train_sizes : array-like of shape (n_ticks,)
         Numbers of training examples that will be used to generate the
         learning curve. If the dtype is float, it is regarded as a
-        fraction of 'n_max_training_samples', i.e. it has to be within (0, 1].
+        fraction of the maximum size of the training set (that is determined
+        by the selected validation method), i.e. it has to be within (0, 1].
+        Otherwise it is interpreted as absolute sizes of the training sets.
+        Note that for classification the number of samples usually has to
+        be big enough to contain at least one sample from each class.
 
     n_max_training_samples : int
         Maximum number of training samples (upper bound of 'train_sizes').
