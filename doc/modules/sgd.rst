@@ -64,8 +64,8 @@ descent learning routine which supports different loss functions and
 penalties for classification. Below is the decision boundary of a
 :class:`SGDClassifier` trained with the hinge loss, equivalent to a linear SVM.
 
-.. figure:: ../auto_examples/linear_model/images/sphx_glr_plot_sgd_separating_hyperplane_001.png
-   :target: ../auto_examples/linear_model/plot_sgd_separating_hyperplane.html
+.. figure:: ../auto_examples/linear_model/images/sphx_glr_plot_sgd_overview_003.png
+   :target: ../auto_examples/linear_model/plot_sgd_overview.html
    :align: center
    :scale: 75
 
@@ -157,8 +157,8 @@ below illustrates the OVA approach on the iris dataset.  The dashed
 lines represent the three OVA classifiers; the background colors show
 the decision surface induced by the three classifiers.
 
-.. figure:: ../auto_examples/linear_model/images/sphx_glr_plot_sgd_iris_001.png
-   :target: ../auto_examples/linear_model/plot_sgd_iris.html
+.. figure:: ../auto_examples/linear_model/images/sphx_glr_plot_sgd_overview_004.png
+   :target: ../auto_examples/linear_model/plot_sgd_overview.html
    :align: center
    :scale: 75
 
@@ -191,9 +191,7 @@ algorithm, available as a solver in :class:`LogisticRegression`.
 
 .. rubric:: Examples
 
-- :ref:`sphx_glr_auto_examples_linear_model_plot_sgd_separating_hyperplane.py`
-- :ref:`sphx_glr_auto_examples_linear_model_plot_sgd_iris.py`
-- :ref:`sphx_glr_auto_examples_linear_model_plot_sgd_weighted_samples.py`
+- :ref:`sphx_glr_auto_examples_linear_model_plot_sgd_overview.py`
 - :ref:`sphx_glr_auto_examples_svm_plot_separating_hyperplane_unbalanced.py`
   (See the Note in the example)
 
@@ -444,8 +442,8 @@ the regularization strength.
 All of the above loss functions can be regarded as an upper bound on the
 misclassification error (Zero-one loss) as shown in the Figure below.
 
-.. figure:: ../auto_examples/linear_model/images/sphx_glr_plot_sgd_loss_functions_001.png
-    :target: ../auto_examples/linear_model/plot_sgd_loss_functions.html
+.. figure:: ../auto_examples/linear_model/images/sphx_glr_plot_sgd_overview_001.png
+    :target: ../auto_examples/linear_model/plot_sgd_overview.html
     :align: center
     :scale: 75
 
@@ -462,8 +460,8 @@ parameter) include:
 The Figure below shows the contours of the different regularization terms
 in a 2-dimensional parameter space (:math:`m=2`) when :math:`R(w) = 1`.
 
-.. figure:: ../auto_examples/linear_model/images/sphx_glr_plot_sgd_penalties_001.png
-    :target: ../auto_examples/linear_model/plot_sgd_penalties.html
+.. figure:: ../auto_examples/linear_model/images/sphx_glr_plot_sgd_overview_002.png
+    :target: ../auto_examples/linear_model/plot_sgd_overview.html
     :align: center
     :scale: 75
 

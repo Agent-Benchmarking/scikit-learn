@@ -993,7 +993,7 @@ class SGDClassifier(BaseSGDClassifier):
         More details about the losses formulas can be found in the :ref:`User Guide
         <sgd_mathematical_formulation>` and you can find a visualisation of the loss
         functions in
-        :ref:`sphx_glr_auto_examples_linear_model_plot_sgd_loss_functions.py`.
+        :ref:`sphx_glr_auto_examples_linear_model_plot_sgd_overview.py`.
 
     penalty : {'l2', 'l1', 'elasticnet', None}, default='l2'
         The penalty (aka regularization term) to be used. Defaults to 'l2'
@@ -1002,7 +1002,7 @@ class SGDClassifier(BaseSGDClassifier):
         not achievable with 'l2'. No penalty is added when set to `None`.
 
         You can see a visualisation of the penalties in
-        :ref:`sphx_glr_auto_examples_linear_model_plot_sgd_penalties.py`.
+        :ref:`sphx_glr_auto_examples_linear_model_plot_sgd_overview.py`.
 
     alpha : float, default=0.0001
         Constant that multiplies the regularization term. The higher the
@@ -1826,7 +1826,7 @@ class SGDRegressor(BaseSGDRegressor):
         not achievable with 'l2'. No penalty is added when set to `None`.
 
         You can see a visualisation of the penalties in
-        :ref:`sphx_glr_auto_examples_linear_model_plot_sgd_penalties.py`.
+        :ref:`sphx_glr_auto_examples_linear_model_plot_sgd_overview.py`.
 
     alpha : float, default=0.0001
         Constant that multiplies the regularization term. The higher the

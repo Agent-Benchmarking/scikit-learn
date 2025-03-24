@@ -34,7 +34,7 @@ def l1_min_c(X, y, *, loss="squared_hinge", fit_intercept=True, intercept_scalin
     This value is valid if `class_weight` parameter in `fit()` is not set.
 
     For an example of how to use this function, see
-    :ref:`sphx_glr_auto_examples_linear_model_plot_logistic_path.py`.
+    :ref:`sphx_glr_auto_examples_linear_model_plot_logistic_regression_overview.py`.
 
     Parameters
     ----------
