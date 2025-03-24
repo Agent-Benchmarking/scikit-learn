@@ -109,8 +109,8 @@ The complexity parameter :math:`\alpha \geq 0` controls the amount
 of shrinkage: the larger the value of :math:`\alpha`, the greater the amount
 of shrinkage and thus the coefficients become more robust to collinearity.
 
-.. figure:: ../auto_examples/linear_model/images/sphx_glr_plot_ridge_path_001.png
-   :target: ../auto_examples/linear_model/plot_ridge_path.html
+.. figure:: ../auto_examples/linear_model/images/sphx_glr_plot_regularization_paths_001.png
+   :target: ../auto_examples/linear_model/plot_regularization_paths.html
    :align: center
    :scale: 50%
 
@@ -148,7 +148,7 @@ the corresponding solver is chosen.
 .. rubric:: Examples
 
 * :ref:`sphx_glr_auto_examples_linear_model_plot_ols_ridge.py`
-* :ref:`sphx_glr_auto_examples_linear_model_plot_ridge_path.py`
+* :ref:`sphx_glr_auto_examples_linear_model_plot_regularization_paths.py`
 * :ref:`sphx_glr_auto_examples_inspection_plot_linear_model_coefficient_interpretation.py`
 
 Classification
@@ -510,8 +510,8 @@ The objective function to minimize is in this case
     \frac{\alpha(1-\rho)}{2} ||w||_2 ^ 2}
 
 
-.. figure:: ../auto_examples/linear_model/images/sphx_glr_plot_lasso_lasso_lars_elasticnet_path_002.png
-   :target: ../auto_examples/linear_model/plot_lasso_lasso_lars_elasticnet_path.html
+.. figure:: ../auto_examples/linear_model/images/sphx_glr_plot_regularization_paths_002.png
+   :target: ../auto_examples/linear_model/plot_regularization_paths.html
    :align: center
    :scale: 50%
 
@@ -521,7 +521,7 @@ The class :class:`ElasticNetCV` can be used to set the parameters
 .. rubric:: Examples
 
 * :ref:`sphx_glr_auto_examples_linear_model_plot_lasso_and_elasticnet.py`
-* :ref:`sphx_glr_auto_examples_linear_model_plot_lasso_lasso_lars_elasticnet_path.py`
+* :ref:`sphx_glr_auto_examples_linear_model_plot_regularization_paths.py`
 * :ref:`sphx_glr_auto_examples_linear_model_plot_elastic_net_precomputed_gram_matrix_with_weighted_samples.py`
 
 .. dropdown:: References
@@ -615,8 +615,8 @@ algorithm, and unlike the implementation based on coordinate descent,
 this yields the exact solution, which is piecewise linear as a
 function of the norm of its coefficients.
 
-.. figure:: ../auto_examples/linear_model/images/sphx_glr_plot_lasso_lasso_lars_elasticnet_path_001.png
-   :target: ../auto_examples/linear_model/plot_lasso_lasso_lars_elasticnet_path.html
+.. figure:: ../auto_examples/linear_model/images/sphx_glr_plot_regularization_paths_003.png
+   :target: ../auto_examples/linear_model/plot_regularization_paths.html
    :align: center
    :scale: 50%
 
@@ -631,7 +631,7 @@ function of the norm of its coefficients.
 
 .. rubric:: Examples
 
-* :ref:`sphx_glr_auto_examples_linear_model_plot_lasso_lasso_lars_elasticnet_path.py`
+* :ref:`sphx_glr_auto_examples_linear_model_plot_regularization_paths.py`
 
 The LARS algorithm provides the full path of the coefficients along
 the regularization parameter almost for free, thus a common operation
@@ -893,7 +893,7 @@ regularization.
 .. rubric:: Examples
 
 * :ref:`sphx_glr_auto_examples_linear_model_plot_logistic_l1_l2_sparsity.py`
-* :ref:`sphx_glr_auto_examples_linear_model_plot_logistic_path.py`
+* :ref:`sphx_glr_auto_examples_linear_model_plot_logistic_regression_overview.py`
 * :ref:`sphx_glr_auto_examples_linear_model_plot_logistic_multinomial.py`
 * :ref:`sphx_glr_auto_examples_linear_model_plot_sparse_logistic_regression_20newsgroups.py`
 * :ref:`sphx_glr_auto_examples_linear_model_plot_sparse_logistic_regression_mnist.py`
