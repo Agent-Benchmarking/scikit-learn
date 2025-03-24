@@ -23,6 +23,7 @@ from ._estimator_html_repr import estimator_html_repr
 from ._indexing import (
     _safe_indexing,  # noqa
     resample,
+    safe_indexing,
     shuffle,
 )
 from ._mask import safe_mask
@@ -96,6 +97,7 @@ __all__ = [
     "parallel_backend",
     "register_parallel_backend",
     "resample",
+    "safe_indexing",
     "safe_mask",
     "safe_sqr",
     "shuffle",

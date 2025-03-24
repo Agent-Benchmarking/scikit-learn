@@ -177,14 +177,8 @@ def _determine_key_type(key, accept_slice=True):
     raise ValueError(err_msg)
 
 
-def _safe_indexing(X, indices, *, axis=0):
+def safe_indexing(X, indices, *, axis=0):
     """Return rows, items or columns of X using indices.
-
-    .. warning::
-
-        This utility is documented, but **private**. This means that
-        backward compatibility might be broken without any deprecation
-        cycle.
 
     Parameters
     ----------
@@ -221,11 +215,11 @@ def _safe_indexing(X, indices, *, axis=0):
     Examples
     --------
     >>> import numpy as np
-    >>> from sklearn.utils import _safe_indexing
+    >>> from sklearn.utils import safe_indexing
     >>> data = np.array([[1, 2], [3, 4], [5, 6]])
-    >>> _safe_indexing(data, 0, axis=0)  # select the first row
+    >>> safe_indexing(data, 0, axis=0)  # select the first row
     array([1, 2])
-    >>> _safe_indexing(data, 0, axis=1)  # select the first column
+    >>> safe_indexing(data, 0, axis=1)  # select the first column
     array([1, 3, 5])
     """
     if indices is None:
@@ -273,6 +267,14 @@ def _safe_indexing(X, indices, *, axis=0):
         return _list_indexing(X, indices, indices_dtype)
 
 
+def _safe_indexing(X, indices, *, axis=0):
+    """Deprecated private function, kept for backward compatibility.
+
+    Use `safe_indexing` instead.
+    """
+    return safe_indexing(X, indices, axis=axis)
+
+
 def _safe_assign(X, values, *, row_indexer=None, column_indexer=None):
     """Safe assignment to a numpy array, sparse matrix, or pandas dataframe.
 
@@ -313,7 +315,7 @@ def _safe_assign(X, values, *, row_indexer=None, column_indexer=None):
 def _get_column_indices_for_bool_or_int(key, n_columns):
     # Convert key into list of positive integer indexes
     try:
-        idx = _safe_indexing(np.arange(n_columns), key)
+        idx = safe_indexing(np.arange(n_columns), key)
     except IndexError as e:
         raise ValueError(
             f"all features must be in [0, {n_columns - 1}] or [-{n_columns}, 0]"
@@ -325,7 +327,7 @@ def _get_column_indices(X, key):
     """Get feature column indices for input data X and key.
 
     For accepted values of `key`, see the docstring of
-    :func:`_safe_indexing`.
+    :func:`safe_indexing`.
     """
     key_dtype = _determine_key_type(key)
     if _use_interchange_protocol(X):
@@ -486,6 +488,7 @@ def resample(
     It is possible to mix sparse and dense arrays in the same run::
 
       >>> import numpy as np
+      >>> from sklearn.utils import resample
       >>> X = np.array([[1., 0.], [2., 1.], [0., 0.]])
       >>> y = np.array([0, 1, 2])
 
@@ -598,7 +601,7 @@ def resample(
 
     # convert sparse matrices to CSR for row-based indexing
     arrays = [a.tocsr() if issparse(a) else a for a in arrays]
-    resampled_arrays = [_safe_indexing(a, indices) for a in arrays]
+    resampled_arrays = [safe_indexing(a, indices) for a in arrays]
     if len(resampled_arrays) == 1:
         # syntactic sugar for the unit argument case
         return resampled_arrays[0]
