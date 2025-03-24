@@ -8,7 +8,7 @@ from scipy.stats import kstest
 
 import sklearn
 from sklearn.externals._packaging.version import parse as parse_version
-from sklearn.utils import _safe_indexing, resample, shuffle
+from sklearn.utils import resample, safe_indexing, shuffle
 from sklearn.utils._array_api import yield_namespace_device_dtype_combinations
 from sklearn.utils._indexing import (
     _determine_key_type,
@@ -30,7 +30,7 @@ X_toy = np.arange(9).reshape((3, 3))
 
 
 def test_polars_indexing():
-    """Check _safe_indexing for polars as expected."""
+    """Check safe_indexing for polars as expected."""
     pl = pytest.importorskip("polars", minversion="0.18.2")
     df = pl.DataFrame(
         {"a": [1, 2, 3, 4], "b": [4, 5, 6, 8], "c": [1, 4, 1, 10]}, orient="row"
@@ -41,24 +41,24 @@ def test_polars_indexing():
     str_keys = [["b"], ["a", "b"], ["b", "a", "c"], ["c"], ["a"]]
 
     for key in str_keys:
-        out = _safe_indexing(df, key, axis=1)
+        out = safe_indexing(df, key, axis=1)
         assert_frame_equal(df[key], out)
 
     bool_keys = [([True, False, True], ["a", "c"]), ([False, False, True], ["c"])]
 
     for bool_key, str_key in bool_keys:
-        out = _safe_indexing(df, bool_key, axis=1)
+        out = safe_indexing(df, bool_key, axis=1)
         assert_frame_equal(df[:, str_key], out)
 
     int_keys = [([0, 1], ["a", "b"]), ([2], ["c"])]
 
     for int_key, str_key in int_keys:
-        out = _safe_indexing(df, int_key, axis=1)
+        out = safe_indexing(df, int_key, axis=1)
         assert_frame_equal(df[:, str_key], out)
 
     axis_0_keys = [[0, 1], [1, 3], [3, 2]]
     for key in axis_0_keys:
-        out = _safe_indexing(df, key, axis=0)
+        out = safe_indexing(df, key, axis=0)
         assert_frame_equal(df[key], out)
 
 
@@ -138,7 +138,7 @@ def test_safe_indexing_2d_container_axis_0(array_type, indices_type):
         indices[1] += 1
     array = _convert_container([[1, 2, 3], [4, 5, 6], [7, 8, 9]], array_type)
     indices = _convert_container(indices, indices_type)
-    subset = _safe_indexing(array, indices, axis=0)
+    subset = safe_indexing(array, indices, axis=0)
     assert_allclose_dense_sparse(
         subset, _convert_container([[4, 5, 6], [7, 8, 9]], array_type)
     )
@@ -152,7 +152,7 @@ def test_safe_indexing_1d_container(array_type, indices_type):
         indices[1] += 1
     array = _convert_container([1, 2, 3, 4, 5, 6, 7, 8, 9], array_type)
     indices = _convert_container(indices, indices_type)
-    subset = _safe_indexing(array, indices, axis=0)
+    subset = safe_indexing(array, indices, axis=0)
     assert_allclose_dense_sparse(subset, _convert_container([2, 3], array_type))
 
 
@@ -177,9 +177,9 @@ def test_safe_indexing_2d_container_axis_1(array_type, indices_type, indices):
             "Specifying the columns using strings is only supported for dataframes"
         )
         with pytest.raises(ValueError, match=err_msg):
-            _safe_indexing(array, indices_converted, axis=1)
+            safe_indexing(array, indices_converted, axis=1)
     else:
-        subset = _safe_indexing(array, indices_converted, axis=1)
+        subset = safe_indexing(array, indices_converted, axis=1)
         assert_allclose_dense_sparse(
             subset, _convert_container([[2, 3], [5, 6], [8, 9]], array_type)
         )
@@ -203,7 +203,7 @@ def test_safe_indexing_2d_read_only_axis_1(
     if indices_read_only:
         indices.setflags(write=False)
     indices = _convert_container(indices, indices_type)
-    subset = _safe_indexing(array, indices, axis=axis)
+    subset = safe_indexing(array, indices, axis=axis)
     assert_allclose_dense_sparse(subset, _convert_container(expected_array, array_type))
 
 
@@ -213,7 +213,7 @@ def test_safe_indexing_1d_container_mask(array_type, indices_type):
     indices = [False] + [True] * 2 + [False] * 6
     array = _convert_container([1, 2, 3, 4, 5, 6, 7, 8, 9], array_type)
     indices = _convert_container(indices, indices_type)
-    subset = _safe_indexing(array, indices, axis=0)
+    subset = safe_indexing(array, indices, axis=0)
     assert_allclose_dense_sparse(subset, _convert_container([2, 3], array_type))
 
 
@@ -231,7 +231,7 @@ def test_safe_indexing_2d_mask(array_type, indices_type, axis, expected_subset):
     indices = [False, True, True]
     indices = _convert_container(indices, indices_type)
 
-    subset = _safe_indexing(array, indices, axis=axis)
+    subset = safe_indexing(array, indices, axis=axis)
     assert_allclose_dense_sparse(
         subset, _convert_container(expected_subset, array_type)
     )
@@ -250,7 +250,7 @@ def test_safe_indexing_2d_mask(array_type, indices_type, axis, expected_subset):
 def test_safe_indexing_2d_scalar_axis_0(array_type, expected_output_type):
     array = _convert_container([[1, 2, 3], [4, 5, 6], [7, 8, 9]], array_type)
     indices = 2
-    subset = _safe_indexing(array, indices, axis=0)
+    subset = safe_indexing(array, indices, axis=0)
     expected_array = _convert_container([7, 8, 9], expected_output_type)
     assert_allclose_dense_sparse(subset, expected_array)
 
@@ -259,7 +259,7 @@ def test_safe_indexing_2d_scalar_axis_0(array_type, expected_output_type):
 def test_safe_indexing_1d_scalar(array_type):
     array = _convert_container([1, 2, 3, 4, 5, 6, 7, 8, 9], array_type)
     indices = 2
-    subset = _safe_indexing(array, indices, axis=0)
+    subset = safe_indexing(array, indices, axis=0)
     assert subset == 3
 
 
@@ -284,9 +284,9 @@ def test_safe_indexing_2d_scalar_axis_1(array_type, expected_output_type, indice
             "Specifying the columns using strings is only supported for dataframes"
         )
         with pytest.raises(ValueError, match=err_msg):
-            _safe_indexing(array, indices, axis=1)
+            safe_indexing(array, indices, axis=1)
     else:
-        subset = _safe_indexing(array, indices, axis=1)
+        subset = safe_indexing(array, indices, axis=1)
         expected_output = [3, 6, 9]
         if expected_output_type == "sparse":
             # sparse matrix are keeping the 2D shape
@@ -298,7 +298,7 @@ def test_safe_indexing_2d_scalar_axis_1(array_type, expected_output_type, indice
 @pytest.mark.parametrize("array_type", ["list", "array", "sparse"])
 def test_safe_indexing_None_axis_0(array_type):
     X = _convert_container([[1, 2, 3], [4, 5, 6], [7, 8, 9]], array_type)
-    X_subset = _safe_indexing(X, None, axis=0)
+    X_subset = safe_indexing(X, None, axis=0)
     assert_allclose_dense_sparse(X_subset, X)
 
 
@@ -307,13 +307,13 @@ def test_safe_indexing_pandas_no_matching_cols_error():
     err_msg = "No valid specification of the columns."
     X = pd.DataFrame(X_toy)
     with pytest.raises(ValueError, match=err_msg):
-        _safe_indexing(X, [1.0], axis=1)
+        safe_indexing(X, [1.0], axis=1)
 
 
 @pytest.mark.parametrize("axis", [None, 3])
 def test_safe_indexing_error_axis(axis):
     with pytest.raises(ValueError, match="'axis' should be either 0"):
-        _safe_indexing(X_toy, [0, 1], axis=axis)
+        safe_indexing(X_toy, [0, 1], axis=axis)
 
 
 @pytest.mark.parametrize("X_constructor", ["array", "series", "polars_series"])
@@ -332,7 +332,7 @@ def test_safe_indexing_1d_array_error(X_constructor):
 
     err_msg = "'X' should be a 2D NumPy array, 2D sparse matrix or dataframe"
     with pytest.raises(ValueError, match=err_msg):
-        _safe_indexing(X_constructor, [0, 1], axis=1)
+        safe_indexing(X_constructor, [0, 1], axis=1)
 
 
 def test_safe_indexing_container_axis_0_unsupported_type():
@@ -340,7 +340,7 @@ def test_safe_indexing_container_axis_0_unsupported_type():
     array = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
     err_msg = "String indexing is not supported with 'axis=0'"
     with pytest.raises(ValueError, match=err_msg):
-        _safe_indexing(array, indices, axis=0)
+        safe_indexing(array, indices, axis=0)
 
 
 def test_safe_indexing_pandas_no_settingwithcopy_warning():
@@ -355,7 +355,7 @@ def test_safe_indexing_pandas_no_settingwithcopy_warning():
         raise SkipTest("SettingWithCopyWarning has been removed in pandas 3.0.0.dev")
 
     X = pd.DataFrame({"a": [1, 2, 3], "b": [3, 4, 5]})
-    subset = _safe_indexing(X, [0, 1], axis=0)
+    subset = safe_indexing(X, [0, 1], axis=0)
     if hasattr(pd.errors, "SettingWithCopyWarning"):
         SettingWithCopyWarning = pd.errors.SettingWithCopyWarning
     else:
@@ -374,7 +374,7 @@ def test_safe_indexing_list_axis_1_unsupported(indices):
     X = [[1, 2], [4, 5], [7, 8]]
     err_msg = "axis=1 is not supported for lists"
     with pytest.raises(ValueError, match=err_msg):
-        _safe_indexing(X, indices, axis=1)
+        safe_indexing(X, indices, axis=1)
 
 
 @pytest.mark.parametrize("array_type", ["array", "sparse", "dataframe"])
@@ -388,7 +388,7 @@ def test_safe_assign(array_type):
     X = _convert_container(X_array, array_type)
     _safe_assign(X, values, row_indexer=row_indexer)
 
-    assigned_portion = _safe_indexing(X, row_indexer, axis=0)
+    assigned_portion = safe_indexing(X, row_indexer, axis=0)
     assert_allclose_dense_sparse(
         assigned_portion, _convert_container(values, array_type)
     )
@@ -398,7 +398,7 @@ def test_safe_assign(array_type):
     X = _convert_container(X_array, array_type)
     _safe_assign(X, values, column_indexer=column_indexer)
 
-    assigned_portion = _safe_indexing(X, column_indexer, axis=1)
+    assigned_portion = safe_indexing(X, column_indexer, axis=1)
     assert_allclose_dense_sparse(
         assigned_portion, _convert_container(values, array_type)
     )
