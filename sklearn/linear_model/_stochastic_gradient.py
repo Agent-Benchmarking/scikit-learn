@@ -853,6 +853,19 @@ class BaseSGDClassifier(LinearClassifierMixin, BaseSGD, metaclass=ABCMeta):
         if not hasattr(self, "classes_"):
             self._more_validate_params(for_partial_fit=True)
 
+            if self.class_weight == "balanced":
+                raise ValueError(
+                    "class_weight '{0}' is not supported for "
+                    "partial_fit. In order to use 'balanced' weights,"
+                    " use compute_class_weight('{0}', "
+                    "classes=classes, y=y). "
+                    "In place of y you can use a large enough sample "
+                    "of the full training set target to properly "
+                    "estimate the class frequency distributions. "
+                    "Pass the resulting weights as the class_weight "
+                    "parameter.".format(self.class_weight)
+                )
+
         return self._partial_fit(
             X,
             y,
@@ -2408,10 +2421,22 @@ class SGDOneClassSVM(OutlierMixin, BaseSGD):
         if not hasattr(self, "coef_"):
             self._more_validate_params(for_partial_fit=True)
 
-        alpha = self.nu / 2
+            if self.class_weight == "balanced":
+                raise ValueError(
+                    "class_weight '{0}' is not supported for "
+                    "partial_fit. In order to use 'balanced' weights,"
+                    " use compute_class_weight('{0}', "
+                    "classes=classes, y=y). "
+                    "In place of y you can use a large enough sample "
+                    "of the full training set target to properly "
+                    "estimate the class frequency distributions. "
+                    "Pass the resulting weights as the class_weight "
+                    "parameter.".format(self.class_weight)
+                )
+
         return self._partial_fit(
             X,
-            alpha,
+            self.nu / 2,
             C=1.0,
             loss=self.loss,
             learning_rate=self.learning_rate,
