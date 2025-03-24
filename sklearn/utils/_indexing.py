@@ -450,9 +450,8 @@ def resample(
 
     n_samples : int, default=None
         Number of samples to generate. If left to None this is
-        automatically set to the first dimension of the arrays.
-        If replace is False it should not be larger than the length of
-        arrays.
+        automatically set to the first dimension of the arrays. If replace is False it
+        should not be larger than the length of arrays.
 
     random_state : int, RandomState instance or None, default=None
         Determines random number generation for shuffling
