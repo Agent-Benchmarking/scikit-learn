@@ -858,3 +858,84 @@ def test_rfecv_error_score():
     )
     with pytest.raises(ValueError, match="Deliberate failure for testing"):
         rfecv_raise.fit(X, y)
+
+
+def test_rfecv_refit_parameter():
+    """Test RFECV with the refit parameter."""
+    generator = check_random_state(0)
+    iris = load_iris()
+    X = np.c_[iris.data, generator.normal(size=(len(iris.data), 6))]
+    y = list(iris.target)
+
+    # Test with dict scoring
+    scoring_dict = {
+        "accuracy": "accuracy",
+        "precision": make_scorer(precision_score, average="macro"),
+        "recall": make_scorer(recall_score, average="macro"),
+    }
+
+    # First, test with default behavior (first metric is used)
+    rfecv_default = RFECV(
+        estimator=SVC(kernel="linear"), step=1, cv=5, scoring=scoring_dict
+    )
+    rfecv_default.fit(X, y)
+    default_features = rfecv_default.n_features_
+
+    # Now, explicitly set refit to the first metric
+    rfecv_first = RFECV(
+        estimator=SVC(kernel="linear"),
+        step=1,
+        cv=5,
+        scoring=scoring_dict,
+        refit="accuracy",
+    )
+    rfecv_first.fit(X, y)
+
+    # Both should select the same number of features
+    assert rfecv_first.n_features_ == default_features
+
+    # Now try with a different metric
+    rfecv_recall = RFECV(
+        estimator=SVC(kernel="linear"),
+        step=1,
+        cv=5,
+        scoring=scoring_dict,
+        refit="recall",
+    )
+    rfecv_recall.fit(X, y)
+
+    # The number of features could be different when using a different metric
+    # (though they might be the same in some cases)
+
+    # Test with list scoring
+    scoring_list = ["accuracy", "precision_macro", "recall_macro"]
+
+    # First, test with default behavior (first metric is used)
+    rfecv_list_default = RFECV(
+        estimator=SVC(kernel="linear"), step=1, cv=5, scoring=scoring_list
+    )
+    rfecv_list_default.fit(X, y)
+
+    # Explicitly set refit to the first metric
+    rfecv_list_first = RFECV(
+        estimator=SVC(kernel="linear"),
+        step=1,
+        cv=5,
+        scoring=scoring_list,
+        refit="accuracy",
+    )
+    rfecv_list_first.fit(X, y)
+
+    # Both should select the same number of features
+    assert rfecv_list_first.n_features_ == rfecv_list_default.n_features_
+
+    # Test with invalid refit parameter
+    with pytest.raises(ValueError, match="Refit metric .* not in"):
+        rfecv_invalid = RFECV(
+            estimator=SVC(kernel="linear"),
+            step=1,
+            cv=5,
+            scoring=scoring_dict,
+            refit="invalid_metric",
+        )
+        rfecv_invalid.fit(X, y)
