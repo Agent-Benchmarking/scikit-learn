@@ -79,6 +79,7 @@ print(f"Selected features: {np.where(rfecv.support_)[0]}")
 import matplotlib.pyplot as plt
 import pandas as pd
 
+# Convert cv_results_ to a DataFrame
 cv_results = pd.DataFrame(rfecv.cv_results_)
 
 plt.figure(figsize=(10, 6))

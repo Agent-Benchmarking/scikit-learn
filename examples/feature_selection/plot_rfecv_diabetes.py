@@ -90,6 +90,7 @@ print(f"Selected features: {[feature_names[i] for i in np.where(rfecv.support_)[
 import matplotlib.pyplot as plt
 import pandas as pd
 
+# Convert cv_results_ to a DataFrame
 cv_results = pd.DataFrame(rfecv.cv_results_)
 
 # Create a plot with 2 rows and 2 columns of subplots
@@ -128,10 +129,9 @@ plt.show()
 
 # %%
 # Comparing optimal features across metrics
-# --------------------------------------
+# ---------------------------------------
 #
-# Different metrics may suggest different optimal feature subsets. Let's see if
-# there's a consensus or divergence.
+# Different metrics might suggest different optimal numbers of features.
 
 print("Optimal number of features per metric:")
 for metric in metrics:

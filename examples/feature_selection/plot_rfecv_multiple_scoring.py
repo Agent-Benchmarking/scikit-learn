@@ -85,8 +85,10 @@ print(f"Optimal number of features (using accuracy): {rfecv.n_features_}")
 import matplotlib.pyplot as plt
 import pandas as pd
 
+# Convert cv_results_ to a DataFrame
 cv_results = pd.DataFrame(rfecv.cv_results_)
 
+# Create a figure for plotting
 plt.figure(figsize=(10, 6))
 metrics = list(scoring.keys())
 colors = ["blue", "green", "red"]
@@ -100,6 +102,8 @@ for i, metric in enumerate(metrics):
         y=cv_results[mean_key],
         yerr=cv_results[std_key],
         color=colors[i],
+        marker="o",
+        linestyle="-",
         label=metric,
     )
 

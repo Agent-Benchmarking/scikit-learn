@@ -1040,7 +1040,9 @@ plot_rfecv_multiple_scoring_regression.py`
             n_features_to_select = step_n_features_rev[np.argmax(main_scores_sum_rev)]
 
             # Add n_features to cv_results
-            self.cv_results_["n_features"] = step_n_features_rev
+            # Only keep n_features values that were actually evaluated
+            metric_array_len = len(self.cv_results_[f"mean_test_{main_metric}"])
+            self.cv_results_["n_features"] = step_n_features_rev[:metric_array_len]
         else:
             # Reverse order such that lowest number of features
             # is selected in case of tie.
@@ -1049,14 +1051,15 @@ plot_rfecv_multiple_scoring_regression.py`
 
             # reverse to stay consistent with before
             scores_rev = scores[:, ::-1]
+            mean_scores = np.mean(scores_rev, axis=0)
             self.cv_results_ = {
-                "mean_test_score": np.mean(scores_rev, axis=0),
+                "mean_test_score": mean_scores,
                 "std_test_score": np.std(scores_rev, axis=0),
                 **{
                     f"split{i}_test_score": scores_rev[i]
                     for i in range(scores.shape[0])
                 },
-                "n_features": step_n_features_rev,
+                "n_features": step_n_features_rev[: len(mean_scores)],
             }
 
         # Re-execute an elimination with best_k over the whole set
