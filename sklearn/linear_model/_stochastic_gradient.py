@@ -87,7 +87,7 @@ class BaseSGD(SparseCoefMixin, BaseEstimator, metaclass=ABCMeta):
         "verbose": ["verbose"],
         "random_state": ["random_state"],
         "warm_start": ["boolean"],
-        "average": [Interval(Integral, 0, None, closed="left"), "boolean"],
+        "average": [Interval(Integral, 1, None, closed="left"), "boolean"],
     }
 
     def __init__(
@@ -597,17 +597,6 @@ class BaseSGDClassifier(LinearClassifierMixin, BaseSGD, metaclass=ABCMeta):
             reset=first_call,
         )
 
-        if first_call:
-            # TODO(1.7) remove 0 from average parameter constraint
-            if not isinstance(self.average, (bool, np.bool_)) and self.average == 0:
-                warnings.warn(
-                    (
-                        "Passing average=0 to disable averaging is deprecated and will"
-                        " be removed in 1.7. Please use average=False instead."
-                    ),
-                    FutureWarning,
-                )
-
         n_samples, n_features = X.shape
 
         _check_partial_fit_first_call(self, classes)
@@ -682,16 +671,6 @@ class BaseSGDClassifier(LinearClassifierMixin, BaseSGD, metaclass=ABCMeta):
         if hasattr(self, "classes_"):
             # delete the attribute otherwise _partial_fit thinks it's not the first call
             delattr(self, "classes_")
-
-        # TODO(1.7) remove 0 from average parameter constraint
-        if not isinstance(self.average, (bool, np.bool_)) and self.average == 0:
-            warnings.warn(
-                (
-                    "Passing average=0 to disable averaging is deprecated and will be "
-                    "removed in 1.7. Please use average=False instead."
-                ),
-                FutureWarning,
-            )
 
         # labels can be encoded as float, int, or string literals
         # np.unique sorts in asc order; largest class id is positive class
@@ -1477,17 +1456,6 @@ class BaseSGDRegressor(RegressorMixin, BaseSGD):
         )
         y = y.astype(X.dtype, copy=False)
 
-        if first_call:
-            # TODO(1.7) remove 0 from average parameter constraint
-            if not isinstance(self.average, (bool, np.bool_)) and self.average == 0:
-                warnings.warn(
-                    (
-                        "Passing average=0 to disable averaging is deprecated and will"
-                        " be removed in 1.7. Please use average=False instead."
-                    ),
-                    FutureWarning,
-                )
-
         n_samples, n_features = X.shape
 
         sample_weight = _check_sample_weight(sample_weight, X, dtype=X.dtype)
@@ -1501,6 +1469,12 @@ class BaseSGDRegressor(RegressorMixin, BaseSGD):
                 coef_init=coef_init,
                 intercept_init=intercept_init,
             )
+        elif n_features != self.coef_.shape[-1]:
+            raise ValueError(
+                "Number of features %d does not match previous data %d."
+                % (n_features, self.coef_.shape[-1])
+            )
+
         if self.average > 0 and getattr(self, "_average_coef", None) is None:
             self._average_coef = np.zeros(n_features, dtype=X.dtype, order="C")
             self._average_intercept = np.zeros(1, dtype=X.dtype, order="C")
@@ -1565,17 +1539,7 @@ class BaseSGDRegressor(RegressorMixin, BaseSGD):
         intercept_init=None,
         sample_weight=None,
     ):
-        # TODO(1.7) remove 0 from average parameter constraint
-        if not isinstance(self.average, (bool, np.bool_)) and self.average == 0:
-            warnings.warn(
-                (
-                    "Passing average=0 to disable averaging is deprecated and will be "
-                    "removed in 1.7. Please use average=False instead."
-                ),
-                FutureWarning,
-            )
-
-        if self.warm_start and getattr(self, "coef_", None) is not None:
+        if self.warm_start and hasattr(self, "coef_"):
             if coef_init is None:
                 coef_init = self.coef_
             if intercept_init is None:
@@ -1635,7 +1599,8 @@ class BaseSGDRegressor(RegressorMixin, BaseSGD):
             The initial intercept to warm-start the optimization.
 
         sample_weight : array-like, shape (n_samples,), default=None
-            Weights applied to individual samples (1. for unweighted).
+            Weights applied to individual samples.
+            If not provided, uniform weights are assumed.
 
         Returns
         -------
@@ -1772,7 +1737,8 @@ class BaseSGDRegressor(RegressorMixin, BaseSGD):
                 self.intercept_ = np.atleast_1d(average_intercept)
             else:
                 self.coef_ = coef
-                self.intercept_ = np.atleast_1d(intercept)
+                self._standard_intercept = np.atleast_1d(intercept)
+                self.intercept_ = self._standard_intercept
 
         else:
             self.intercept_ = np.atleast_1d(intercept)
@@ -2116,11 +2082,10 @@ class SGDOneClassSVM(OutlierMixin, BaseSGD):
         The verbosity level.
 
     random_state : int, RandomState instance or None, default=None
-        The seed of the pseudo random number generator to use when shuffling
-        the data.  If int, random_state is the seed used by the random number
-        generator; If RandomState instance, random_state is the random number
-        generator; If None, the random number generator is the RandomState
-        instance used by `np.random`.
+        Used for shuffling the data, when ``shuffle`` is set to ``True``.
+        Pass an int for reproducible output across multiple function calls.
+        See :term:`Glossary <random_state>`.
+        Integer values must be in the range `[0, 2**32 - 1]`.
 
     learning_rate : {'constant', 'optimal', 'invscaling', 'adaptive'}, default='optimal'
         The learning rate schedule to use with `fit`. (If using `partial_fit`,
@@ -2134,6 +2099,9 @@ class SGDOneClassSVM(OutlierMixin, BaseSGD):
           Each time n_iter_no_change consecutive epochs fail to decrease the
           training loss by tol or fail to increase validation score by tol if
           early_stopping is True, the current learning rate is divided by 5.
+
+        .. versionadded:: 0.20
+            Added 'adaptive' option.
 
     eta0 : float, default=0.0
         The initial learning rate for the 'constant', 'invscaling' or
@@ -2387,17 +2355,6 @@ class SGDOneClassSVM(OutlierMixin, BaseSGD):
             reset=first_call,
         )
 
-        if first_call:
-            # TODO(1.7) remove 0 from average parameter constraint
-            if not isinstance(self.average, (bool, np.bool_)) and self.average == 0:
-                warnings.warn(
-                    (
-                        "Passing average=0 to disable averaging is deprecated and will"
-                        " be removed in 1.7. Please use average=False instead."
-                    ),
-                    FutureWarning,
-                )
-
         n_features = X.shape[1]
 
         # Allocate datastructures from input arguments
@@ -2488,16 +2445,6 @@ class SGDOneClassSVM(OutlierMixin, BaseSGD):
         offset_init=None,
         sample_weight=None,
     ):
-        # TODO(1.7) remove 0 from average parameter constraint
-        if not isinstance(self.average, (bool, np.bool_)) and self.average == 0:
-            warnings.warn(
-                (
-                    "Passing average=0 to disable averaging is deprecated and will be "
-                    "removed in 1.7. Please use average=False instead."
-                ),
-                FutureWarning,
-            )
-
         if self.warm_start and hasattr(self, "coef_"):
             if coef_init is None:
                 coef_init = self.coef_
