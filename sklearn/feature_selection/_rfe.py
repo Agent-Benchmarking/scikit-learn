@@ -818,6 +818,14 @@ class RFECV(RFE):
     >>> # Scores for each metric are available in cv_results_
     >>> selector.cv_results_.keys()  # doctest: +ELLIPSIS
     dict_keys(['mean_test_r2', 'std_test_r2', ...])
+
+    .. rubric:: Examples
+
+    * :ref:`sphx_glr_auto_examples_feature_selection_plot_rfe_with_cross_validation.py`
+    * :ref:`sphx_glr_auto_examples_feature_selection_plot_rfecv_multiple_scoring.py`
+    * :ref:`sphx_glr_auto_examples_feature_selection_\
+plot_rfecv_multiple_scoring_regression.py`
+    * :ref:`sphx_glr_auto_examples_feature_selection_plot_rfecv_diabetes.py`
     """
 
     _parameter_constraints: dict = {
