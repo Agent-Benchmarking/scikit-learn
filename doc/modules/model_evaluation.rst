@@ -444,7 +444,7 @@ Using multiple metric evaluation
 --------------------------------
 
 Scikit-learn also permits evaluation of multiple metrics in ``GridSearchCV``,
-``RandomizedSearchCV`` and ``cross_validate``.
+``RandomizedSearchCV``, ``cross_validate`` and ``RFECV``.
 
 There are three ways to specify multiple scoring metrics for the ``scoring``
 parameter:
@@ -2305,7 +2305,7 @@ the ranking loss is defined as
 .. math::
   ranking\_loss(y, \hat{f}) =  \frac{1}{n_{\text{samples}}}
     \sum_{i=0}^{n_{\text{samples}} - 1} \frac{1}{||y_i||_0(n_\text{labels} - ||y_i||_0)}
-    \left|\left\{(k, l): \hat{f}_{ik} \leq \hat{f}_{il}, y_{ik} = 1, y_{il} = 0 \right\}\right|
+    \left|\left\{(k, l): \hat{f}_{ik} \leq \hat{f}_{il}, y_{ik} = 1, y_{il} = 0\right\}\right|
 
 where :math:`|\cdot|` computes the cardinality of the set (i.e., the number of
 elements in the set) and :math:`||\cdot||_0` is the :math:`\ell_0` "norm"

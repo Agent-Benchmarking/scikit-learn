@@ -1,0 +1,11 @@
+28937.feature.rst
+
+:class:`~sklearn.feature_selection.RFECV` now supports multiple scoring metrics
+through the ``scoring`` parameter, similar to :class:`~sklearn.model_selection.GridSearchCV`.
+When multiple metrics are provided as a list, tuple, or dictionary, each metric will
+be evaluated for all feature subsets. By default, the first metric is used to determine
+the optimal number of features. The new ``refit`` parameter can be used to specify
+which metric to optimize when multiple metrics are provided.
+
+This makes it possible to evaluate feature selection with multiple metrics simultaneously,
+reducing the need to run RFECV multiple times for different metrics.

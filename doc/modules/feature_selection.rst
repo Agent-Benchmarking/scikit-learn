@@ -139,10 +139,17 @@ eventually reached.
 number of features. In more details, the number of features selected is tuned
 automatically by fitting an :class:`RFE` selector on the different
 cross-validation splits (provided by the `cv` parameter). The performance
-of the :class:`RFE` selector is evaluated using `scorer` for different numbers
+of the :class:`RFE` selector is evaluated using `scoring` for different numbers
 of selected features and aggregated together. Finally, the scores are averaged
 across folds and the number of features selected is set to the number of
 features that maximize the cross-validation score.
+
+:class:`RFECV` also supports multiple scoring metrics through the `scoring` parameter,
+similar to :class:`~sklearn.model_selection.GridSearchCV`. When multiple metrics
+are provided as a list, tuple, or dictionary, each metric will be evaluated for all
+feature subsets. By default, the first metric is used to determine the optimal number
+of features. The `refit` parameter can be used to specify which metric to optimize when
+multiple metrics are provided.
 
 .. rubric:: Examples
 
@@ -224,8 +231,8 @@ alpha parameter, the fewer features selected.
   noise, the smallest absolute value of non-zero coefficients, and the
   structure of the design matrix X. In addition, the design matrix must
   display certain specific properties, such as not being too correlated.
-  On the use of Lasso for sparse signal recovery, see this example on 
-  compressive sensing: 
+  On the use of Lasso for sparse signal recovery, see this example on
+  compressive sensing:
   :ref:`sphx_glr_auto_examples_applications_plot_tomography_l1_reconstruction.py`.
 
   There is no general rule to select an alpha parameter for recovery of

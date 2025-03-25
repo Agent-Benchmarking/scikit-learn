@@ -801,6 +801,23 @@ class RFECV(RFE):
            False])
     >>> selector.ranking_
     array([1, 1, 1, 1, 1, 6, 4, 3, 2, 5])
+
+    You can also use multiple scoring metrics:
+
+    >>> from sklearn.datasets import make_friedman1
+    >>> from sklearn.feature_selection import RFECV
+    >>> from sklearn.svm import SVR
+    >>> X, y = make_friedman1(n_samples=50, n_features=10, random_state=0)
+    >>> estimator = SVR(kernel="linear")
+    >>> scoring = {'r2': 'r2', 'neg_mean_squared_error': 'neg_mean_squared_error'}
+    >>> selector = RFECV(estimator, step=1, cv=5, scoring=scoring, refit='r2')
+    >>> selector = selector.fit(X, y)
+    >>> selector.support_
+    array([ True,  True,  True,  True,  True, False, False, False, False,
+           False])
+    >>> # Scores for each metric are available in cv_results_
+    >>> selector.cv_results_.keys()  # doctest: +ELLIPSIS
+    dict_keys(['mean_test_r2', 'std_test_r2', ...])
     """
 
     _parameter_constraints: dict = {
