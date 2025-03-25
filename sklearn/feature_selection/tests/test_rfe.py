@@ -17,7 +17,13 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_selection import RFE, RFECV
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LinearRegression, LogisticRegression
-from sklearn.metrics import get_scorer, make_scorer, zero_one_loss
+from sklearn.metrics import (
+    get_scorer,
+    make_scorer,
+    precision_score,
+    recall_score,
+    zero_one_loss,
+)
 from sklearn.model_selection import GroupKFold, cross_val_score
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
@@ -721,3 +727,134 @@ def test_rfe_with_joblib_threading_backend(global_random_seed):
         rfe.fit(X, y)
 
     assert_array_equal(ranking_ref, rfe.ranking_)
+
+
+def test_rfecv_multiple_scoring_list():
+    """Test RFECV with a list of scoring metrics."""
+    generator = check_random_state(0)
+    iris = load_iris()
+    X = np.c_[iris.data, generator.normal(size=(len(iris.data), 6))]
+    y = list(iris.target)
+
+    # Use a list of scoring metrics
+    scoring = ["accuracy", "precision_macro", "recall_macro"]
+    rfecv = RFECV(estimator=SVC(kernel="linear"), step=1, scoring=scoring, cv=5)
+    rfecv.fit(X, y)
+
+    # Check the structure of cv_results_
+    for metric in scoring:
+        assert f"mean_test_{metric}" in rfecv.cv_results_
+        assert f"std_test_{metric}" in rfecv.cv_results_
+        # Check at least one split exists
+        assert any(
+            key.startswith("split") and key.endswith(f"test_{metric}")
+            for key in rfecv.cv_results_.keys()
+        )
+
+    # Check the number of selected features
+    assert rfecv.n_features_ > 0
+    assert rfecv.n_features_ <= X.shape[1]
+
+    # Ensure that score returns a dictionary with all metrics
+    scores = rfecv.score(X, y)
+    assert isinstance(scores, dict)
+    for metric in scoring:
+        assert metric in scores
+        assert isinstance(scores[metric], float)
+
+
+def test_rfecv_multiple_scoring_dict():
+    """Test RFECV with a dict of scoring metrics."""
+    generator = check_random_state(0)
+    iris = load_iris()
+    X = np.c_[iris.data, generator.normal(size=(len(iris.data), 6))]
+    y = list(iris.target)
+
+    # Define custom scorers
+    precision = make_scorer(precision_score, average="macro")
+    recall = make_scorer(recall_score, average="macro")
+
+    # Use a dict of scoring metrics
+    scoring = {"accuracy": "accuracy", "precision": precision, "recall": recall}
+    rfecv = RFECV(estimator=SVC(kernel="linear"), step=1, scoring=scoring, cv=5)
+    rfecv.fit(X, y)
+
+    # Check the structure of cv_results_
+    for metric in scoring.keys():
+        assert f"mean_test_{metric}" in rfecv.cv_results_
+        assert f"std_test_{metric}" in rfecv.cv_results_
+        # Check at least one split exists
+        assert any(
+            key.startswith("split") and key.endswith(f"test_{metric}")
+            for key in rfecv.cv_results_.keys()
+        )
+
+    # Check the number of selected features
+    assert rfecv.n_features_ > 0
+    assert rfecv.n_features_ <= X.shape[1]
+
+    # Ensure that score returns a dictionary with all metrics
+    scores = rfecv.score(X, y)
+    assert isinstance(scores, dict)
+    for metric in scoring.keys():
+        assert metric in scores
+        assert isinstance(scores[metric], float)
+
+
+def test_rfecv_feature_selection_with_multiple_metrics():
+    """Test that RFECV selects features properly with multiple metrics."""
+    # Create a dataset where the first few features are informative
+    # and the rest are noise
+    X, y = make_friedman1(n_samples=50, n_features=10, random_state=0)
+    # Add some noise features
+    X = np.hstack((X, np.random.RandomState(0).randn(X.shape[0], 10)))
+
+    # Define multiple scoring metrics
+    scoring = {"r2": "r2", "neg_mean_squared_error": "neg_mean_squared_error"}
+
+    # First key is used as the main metric for selecting features
+    rfecv = RFECV(
+        estimator=SVR(kernel="linear"),
+        step=1,
+        cv=3,
+        scoring=scoring,
+        min_features_to_select=3,
+    )
+    rfecv.fit(X, y)
+
+    # Check that we have results for all metrics
+    for metric in scoring:
+        assert f"mean_test_{metric}" in rfecv.cv_results_
+
+    # Check that the same number of features was selected using the first metric
+    main_metric = list(scoring.keys())[0]
+    best_features_idx = np.argmax(rfecv.cv_results_[f"mean_test_{main_metric}"])
+    best_n_features = rfecv.cv_results_["n_features"][best_features_idx]
+    assert rfecv.n_features_ == best_n_features
+
+    # The model should select informative features (mostly from the first 10)
+    support = rfecv.support_
+    # At least half of the selected features should be from the informative set
+    assert np.sum(support[:10]) >= rfecv.n_features_ / 2
+
+
+def test_rfecv_error_score():
+    """Test RFECV with error_score='raise'."""
+    generator = check_random_state(0)
+    iris = load_iris()
+    X = np.c_[iris.data, generator.normal(size=(len(iris.data), 6))]
+    y = list(iris.target)
+
+    # Create a scoring function that deliberately fails
+    def failing_scorer(estimator, X, y):
+        raise ValueError("Deliberate failure for testing")
+
+    # Test with error_score="raise"
+    rfecv_raise = RFECV(
+        estimator=SVC(kernel="linear"),
+        step=1,
+        scoring=failing_scorer,
+        error_score="raise",
+    )
+    with pytest.raises(ValueError, match="Deliberate failure for testing"):
+        rfecv_raise.fit(X, y)
