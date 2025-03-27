@@ -109,8 +109,8 @@ The complexity parameter :math:`\alpha \geq 0` controls the amount
 of shrinkage: the larger the value of :math:`\alpha`, the greater the amount
 of shrinkage and thus the coefficients become more robust to collinearity.
 
-.. figure:: ../auto_examples/linear_model/images/sphx_glr_plot_ridge_path_001.png
-   :target: ../auto_examples/linear_model/plot_ridge_path.html
+.. figure:: ../auto_examples/linear_model/images/sphx_glr_plot_ridge_path_and_coeffs_001.png
+   :target: ../auto_examples/linear_model/plot_ridge_path_and_coeffs.html
    :align: center
    :scale: 50%
 
@@ -148,7 +148,7 @@ the corresponding solver is chosen.
 .. rubric:: Examples
 
 * :ref:`sphx_glr_auto_examples_linear_model_plot_ols_ridge.py`
-* :ref:`sphx_glr_auto_examples_linear_model_plot_ridge_path.py`
+* :ref:`sphx_glr_auto_examples_linear_model_plot_ridge_path_and_coeffs.py`
 * :ref:`sphx_glr_auto_examples_inspection_plot_linear_model_coefficient_interpretation.py`
 
 Classification
@@ -313,15 +313,20 @@ the advantage of exploring more relevant values of `alpha` parameter, and
 if the number of samples is very small compared to the number of
 features, it is often faster than :class:`LassoCV`.
 
-.. |lasso_cv_1| image:: ../auto_examples/linear_model/images/sphx_glr_plot_lasso_model_selection_002.png
-    :target: ../auto_examples/linear_model/plot_lasso_model_selection.html
+.. |lasso_cv_1| image:: ../auto_examples/linear_model/images/sphx_glr_plot_lasso_model_selection_and_path_002.png
+    :target: ../auto_examples/linear_model/plot_lasso_model_selection_and_path.html
     :scale: 48%
 
-.. |lasso_cv_2| image:: ../auto_examples/linear_model/images/sphx_glr_plot_lasso_model_selection_003.png
-    :target: ../auto_examples/linear_model/plot_lasso_model_selection.html
+.. |lasso_cv_2| image:: ../auto_examples/linear_model/images/sphx_glr_plot_lasso_model_selection_and_path_003.png
+    :target: ../auto_examples/linear_model/plot_lasso_model_selection_and_path.html
     :scale: 48%
 
 .. centered:: |lasso_cv_1| |lasso_cv_2|
+
+.. figure:: ../auto_examples/linear_model/images/sphx_glr_plot_lasso_model_selection_and_path_004.png
+   :target: ../auto_examples/linear_model/plot_lasso_model_selection_and_path.html
+   :align: center
+   :scale: 50%
 
 .. _lasso_lars_ic:
 
@@ -1851,3 +1856,5 @@ And the classifier "predictions" are perfect::
     array([0, 1, 1, 0])
     >>> clf.score(X, y)
     1.0
+
+* :ref:`sphx_glr_auto_examples_linear_model_plot_logistic_combined.py`

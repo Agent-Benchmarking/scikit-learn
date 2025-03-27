@@ -462,10 +462,15 @@ parameter) include:
 The Figure below shows the contours of the different regularization terms
 in a 2-dimensional parameter space (:math:`m=2`) when :math:`R(w) = 1`.
 
-.. figure:: ../auto_examples/linear_model/images/sphx_glr_plot_sgd_penalties_001.png
-    :target: ../auto_examples/linear_model/plot_sgd_penalties.html
-    :align: center
-    :scale: 75
+.. figure:: ../auto_examples/linear_model/images/sphx_glr_plot_sgd_loss_and_penalties_001.png
+   :target: ../auto_examples/linear_model/plot_sgd_loss_and_penalties.html
+   :align: center
+   :scale: 75
+
+.. figure:: ../auto_examples/linear_model/images/sphx_glr_plot_sgd_loss_and_penalties_002.png
+   :target: ../auto_examples/linear_model/plot_sgd_loss_and_penalties.html
+   :align: center
+   :scale: 75
 
 SGD
 ---
