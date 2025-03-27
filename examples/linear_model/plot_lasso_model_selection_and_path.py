@@ -23,6 +23,7 @@ import time
 
 import matplotlib.pyplot as plt
 import numpy as np
+import polars as pl
 
 from sklearn.datasets import load_diabetes
 from sklearn.linear_model import Lasso, LassoCV, LassoLarsIC
@@ -38,11 +39,16 @@ print(__doc__)
 #
 # We'll use the diabetes dataset for this example.
 X, y = load_diabetes(return_X_y=True, as_frame=True)
-n_samples = X.shape[0]
-n_features = X.shape[1]
+# Convert to polars
+X_pl = pl.from_pandas(X)
+y_pl = pl.from_pandas(y.to_frame())
 
-X = X.values
-y = y.values
+n_samples = X_pl.shape[0]
+n_features = X_pl.shape[1]
+
+# Convert to numpy arrays for sklearn compatibility
+X = X_pl.to_numpy()
+y = y_pl.to_numpy().ravel()
 
 # %%
 # Part 2: Cross-Validation Approach
@@ -93,12 +99,17 @@ plt.legend()
 
 # Plot number of features selected with cross-validation
 plt.subplot(1, 2, 2)
-plt.semilogx(
-    alphas,
-    cv_model[-1].coef_.shape[0] - np.sum(cv_model[-1].coef_ == 0, axis=1),
-    marker="o",
-    label="Features",
+
+# Debug print to understand the shape
+print("Alphas shape:", alphas.shape)
+print("Coefficients shape:", cv_model[-1].coef_.shape)
+
+# Count non-zero coefficients for each alpha
+active_features = [cv_model[-1].coef_.shape[0] - np.sum(cv_model[-1].coef_ == 0)] * len(
+    alphas
 )
+
+plt.semilogx(alphas, active_features, marker="o", label="Features")
 plt.axvline(best_alpha, linestyle="--", color="k", label=f"alpha: {best_alpha:.5f}")
 plt.xlabel("alpha")
 plt.ylabel("Number of active features")
@@ -114,12 +125,8 @@ plt.tight_layout()
 # based on AIC or BIC.
 
 # Initialize models using AIC and BIC
-aic_model = make_pipeline(
-    StandardScaler(), LassoLarsIC(criterion="aic", normalize=False)
-)
-bic_model = make_pipeline(
-    StandardScaler(), LassoLarsIC(criterion="bic", normalize=False)
-)
+aic_model = make_pipeline(StandardScaler(), LassoLarsIC(criterion="aic"))
+bic_model = make_pipeline(StandardScaler(), LassoLarsIC(criterion="bic"))
 
 # Fit the models
 t1 = time.time()
@@ -217,26 +224,33 @@ print(f"  Selection time: {t_ic/2:.3f} seconds")
 
 # %%
 # Compare coefficients from different approaches
-plt.figure(figsize=(10, 6))
+# Create a dataframe of coefficients for visualization
 coef_names = [f"Feature {i}" for i in range(n_features)]
 
-# Create a dataframe of coefficients for visualization
-import pandas as pd
-
-coef_data = pd.DataFrame(
+coef_data = pl.DataFrame(
     {
+        "coef_name": coef_names,
         "CV": best_model[-1].coef_,
         "AIC": aic_model[-1].coef_,
         "BIC": bic_model[-1].coef_,
-    },
-    index=coef_names,
+    }
 )
 
-# Plot the coefficients as a bar chart
-coef_data.plot(kind="bar", figsize=(12, 6))
-plt.axhline(y=0, color="k", linestyle="-", alpha=0.3)
-plt.title("Lasso coefficients from different selection methods")
-plt.ylabel("Coefficient value")
+# Plot the coefficients as a bar chart using matplotlib directly
+fig, ax = plt.subplots(figsize=(12, 6))
+x = np.arange(len(coef_names))
+width = 0.25
+
+ax.bar(x - width, coef_data["CV"].to_numpy(), width, label="CV")
+ax.bar(x, coef_data["AIC"].to_numpy(), width, label="AIC")
+ax.bar(x + width, coef_data["BIC"].to_numpy(), width, label="BIC")
+
+ax.set_xticks(x)
+ax.set_xticklabels(coef_names, rotation=90)
+ax.axhline(y=0, color="k", linestyle="-", alpha=0.3)
+ax.set_title("Lasso coefficients from different selection methods")
+ax.set_ylabel("Coefficient value")
+ax.legend()
 plt.tight_layout()
 plt.show()
 
@@ -278,3 +292,22 @@ plt.show()
 #
 # These techniques can also be used together to gain multiple perspectives on
 # model selection.
+
+# Build a comparison table using polars
+data = {
+    "Method": ["Cross-Validation", "AIC", "BIC"],
+    "Alpha": [best_alpha, alpha_aic, alpha_bic],
+    "Features": [active_cv, active_aic, active_bic],
+    "R²": [r2_cv, r2_aic, r2_bic],
+    "Time (seconds)": [t_lasso_cv, t_ic / 2, t_ic / 2],
+}
+
+comparison = pl.DataFrame(data)
+# Format the comparison table with rounded values
+formatted_comparison = comparison.with_columns(
+    [pl.col("Alpha").round(3), pl.col("R²").round(3), pl.col("Time (seconds)").round(3)]
+)
+
+# Print the comparison table
+print("\nModel selection method comparison:")
+print(formatted_comparison)

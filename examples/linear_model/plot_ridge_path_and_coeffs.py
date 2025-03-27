@@ -33,7 +33,7 @@ The example combines and expands on the material from the previous examples:
 
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
+import polars as pl
 
 from sklearn import linear_model
 from sklearn.datasets import make_regression
@@ -112,27 +112,39 @@ for a in alphas_synth:
 # We'll create two side-by-side plots: one showing the coefficients as they change
 # with alpha, and another showing the error between the estimated and true coefficients.
 
-alphas_df = pd.Index(alphas_synth, name="alpha")
-coefs_df = pd.DataFrame(
-    coefs_synth, index=alphas_df, columns=[f"Feature {i}" for i in range(10)]
-)
-errors = pd.Series(errors_coefs, index=alphas_df, name="Mean squared error")
+# Create a Polars DataFrame for coefficients
+alpha_index = list(alphas_synth)
+feature_names = [f"Feature {i}" for i in range(10)]
+# Convert coefficients to a list of dictionaries for Polars
+coefs_dict_list = []
+for i, alpha in enumerate(alpha_index):
+    row_dict = {"alpha": alpha}
+    for j, feat in enumerate(feature_names):
+        row_dict[feat] = coefs_synth[i][j]
+    coefs_dict_list.append(row_dict)
+
+coefs_df = pl.DataFrame(coefs_dict_list)
+
+# Create a Polars Series for errors
+errors_dict_list = [{"alpha": a, "error": e} for a, e in zip(alpha_index, errors_coefs)]
+errors_df = pl.DataFrame(errors_dict_list)
 
 fig, axs = plt.subplots(1, 2, figsize=(20, 6))
 
-coefs_df.plot(
-    ax=axs[0],
-    logx=True,
-    title="Ridge coefficients as a function of the regularization strength",
-)
-axs[0].set_ylabel("Ridge coefficient values")
+# Plot coefficients - manual plotting from Polars DataFrame
+for feature in feature_names:
+    feature_values = coefs_df.select(["alpha", feature]).to_numpy()
+    axs[0].semilogx(feature_values[:, 0], feature_values[:, 1], label=feature)
 
-errors.plot(
-    ax=axs[1],
-    logx=True,
-    title="Coefficient error as a function of the regularization strength",
-)
+axs[0].set_ylabel("Ridge coefficient values")
+axs[0].set_title("Ridge coefficients as a function of the regularization strength")
+axs[0].legend()
+
+# Plot errors
+error_values = errors_df.select(["alpha", "error"]).to_numpy()
+axs[1].semilogx(error_values[:, 0], error_values[:, 1])
 axs[1].set_ylabel("Mean squared error")
+axs[1].set_title("Coefficient error as a function of the regularization strength")
 
 plt.tight_layout()
 plt.show()

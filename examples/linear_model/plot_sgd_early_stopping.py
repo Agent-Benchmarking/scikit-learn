@@ -45,7 +45,7 @@ import time
 
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
+import polars as pl
 
 from sklearn import linear_model
 from sklearn.datasets import fetch_openml
@@ -117,7 +117,7 @@ for estimator_name, estimator in estimator_dict.items():
         )
     print("")
 
-# Transform the results in a pandas dataframe for easy plotting
+# Transform the results to a Polars DataFrame for easy plotting
 columns = [
     "Stopping criterion",
     "max_iter",
@@ -126,7 +126,7 @@ columns = [
     "Train score",
     "Test score",
 ]
-results_df = pd.DataFrame(results, columns=columns)
+results_df = pl.DataFrame(results, schema=columns, orient="row")
 
 # Define what to plot
 lines = "Stopping criterion"
@@ -136,18 +136,32 @@ styles = ["-.", "--", "-"]
 # First plot: train and test scores
 fig, axes = plt.subplots(nrows=1, ncols=2, sharey=True, figsize=(12, 4))
 for ax, y_axis in zip(axes, ["Train score", "Test score"]):
-    for style, (criterion, group_df) in zip(styles, results_df.groupby(lines)):
-        group_df.plot(x=x_axis, y=y_axis, label=criterion, ax=ax, style=style)
+    # Get unique criteria and plot each one
+    criteria = results_df["Stopping criterion"].unique().to_list()
+    for style, criterion in zip(styles, criteria):
+        # Filter dataframe for each criterion
+        group_df = results_df.filter(pl.col("Stopping criterion") == criterion)
+        x_values = group_df.get_column(x_axis).to_numpy()
+        y_values = group_df.get_column(y_axis).to_numpy()
+        ax.plot(x_values, y_values, style, label=criterion)
     ax.set_title(y_axis)
+    ax.set_xlabel(x_axis)
     ax.legend(title=lines)
 fig.tight_layout()
 
 # Second plot: n_iter and fit time
 fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(12, 4))
 for ax, y_axis in zip(axes, ["n_iter_", "Fit time (sec)"]):
-    for style, (criterion, group_df) in zip(styles, results_df.groupby(lines)):
-        group_df.plot(x=x_axis, y=y_axis, label=criterion, ax=ax, style=style)
+    # Get unique criteria and plot each one
+    criteria = results_df["Stopping criterion"].unique().to_list()
+    for style, criterion in zip(styles, criteria):
+        # Filter dataframe for each criterion
+        group_df = results_df.filter(pl.col("Stopping criterion") == criterion)
+        x_values = group_df.get_column(x_axis).to_numpy()
+        y_values = group_df.get_column(y_axis).to_numpy()
+        ax.plot(x_values, y_values, style, label=criterion)
     ax.set_title(y_axis)
+    ax.set_xlabel(x_axis)
     ax.legend(title=lines)
 fig.tight_layout()
 
