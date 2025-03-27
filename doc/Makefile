@@ -71,7 +71,7 @@ html:
 	# the embedding of images more robust
 	rm -rf $(BUILDDIR)/html/_images
 	#rm -rf _build/doctrees/
-	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) -j$(SPHINX_NUMJOBS) $(BUILDDIR)/html/stable
+	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html/stable
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html/stable"
 
@@ -79,7 +79,7 @@ html:
 # html-noplot build faster
 html-noplot: SPHINX_NUMJOBS ?= $(SPHINX_NUMJOBS_NOPLOT_DEFAULT)
 html-noplot:
-	$(SPHINXBUILD) -D plot_gallery=0 -b html $(ALLSPHINXOPTS) -j$(SPHINX_NUMJOBS) \
+	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) -D plot_gallery=0 \
     $(BUILDDIR)/html/stable
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html/stable."
