@@ -39,6 +39,34 @@ from ._base import SelectorMixin, _get_feature_importances
 def _rfe_single_fit(rfe, estimator, X, y, train, test, scorer, routed_params):
     """
     Return the score and n_features per step for a fit across one fold.
+
+    Parameters
+    ----------
+    rfe : RFE instance
+        The RFE instance to fit.
+    estimator : estimator instance
+        The estimator to fit.
+    X : array-like of shape (n_samples, n_features)
+        The input samples.
+    y : array-like of shape (n_samples,)
+        The target values.
+    train : array-like of shape (n_train_samples,)
+        The indices of the training samples.
+    test : array-like of shape (n_test_samples,)
+        The indices of the test samples.
+    scorer : callable or dict of callables
+        The scorer(s) to use. If multiple scorers are specified,
+        a dict mapping scorer name to the scorer callable is returned.
+    routed_params : dict
+        Parameters to route to the estimator and scorer.
+
+    Returns
+    -------
+    scores : array-like or dict of array-like
+        The scores for each step. If multiple scorers are used, a dict
+        mapping scorer name to scores is returned.
+    n_features : array-like
+        The number of features used at each step.
     """
     X_train, y_train = _safe_split(estimator, X, y, train)
     X_test, y_test = _safe_split(estimator, X, y, test, train)
@@ -49,20 +77,42 @@ def _rfe_single_fit(rfe, estimator, X, y, train, test, scorer, routed_params):
         X=X, params=routed_params.scorer.score, indices=test
     )
 
-    rfe._fit(
-        X_train,
-        y_train,
-        lambda estimator, features: _score(
-            estimator,
-            X_test[:, features],
-            y_test,
-            scorer,
-            score_params=score_params,
-        ),
-        **fit_params,
-    )
+    # Handle multiple scorers
+    if isinstance(scorer, dict):
+        # Create a scoring function that returns a dict of scores
+        def _multimetric_score(estimator, features):
+            return {
+                name: _score(
+                    estimator,
+                    X_test[:, features],
+                    y_test,
+                    scorer_,
+                    score_params=score_params,
+                )
+                for name, scorer_ in scorer.items()
+            }
 
-    return rfe.step_scores_, rfe.step_n_features_
+        # Fit the RFE with the multimetric scorer
+        rfe._fit(X_train, y_train, _multimetric_score, **fit_params)
+
+        # Return scores for each metric and n_features
+        return rfe.step_scores_, rfe.step_n_features_
+    else:
+        # Single scorer case (original behavior)
+        rfe._fit(
+            X_train,
+            y_train,
+            lambda estimator, features: _score(
+                estimator,
+                X_test[:, features],
+                y_test,
+                scorer,
+                score_params=score_params,
+            ),
+            **fit_params,
+        )
+
+        return rfe.step_scores_, rfe.step_n_features_
 
 
 class RFE(SelectorMixin, MetaEstimatorMixin, BaseEstimator):
@@ -605,14 +655,28 @@ class RFECV(RFE):
         .. versionchanged:: 0.22
             ``cv`` default value of None changed from 3-fold to 5-fold.
 
-    scoring : str or callable, default=None
-        Scoring method to evaluate the :class:`RFE` selectors' performance. Options:
+    scoring : str, callable, list, tuple or dict, default=None
+        Strategy to evaluate the performance of the cross-validated model on
+        the test set.
 
-        - str: see :ref:`scoring_string_names` for options.
-        - callable: a scorer callable object (e.g., function) with signature
-          ``scorer(estimator, X, y)``. See :ref:`scoring_callable` for details.
-        - `None`: the `estimator`'s
+        If `scoring` represents a single score, one can use:
+
+        - a single string (see :ref:`scoring_string_names`);
+        - a callable (see :ref:`scoring_callable`) that returns a single value;
+        - `None`, the `estimator`'s
           :ref:`default evaluation criterion <scoring_api_overview>` is used.
+
+        If `scoring` represents multiple scores, one can use:
+
+        - a list or tuple of unique strings;
+        - a callable returning a dictionary where the keys are the metric
+          names and the values are the metric scores;
+        - a dictionary with metric names as keys and callables as values.
+
+        When multiple metrics are used, the `cv_results_` attribute will contain
+        metrics for each scorer, but the best number of features will not be
+        automatically selected. The user must decide which metric to use for
+        feature selection.
 
     verbose : int, default=0
         Controls verbosity of output.
@@ -662,12 +726,18 @@ class RFECV(RFE):
 
         split(k)_test_score : ndarray of shape (n_subsets_of_features,)
             The cross-validation scores across (k)th fold.
+            When multiple metrics are used, this will be replaced by
+            split(k)_test_{scorer_name} for each scorer.
 
         mean_test_score : ndarray of shape (n_subsets_of_features,)
             Mean of scores over the folds.
+            When multiple metrics are used, this will be replaced by
+            mean_test_{scorer_name} for each scorer.
 
         std_test_score : ndarray of shape (n_subsets_of_features,)
             Standard deviation of scores over the folds.
+            When multiple metrics are used, this will be replaced by
+            std_test_{scorer_name} for each scorer.
 
         n_features : ndarray of shape (n_subsets_of_features,)
             Number of features used at each step.
@@ -688,6 +758,11 @@ class RFECV(RFE):
         has feature names that are all strings.
 
         .. versionadded:: 1.0
+
+    multimetric_ : bool
+        Whether multiple metrics were used for scoring.
+
+        .. versionadded:: 1.6
 
     ranking_ : narray of shape (n_features,)
         The feature ranking, such that `ranking_[i]`
@@ -735,13 +810,34 @@ class RFECV(RFE):
            False])
     >>> selector.ranking_
     array([1, 1, 1, 1, 1, 6, 4, 3, 2, 5])
+
+    The following example shows how to use multiple scoring metrics to
+    evaluate feature selection.
+
+    >>> from sklearn.datasets import make_classification
+    >>> from sklearn.feature_selection import RFECV
+    >>> from sklearn.svm import SVC
+    >>> X, y = make_classification(n_samples=100, n_features=10,
+    ...                            n_informative=5, random_state=42)
+    >>> estimator = SVC(kernel="linear")
+    >>> scoring = ['accuracy', 'precision_macro', 'recall_macro']
+    >>> selector = RFECV(estimator, step=1, cv=5, scoring=scoring)
+    >>> selector = selector.fit(X, y)
+    >>> # Access scores for different metrics
+    >>> selector.cv_results_['mean_test_accuracy']
+    array([...])
+    >>> selector.cv_results_['mean_test_precision_macro']
+    array([...])
+    >>> # Score using a specific metric
+    >>> selector.score(X, y, metric='accuracy')
+    0.98
     """
 
     _parameter_constraints: dict = {
         **RFE._parameter_constraints,
         "min_features_to_select": [Interval(Integral, 0, None, closed="neither")],
         "cv": ["cv_object"],
-        "scoring": [None, str, callable],
+        "scoring": [None, str, callable, list, tuple, dict],
         "n_jobs": [None, Integral],
     }
     _parameter_constraints.pop("n_features_to_select")
@@ -905,17 +1001,47 @@ class RFECV(RFE):
         self.estimator_ = clone(self.estimator)
         self.estimator_.fit(self._transform(X), y, **routed_params.estimator.fit)
 
-        # reverse to stay consistent with before
-        scores_rev = scores[:, ::-1]
-        self.cv_results_ = {
-            "mean_test_score": np.mean(scores_rev, axis=0),
-            "std_test_score": np.std(scores_rev, axis=0),
-            **{f"split{i}_test_score": scores_rev[i] for i in range(scores.shape[0])},
-            "n_features": step_n_features_rev,
-        }
+        # Handle multiple scorers
+        self.multimetric_ = isinstance(scores[0], dict)
+
+        if self.multimetric_:
+            # Initialize cv_results_ with n_features
+            self.cv_results_ = {"n_features": step_n_features_rev}
+
+            # Convert scores to a more convenient format
+            # scores is a list of dicts, one dict per fold
+            # We want to convert it to a dict of lists, one list per metric
+            metrics = list(scores[0].keys())
+            scores_dict = {metric: [] for metric in metrics}
+
+            for fold_scores in scores:
+                for metric in metrics:
+                    scores_dict[metric].append(fold_scores[metric])
+
+            # Now scores_dict is a dict of lists, one list per metric
+            # Each list contains the scores for each fold
+            for metric in metrics:
+                # Reverse to stay consistent with original implementation
+                metric_scores = np.array(scores_dict[metric])[:, ::-1]
+                self.cv_results_[f"mean_test_{metric}"] = np.mean(metric_scores, axis=0)
+                self.cv_results_[f"std_test_{metric}"] = np.std(metric_scores, axis=0)
+                for i in range(metric_scores.shape[0]):
+                    self.cv_results_[f"split{i}_test_{metric}"] = metric_scores[i]
+        else:
+            # Original behavior for single scorer
+            scores_rev = scores[:, ::-1]
+            self.cv_results_ = {
+                "mean_test_score": np.mean(scores_rev, axis=0),
+                "std_test_score": np.std(scores_rev, axis=0),
+                **{
+                    f"split{i}_test_score": scores_rev[i]
+                    for i in range(scores.shape[0])
+                },
+                "n_features": step_n_features_rev,
+            }
         return self
 
-    def score(self, X, y, **score_params):
+    def score(self, X, y, metric=None, **score_params):
         """Score using the `scoring` option on the given test data and labels.
 
         Parameters
@@ -925,6 +1051,12 @@ class RFECV(RFE):
 
         y : array-like of shape (n_samples,)
             True labels for X.
+
+        metric : str, default=None
+            Metric to use for scoring when multiple metrics were used during
+            fit. If None and only one metric was used during fit, that metric
+            will be used. If None and multiple metrics were used during fit,
+            an error will be raised.
 
         **score_params : dict
             Parameters to pass to the `score` method of the underlying scorer.
@@ -940,16 +1072,38 @@ class RFECV(RFE):
         -------
         score : float
             Score of self.predict(X) w.r.t. y defined by `scoring`.
+
+        Raises
+        ------
+        ValueError
+            If multiple metrics were used during fit and `metric` is None.
         """
         _raise_for_params(score_params, self, "score")
-        scoring = self._get_scorer()
+        scorer = self._get_scorer()
         if _routing_enabled():
             routed_params = process_routing(self, "score", **score_params)
         else:
             routed_params = Bunch()
             routed_params.scorer = Bunch(score={})
 
-        return scoring(self, X, y, **routed_params.scorer.score)
+        # Handle multiple scorers
+        if hasattr(self, "multimetric_") and self.multimetric_:
+            if metric is None:
+                available_metrics = list(scorer.keys())
+                raise ValueError(
+                    "When multiple scoring metrics are used, the `metric` "
+                    "parameter must be specified to select which metric to "
+                    "use for scoring. Available metrics: %s" % available_metrics
+                )
+            if metric not in scorer:
+                available_metrics = list(scorer.keys())
+                raise ValueError(
+                    "The metric '%s' was not among the scoring metrics used "
+                    "during fit. Available metrics: %s" % (metric, available_metrics)
+                )
+            return scorer[metric](self, X, y, **routed_params.scorer.score)
+        else:
+            return scorer(self, X, y, **routed_params.scorer.score)
 
     def get_metadata_routing(self):
         """Get metadata routing of this object.
@@ -987,8 +1141,23 @@ class RFECV(RFE):
         return router
 
     def _get_scorer(self):
+        """Get the scorer(s) to be used.
+
+        Returns
+        -------
+        scorers : callable or dict of callables
+            The scorer(s) to use. If multiple scorers are specified,
+            a dict mapping scorer name to the scorer callable is returned.
+        """
         if self.scoring is None:
             scoring = "accuracy" if is_classifier(self.estimator) else "r2"
+            return get_scorer(scoring)
+        elif isinstance(self.scoring, str):
+            return get_scorer(self.scoring)
+        elif callable(self.scoring):
+            return self.scoring
         else:
-            scoring = self.scoring
-        return get_scorer(scoring)
+            # Dictionary or list/tuple of strings/callables
+            from ..metrics._scorer import _check_multimetric_scoring
+
+            return _check_multimetric_scoring(self.estimator, self.scoring)

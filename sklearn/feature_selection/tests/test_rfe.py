@@ -550,6 +550,70 @@ def test_rfecv_std_and_mean(global_random_seed):
     assert_allclose(rfecv.cv_results_["std_test_score"], expected_std)
 
 
+def test_rfecv_multiple_metrics(global_random_seed):
+    """Test RFECV with multiple scoring metrics."""
+    generator = check_random_state(global_random_seed)
+    iris = load_iris()
+    X = np.c_[iris.data, generator.normal(size=(len(iris.data), 6))]
+    y = iris.target
+
+    # Test with a list of scoring metrics
+    scoring = ["accuracy", "precision_macro", "recall_macro"]
+    rfecv = RFECV(estimator=SVC(kernel="linear"), scoring=scoring)
+    rfecv.fit(X, y)
+
+    # Check that the cv_results_ contains the expected keys
+    for metric in scoring:
+        assert f"mean_test_{metric}" in rfecv.cv_results_
+        assert f"std_test_{metric}" in rfecv.cv_results_
+        for i in range(5):  # Default CV is 5-fold
+            assert f"split{i}_test_{metric}" in rfecv.cv_results_
+
+    # Check that the multimetric_ attribute is set correctly
+    assert rfecv.multimetric_ is True
+
+    # Test scoring with a specific metric
+    score1 = rfecv.score(X, y, metric="accuracy")
+    score2 = rfecv.score(X, y, metric="precision_macro")
+    assert score1 != score2  # Different metrics should give different scores
+
+    # Test that an error is raised when metric is not specified
+    with pytest.raises(ValueError, match="When multiple scoring metrics are used"):
+        rfecv.score(X, y)
+
+    # Test that an error is raised when an invalid metric is specified
+    with pytest.raises(ValueError, match="was not among the scoring metrics"):
+        rfecv.score(X, y, metric="invalid_metric")
+
+    # Test with a dict of scoring metrics
+    scoring = {"accuracy": "accuracy", "precision": "precision_macro"}
+    rfecv = RFECV(estimator=SVC(kernel="linear"), scoring=scoring)
+    rfecv.fit(X, y)
+
+    # Check that the cv_results_ contains the expected keys
+    for metric in scoring.keys():
+        assert f"mean_test_{metric}" in rfecv.cv_results_
+        assert f"std_test_{metric}" in rfecv.cv_results_
+        for i in range(5):  # Default CV is 5-fold
+            assert f"split{i}_test_{metric}" in rfecv.cv_results_
+
+    # Test with a custom scoring function
+    def custom_scorer(estimator, X, y):
+        return np.mean(estimator.predict(X) == y)
+
+    scoring = {"custom": custom_scorer, "accuracy": "accuracy"}
+    rfecv = RFECV(estimator=SVC(kernel="linear"), scoring=scoring)
+    rfecv.fit(X, y)
+
+    # Check that both metrics are available
+    assert "mean_test_custom" in rfecv.cv_results_
+    assert "mean_test_accuracy" in rfecv.cv_results_
+
+    # Verify that the custom scorer works
+    score = rfecv.score(X, y, metric="custom")
+    assert 0 <= score <= 1
+
+
 @pytest.mark.parametrize(
     ["min_features_to_select", "n_features", "step", "cv_results_n_features"],
     [
