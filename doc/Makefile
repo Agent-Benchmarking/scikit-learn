@@ -21,6 +21,15 @@ else
     SPHINX_NUMJOBS_NOPLOT_DEFAULT=auto
 endif
 
+# Check if -j is already in SPHINXOPTS
+ifneq ($(findstring -j,$(SPHINXOPTS)),)
+    # -j is already in SPHINXOPTS, don't add it again
+    JOBS_FLAG =
+else
+    # -j is not in SPHINXOPTS, add it based on SPHINX_NUMJOBS
+    JOBS_FLAG = -j$(SPHINX_NUMJOBS)
+endif
+
 # Internal variables.
 PAPEROPT_a4     = -D latex_paper_size=a4
 PAPEROPT_letter = -D latex_paper_size=letter
@@ -71,7 +80,7 @@ html:
 	# the embedding of images more robust
 	rm -rf $(BUILDDIR)/html/_images
 	#rm -rf _build/doctrees/
-	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) -j$(SPHINX_NUMJOBS) $(BUILDDIR)/html/stable
+	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(JOBS_FLAG) $(BUILDDIR)/html/stable
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html/stable"
 
@@ -79,7 +88,7 @@ html:
 # html-noplot build faster
 html-noplot: SPHINX_NUMJOBS ?= $(SPHINX_NUMJOBS_NOPLOT_DEFAULT)
 html-noplot:
-	$(SPHINXBUILD) -D plot_gallery=0 -b html $(ALLSPHINXOPTS) -j$(SPHINX_NUMJOBS) \
+	$(SPHINXBUILD) -D plot_gallery=0 -b html $(ALLSPHINXOPTS) $(JOBS_FLAG) \
     $(BUILDDIR)/html/stable
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html/stable."
