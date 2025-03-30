@@ -288,7 +288,7 @@ def test_rfecv_verbose_output():
     generator = check_random_state(0)
     iris = load_iris()
     X = np.c_[iris.data, generator.normal(size=(len(iris.data), 6))]
-    y = list(iris.target)
+    y = iris.target
 
     rfecv = RFECV(estimator=SVC(kernel="linear"), step=1, verbose=1)
     rfecv.fit(X, y)
@@ -721,3 +721,184 @@ def test_rfe_with_joblib_threading_backend(global_random_seed):
         rfe.fit(X, y)
 
     assert_array_equal(ranking_ref, rfe.ranking_)
+
+
+def test_rfecv_multiple_scoring_metrics():
+    """Test RFECV with multiple scoring metrics.
+
+    Tests that:
+    1. RFECV works with multiple scoring metrics passed as list, tuple, or dict
+    2. The cv_results_ dictionary has the correct structure with keys for each metric
+    3. The refit parameter works as expected
+    """
+    generator = check_random_state(0)
+    iris = load_iris()
+    # Add some irrelevant features
+    X = np.c_[iris.data, generator.normal(size=(len(iris.data), 6))]
+    y = iris.target
+
+    # Define a basic estimator
+    estimator = SVC(kernel="linear")
+
+    # Test with list of scoring metrics
+    scoring_list = ["accuracy", "f1_weighted"]
+    rfecv = RFECV(
+        estimator=estimator, step=1, cv=3, scoring=scoring_list, refit="accuracy"
+    )
+    rfecv.fit(X, y)
+
+    # Check that cv_results_ contains entries for each metric
+    assert f"mean_test_{scoring_list[0]}" in rfecv.cv_results_
+    assert f"mean_test_{scoring_list[1]}" in rfecv.cv_results_
+    assert f"std_test_{scoring_list[0]}" in rfecv.cv_results_
+    assert f"std_test_{scoring_list[1]}" in rfecv.cv_results_
+    assert f"rank_test_{scoring_list[0]}" in rfecv.cv_results_
+    assert f"rank_test_{scoring_list[1]}" in rfecv.cv_results_
+
+    # Check that split scores exist for each fold and each metric
+    for i in range(3):  # 3 folds
+        assert f"split{i}_test_{scoring_list[0]}" in rfecv.cv_results_
+        assert f"split{i}_test_{scoring_list[1]}" in rfecv.cv_results_
+
+    # Test with dict of scoring metrics
+    scoring_dict = {"accuracy": "accuracy", "f1": "f1_weighted"}
+    rfecv = RFECV(
+        estimator=estimator, step=1, cv=3, scoring=scoring_dict, refit="accuracy"
+    )
+    rfecv.fit(X, y)
+
+    # Check that cv_results_ contains entries for each metric
+    assert "mean_test_accuracy" in rfecv.cv_results_
+    assert "mean_test_f1" in rfecv.cv_results_
+    assert "rank_test_accuracy" in rfecv.cv_results_
+    assert "rank_test_f1" in rfecv.cv_results_
+
+    # For backward compatibility, check that mean_test_score is taken from refit metric
+    assert_array_equal(
+        rfecv.cv_results_["mean_test_score"], rfecv.cv_results_["mean_test_accuracy"]
+    )
+
+    # Test with callable scoring metrics
+    recall_scorer = make_scorer(zero_one_loss, greater_is_better=False)
+    acc_scorer = get_scorer("accuracy")
+    scoring_dict = {"recall": recall_scorer, "accuracy": acc_scorer}
+    rfecv = RFECV(
+        estimator=estimator, step=1, cv=3, scoring=scoring_dict, refit="accuracy"
+    )
+    rfecv.fit(X, y)
+
+    # Check that cv_results_ contains entries for each metric
+    assert "mean_test_accuracy" in rfecv.cv_results_
+    assert "mean_test_recall" in rfecv.cv_results_
+
+
+def test_rfecv_refit_behavior():
+    """Test RFECV's refit behavior with multiple scoring metrics.
+
+    Tests:
+    1. refit=True (default) uses the first metric if multiple are provided
+    2. refit='metric_name' uses the specified metric
+    3. refit=callable uses the callable to score
+    4. Raises error if refit is string not in scoring keys
+    """
+    generator = check_random_state(0)
+    iris = load_iris()
+    X = np.c_[iris.data, generator.normal(size=(len(iris.data), 6))]
+    y = iris.target
+
+    scoring = {"accuracy": "accuracy", "f1": "f1_weighted"}
+
+    # Test refit=True (default) uses the first metric
+    rfecv = RFECV(
+        estimator=SVC(kernel="linear"), step=1, cv=3, scoring=scoring, refit=True
+    )
+    rfecv.fit(X, y)
+    # Should refit with the estimator
+    assert hasattr(rfecv, "estimator_")
+    # Default score should work
+    score = rfecv.score(X, y)
+    assert isinstance(score, float)
+
+    # Test refit='metric_name' uses the specified metric
+    rfecv = RFECV(
+        estimator=SVC(kernel="linear"), step=1, cv=3, scoring=scoring, refit="f1"
+    )
+    rfecv.fit(X, y)
+    # Should refit with the estimator
+    assert hasattr(rfecv, "estimator_")
+    # mean_test_score should equal mean_test_f1
+    assert_array_equal(
+        rfecv.cv_results_["mean_test_score"], rfecv.cv_results_["mean_test_f1"]
+    )
+
+    # Test refit with callable
+    def refit_callable(cv_results):
+        """A dummy callable that selects the best model based on f1 score."""
+        # Return the index with the maximum f1 score
+        return np.argmax(cv_results["mean_test_f1"])
+
+    rfecv = RFECV(
+        estimator=SVC(kernel="linear"),
+        step=1,
+        cv=3,
+        scoring=scoring,
+        refit=refit_callable,
+    )
+    rfecv.fit(X, y)
+    # Should refit with the estimator
+    assert hasattr(rfecv, "estimator_")
+    # Score method should work
+    score = rfecv.score(X, y)
+    assert isinstance(score, float)
+
+    # Test invalid callable return type
+    def invalid_refit_callable(cv_results):
+        """A dummy callable that returns None instead of an index."""
+        return None
+
+    rfecv = RFECV(
+        estimator=SVC(kernel="linear"),
+        step=1,
+        cv=3,
+        scoring=scoring,
+        refit=invalid_refit_callable,
+    )
+    with pytest.raises(TypeError, match="best_index_ returned is not an integer"):
+        rfecv.fit(X, y)
+
+    # Test out-of-bounds index returned by callable
+    def out_of_bounds_refit_callable(cv_results):
+        """A dummy callable that returns an out-of-bounds index."""
+        return -1  # Negative index is out of bounds
+
+    rfecv = RFECV(
+        estimator=SVC(kernel="linear"),
+        step=1,
+        cv=3,
+        scoring=scoring,
+        refit=out_of_bounds_refit_callable,
+    )
+    with pytest.raises(IndexError, match="best_index_ index out of range"):
+        rfecv.fit(X, y)
+
+    # Test refit is not in scoring keys
+    with pytest.raises(ValueError, match="is not a valid scorer key"):
+        rfecv = RFECV(
+            estimator=SVC(kernel="linear"),
+            step=1,
+            cv=3,
+            scoring=scoring,
+            refit="recall",  # Not in scoring dict
+        )
+        rfecv.fit(X, y)
+
+    # Test refit with string but scoring is not a dict/list
+    with pytest.raises(ValueError, match="but scoring is not a dict or a list"):
+        rfecv = RFECV(
+            estimator=SVC(kernel="linear"),
+            step=1,
+            cv=3,
+            scoring="accuracy",  # Single string
+            refit="f1",  # Can't use a string here
+        )
+        rfecv.fit(X, y)

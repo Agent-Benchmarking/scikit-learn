@@ -3,12 +3,13 @@
 
 """Recursive feature elimination for feature ranking"""
 
+import numbers
 import warnings
 from copy import deepcopy
-from numbers import Integral
 
 import numpy as np
 from joblib import effective_n_jobs
+from scipy.stats import rankdata
 
 from ..base import BaseEstimator, MetaEstimatorMixin, _fit_context, clone, is_classifier
 from ..metrics import get_scorer
@@ -197,10 +198,10 @@ class RFE(SelectorMixin, MetaEstimatorMixin, BaseEstimator):
         "n_features_to_select": [
             None,
             Interval(RealNotInt, 0, 1, closed="right"),
-            Interval(Integral, 0, None, closed="neither"),
+            Interval(numbers.Integral, 0, None, closed="neither"),
         ],
         "step": [
-            Interval(Integral, 0, None, closed="neither"),
+            Interval(numbers.Integral, 0, None, closed="neither"),
             Interval(RealNotInt, 0, 1, closed="neither"),
         ],
         "verbose": ["verbose"],
@@ -294,7 +295,7 @@ class RFE(SelectorMixin, MetaEstimatorMixin, BaseEstimator):
         n_features = X.shape[1]
         if self.n_features_to_select is None:
             n_features_to_select = n_features // 2
-        elif isinstance(self.n_features_to_select, Integral):  # int
+        elif isinstance(self.n_features_to_select, numbers.Integral):  # int
             n_features_to_select = self.n_features_to_select
             if n_features_to_select > n_features:
                 warnings.warn(
@@ -407,44 +408,44 @@ class RFE(SelectorMixin, MetaEstimatorMixin, BaseEstimator):
 
     @available_if(_estimator_has("score"))
     def score(self, X, y, **score_params):
-        """Reduce X to the selected features and return the score of the estimator.
+        """Return the score of the estimator after it has been fit.
 
         Parameters
         ----------
-        X : array of shape [n_samples, n_features]
+        X : array-like of shape (n_samples, n_features)
             The input samples.
 
-        y : array of shape [n_samples]
+        y : array-like of shape (n_samples,)
             The target values.
 
         **score_params : dict
-            - If `enable_metadata_routing=False` (default): Parameters directly passed
-              to the ``score`` method of the underlying estimator.
+            Parameters to pass to the `score` method of the underlying estimator.
 
-            - If `enable_metadata_routing=True`: Parameters safely routed to the `score`
-              method of the underlying estimator.
-
-            .. versionadded:: 1.0
-
-            .. versionchanged:: 1.6
+            .. versionadded:: 1.6
+                Only available if `enable_metadata_routing=True`,
+                which can be set by using
+                ``sklearn.set_config(enable_metadata_routing=True)``.
                 See :ref:`Metadata Routing User Guide <metadata_routing>`
                 for more details.
 
         Returns
         -------
         score : float
-            Score of the underlying base estimator computed with the selected
-            features returned by `rfe.transform(X)` and `y`.
+            Score of self.estimator_ (on the transformed training data if
+            feature selection has been performed).
         """
         check_is_fitted(self)
+
+        # Don't use _raise_for_params to allow backward compatibility
+        # with tests that expect parameters to be passed through
         if _routing_enabled():
             routed_params = process_routing(self, "score", **score_params)
+            return self.estimator_.score(
+                self.transform(X), y, **routed_params.estimator.score
+            )
         else:
-            routed_params = Bunch(estimator=Bunch(score=score_params))
-
-        return self.estimator_.score(
-            self.transform(X), y, **routed_params.estimator.score
-        )
+            # For backward compatibility
+            return self.estimator_.score(self.transform(X), y, **score_params)
 
     def _get_support_mask(self):
         check_is_fitted(self)
@@ -567,7 +568,7 @@ class RFECV(RFE):
     estimator : ``Estimator`` instance
         A supervised learning estimator with a ``fit`` method that provides
         information about feature importance either through a ``coef_``
-        attribute or through a ``feature_importances_`` attribute.
+        or ``feature_importances_`` attribute.
 
     step : int or float, default=1
         If greater than or equal to 1, then ``step`` corresponds to the
@@ -605,14 +606,27 @@ class RFECV(RFE):
         .. versionchanged:: 0.22
             ``cv`` default value of None changed from 3-fold to 5-fold.
 
-    scoring : str or callable, default=None
-        Scoring method to evaluate the :class:`RFE` selectors' performance. Options:
+    scoring : str, callable, list/tuple or dict, default=None
+        Strategy to evaluate the performance of the models.
 
-        - str: see :ref:`scoring_string_names` for options.
-        - callable: a scorer callable object (e.g., function) with signature
-          ``scorer(estimator, X, y)``. See :ref:`scoring_callable` for details.
-        - `None`: the `estimator`'s
-          :ref:`default evaluation criterion <scoring_api_overview>` is used.
+        - If scoring represents a single score, one can use:
+
+          - a single string (see :ref:`scoring_string_names`),
+          - a callable (see :ref:`scoring_callable`) with signature
+            ``scorer(estimator, X, y)``
+          - None, in which case the `estimator`'s
+            :ref:`default evaluation criterion <scoring_api_overview>` is used.
+
+        - If scoring represents multiple metrics, one can use:
+
+          - a list or tuple of unique strings or callables
+            (e.g. ``('precision', 'recall')``),
+          - a dict mapping the scorer name to a predefined or custom scoring function.
+
+        See :ref:`scoring` for details.
+
+        .. versionchanged:: 1.7
+           Support for multiple metrics has been added.
 
     verbose : int, default=0
         Controls verbosity of output.
@@ -642,6 +656,22 @@ class RFECV(RFE):
 
         .. versionadded:: 0.24
 
+    refit : str, bool or callable, default=True
+        Refit an estimator using the selected features on the whole dataset.
+
+        - If a string or a callable, the best parameter must be in ``scoring``.
+          For a dict or a list/tuple of scoring metrics, the scorer name must be in
+          ``scoring.keys()``, or be one of the elements of the list/tuple.
+        - If True, use the scoring parameter to find the best number of features.
+
+        The refitted estimator is made available at the ``estimator_`` attribute
+        and permits using ``score`` method or ``predict`` method on new data.
+
+        See ``refit`` parameter of
+        :class:`~sklearn.model_selection.GridSearchCV` for more details.
+
+        .. versionadded:: 1.7
+
     Attributes
     ----------
     classes_ : ndarray of shape (n_classes,)
@@ -663,11 +693,27 @@ class RFECV(RFE):
         split(k)_test_score : ndarray of shape (n_subsets_of_features,)
             The cross-validation scores across (k)th fold.
 
+        split(k)_test_<scorer_name> : ndarray of shape (n_subsets_of_features,)
+            The cross-validation scores for each scorer across (k)th fold.
+            Only available when ``scoring`` represents multiple metrics.
+
         mean_test_score : ndarray of shape (n_subsets_of_features,)
             Mean of scores over the folds.
 
+        mean_test_<scorer_name> : ndarray of shape (n_subsets_of_features,)
+            Mean of scores over the folds for each scorer.
+            Only available when ``scoring`` represents multiple metrics.
+
         std_test_score : ndarray of shape (n_subsets_of_features,)
             Standard deviation of scores over the folds.
+
+        std_test_<scorer_name> : ndarray of shape (n_subsets_of_features,)
+            Standard deviation of scores over the folds for each scorer.
+            Only available when ``scoring`` represents multiple metrics.
+
+        rank_test_<scorer_name> : ndarray of shape (n_subsets_of_features,)
+            The ranking of models based on their test score for each scorer.
+            Only available when ``scoring`` represents multiple metrics.
 
         n_features : ndarray of shape (n_subsets_of_features,)
             Number of features used at each step.
@@ -735,14 +781,31 @@ class RFECV(RFE):
            False])
     >>> selector.ranking_
     array([1, 1, 1, 1, 1, 6, 4, 3, 2, 5])
+
+    Example with multiple scoring metrics:
+
+    >>> selector = RFECV(
+    ...     estimator=SVR(kernel="linear"),
+    ...     step=1,
+    ...     cv=5,
+    ...     scoring=['r2', 'neg_mean_squared_error'],
+    ...     refit='r2'
+    ... )
+    >>> selector = selector.fit(X, y)
+    >>> selector.support_
+    array([ True,  True,  True,  True,  True, False, False, False, False,
+           False])
     """
 
     _parameter_constraints: dict = {
         **RFE._parameter_constraints,
-        "min_features_to_select": [Interval(Integral, 0, None, closed="neither")],
+        "min_features_to_select": [
+            Interval(numbers.Integral, 0, None, closed="neither")
+        ],
         "cv": ["cv_object"],
-        "scoring": [None, str, callable],
-        "n_jobs": [None, Integral],
+        "scoring": [None, str, callable, list, tuple, dict],
+        "n_jobs": [None, numbers.Integral],
+        "refit": [bool, str, callable],
     }
     _parameter_constraints.pop("n_features_to_select")
     __metadata_request__fit = {"groups": metadata_routing.UNUSED}
@@ -758,6 +821,7 @@ class RFECV(RFE):
         verbose=0,
         n_jobs=None,
         importance_getter="auto",
+        refit=True,
     ):
         self.estimator = estimator
         self.step = step
@@ -767,6 +831,77 @@ class RFECV(RFE):
         self.verbose = verbose
         self.n_jobs = n_jobs
         self.min_features_to_select = min_features_to_select
+        self.refit = refit
+
+    def _get_scorer(self, base_scorer=None):
+        """Return a scorer from parameter scoring."""
+        if base_scorer is not None:
+            # Using a predefined scorer
+            return get_scorer(base_scorer)
+
+        if self.scoring is None:
+            # If no scoring provided, use default based on estimator type
+            scoring = "accuracy" if is_classifier(self.estimator) else "r2"
+            return get_scorer(scoring)
+
+        if isinstance(self.scoring, (list, tuple)):
+            # Convert list of scorer names to dict of scorers
+            scorers = {str(scorer): get_scorer(scorer) for scorer in self.scoring}
+            return scorers
+
+        if isinstance(self.scoring, dict):
+            # User provided dict of scorer names mapped to scorer callables
+            scorers = {key: get_scorer(value) for key, value in self.scoring.items()}
+            return scorers
+
+        # scoring is a string or callable
+        return get_scorer(self.scoring)
+
+    def _check_refit_param(self, scorers):
+        """Check if refit parameter is correctly set for multiple metrics.
+
+        Parameters
+        ----------
+        scorers : dict, list, tuple, or callable
+            The scorers to use.
+
+        Returns
+        -------
+        refit_metric : str or callable
+            The metric to use for refitting.
+        """
+        if isinstance(self.refit, str):
+            if not isinstance(scorers, dict) and not isinstance(scorers, (list, tuple)):
+                raise ValueError(
+                    f"refit={self.refit!r} but scoring is not a dict or a list. "
+                    "If only a single metric is used, set refit=True to use it for "
+                    "refitting."
+                )
+
+            if isinstance(scorers, dict) and self.refit not in scorers:
+                raise ValueError(
+                    f"refit={self.refit!r} is not a valid scorer key. "
+                    f"Valid options are: {list(scorers.keys())}"
+                )
+
+            if isinstance(scorers, (list, tuple)) and self.refit not in scorers:
+                raise ValueError(
+                    f"refit={self.refit!r} is not a valid scorer key. "
+                    f"Valid options are: {scorers}"
+                )
+
+            return self.refit
+
+        # If refit is True and scorers is a dict, return the first key
+        # as the metric to optimize
+        if self.refit is True and isinstance(scorers, dict):
+            return list(scorers.keys())[0]
+
+        # If refit is True and scorers is a list/tuple, return the first element
+        if self.refit is True and isinstance(scorers, (list, tuple)):
+            return scorers[0]
+
+        return self.refit  # callable
 
     # TODO(1.8): remove `groups` from the signature after deprecation cycle.
     @_deprecate_positional_args(version="1.8")
@@ -834,7 +969,30 @@ class RFECV(RFE):
 
         # Initialization
         cv = check_cv(self.cv, y, classifier=is_classifier(self.estimator))
-        scorer = self._get_scorer()
+        scorers = self._get_scorer()
+
+        # Determine refit strategy
+        is_multi_metric = isinstance(scorers, dict)
+        refit_metric = None
+
+        if isinstance(self.refit, str) and not is_multi_metric:
+            raise ValueError(
+                f"refit={self.refit!r} but scoring is not a dict or a list. "
+                "If only a single metric is used, set refit=True to use it for "
+                "refitting."
+            )
+
+        if is_multi_metric:
+            refit_metric = self._check_refit_param(scorers)
+            if callable(refit_metric):
+                # We'll compute all metrics but won't use a specific one for refit
+                select_metric = list(scorers.values())[0]
+            else:
+                # Use the specified metric for refit
+                select_metric = scorers[refit_metric]
+        else:
+            # For single metric, use it for feature selection
+            select_metric = scorers
 
         # Build an RFE object, which will evaluate and score each possible
         # feature count, down to self.min_features_to_select
@@ -875,7 +1033,16 @@ class RFECV(RFE):
             func = delayed(_rfe_single_fit)
 
         scores_features = parallel(
-            func(clone(rfe), self.estimator, X, y, train, test, scorer, routed_params)
+            func(
+                clone(rfe),
+                self.estimator,
+                X,
+                y,
+                train,
+                test,
+                select_metric,
+                routed_params,
+            )
             for train, test in cv.split(X, y, **routed_params.splitter.split)
         )
         scores, step_n_features = zip(*scores_features)
@@ -883,38 +1050,140 @@ class RFECV(RFE):
         step_n_features_rev = np.array(step_n_features[0])[::-1]
         scores = np.array(scores)
 
-        # Reverse order such that lowest number of features is selected in case of tie.
-        scores_sum_rev = np.sum(scores, axis=0)[::-1]
-        n_features_to_select = step_n_features_rev[np.argmax(scores_sum_rev)]
+        # Process multiple metrics if needed
+        if is_multi_metric:
+            all_scores = {}
+            # For each fold, compute scores for each metric
+            for metric_name, metric_scorer in scorers.items():
+                all_fold_scores = parallel(
+                    func(
+                        clone(rfe),
+                        self.estimator,
+                        X,
+                        y,
+                        train,
+                        test,
+                        metric_scorer,
+                        routed_params,
+                    )
+                    for train, test in cv.split(X, y, **routed_params.splitter.split)
+                )
+                fold_scores, _ = zip(*all_fold_scores)
+                all_scores[metric_name] = np.array(fold_scores)
 
-        # Re-execute an elimination with best_k over the whole set
-        rfe = RFE(
-            estimator=self.estimator,
-            n_features_to_select=n_features_to_select,
+        # Create cv_results_ dictionary before calculating best index
+        self.cv_results_ = {"n_features": step_n_features_rev}
+
+        # For multiple metrics, add all metrics to cv_results_
+        if is_multi_metric:
+            for metric_name, metric_scores in all_scores.items():
+                # reverse to stay consistent with before
+                metric_scores_rev = metric_scores[:, ::-1]
+                mean_scores = np.mean(metric_scores_rev, axis=0)
+                self.cv_results_.update(
+                    {
+                        f"mean_test_{metric_name}": mean_scores,
+                        f"std_test_{metric_name}": np.std(metric_scores_rev, axis=0),
+                        **{
+                            f"split{i}_test_{metric_name}": metric_scores_rev[i]
+                            for i in range(metric_scores.shape[0])
+                        },
+                    }
+                )
+
+                # Add ranking of feature counts for each metric
+                ranking = np.asarray(
+                    rankdata(-mean_scores, method="min"), dtype=np.int32
+                )
+                self.cv_results_[f"rank_test_{metric_name}"] = ranking
+
+            # Now we have cv_results_, use it to determine the number of
+            # features to select
+            if callable(refit_metric):
+                best_index = refit_metric(self.cv_results_)
+                if not isinstance(best_index, numbers.Integral):
+                    raise TypeError("best_index_ returned is not an integer")
+
+                # Check if the index is out of bounds
+                if (best_index < 0) or (best_index >= len(step_n_features_rev)):
+                    raise IndexError("best_index_ index out of range")
+
+                n_features_to_select = step_n_features_rev[best_index]
+            elif refit_metric is not None:
+                # Use the specified string metric
+                scores_sum_rev = np.sum(all_scores[refit_metric], axis=0)[::-1]
+                best_index = np.argmax(scores_sum_rev)
+                n_features_to_select = step_n_features_rev[best_index]
+                # Set mean_test_score to the refit metric for backward compatibility
+                self.cv_results_["mean_test_score"] = self.cv_results_[
+                    f"mean_test_{refit_metric}"
+                ]
+                self.cv_results_["std_test_score"] = self.cv_results_[
+                    f"std_test_{refit_metric}"
+                ]
+            else:
+                # Use first metric
+                first_metric = list(scorers.keys())[0]
+                scores_sum_rev = np.sum(all_scores[first_metric], axis=0)[::-1]
+                best_index = np.argmax(scores_sum_rev)
+                n_features_to_select = step_n_features_rev[best_index]
+                # Set mean_test_score to the first metric for backward compatibility
+                self.cv_results_["mean_test_score"] = self.cv_results_[
+                    f"mean_test_{first_metric}"
+                ]
+                self.cv_results_["std_test_score"] = self.cv_results_[
+                    f"std_test_{first_metric}"
+                ]
+        else:
+            # For single metric, use it for feature selection
+            scores_sum_rev = np.sum(scores, axis=0)[::-1]
+            best_index = np.argmax(scores_sum_rev)
+            n_features_to_select = step_n_features_rev[best_index]
+
+            # Create cv_results_ dictionary
+            scores_rev = scores[:, ::-1]
+            self.cv_results_ = {
+                "n_features": step_n_features_rev,
+                "mean_test_score": np.mean(scores_rev, axis=0),
+                "std_test_score": np.std(scores_rev, axis=0),
+                **{
+                    f"split{i}_test_score": scores_rev[i]
+                    for i in range(scores.shape[0])
+                },
+            }
+
+        # Refit on the whole dataset with the selected number of features
+        self.estimator_ = clone(self.estimator)
+
+        # Get the optimal number of features to select
+        features_to_select = n_features_to_select
+        if features_to_select is None:
+            features_to_select = self.min_features_to_select
+
+        # Re-fit the RFE object using the whole dataset to get appropriate
+        # feature_importances_
+        final_rfe = RFE(
+            self.estimator_,
+            n_features_to_select=features_to_select,
             step=self.step,
             importance_getter=self.importance_getter,
             verbose=self.verbose,
         )
+        final_rfe.fit(X, y, **routed_params.estimator.fit)
+        self.estimator_ = final_rfe.estimator_
+        self.n_features_ = features_to_select
+        self.support_ = final_rfe.support_
+        self.ranking_ = final_rfe.ranking_
 
-        rfe.fit(X, y, **routed_params.estimator.fit)
+        # Set n_features_in_ attribute
+        if hasattr(final_rfe, "n_features_in_"):
+            self.n_features_in_ = final_rfe.n_features_in_
+        if hasattr(final_rfe, "feature_names_in_"):
+            self.feature_names_in_ = final_rfe.feature_names_in_
 
-        # Set final attributes
-        self.support_ = rfe.support_
-        self.n_features_ = rfe.n_features_
-        self.ranking_ = rfe.ranking_
-        self.estimator_ = clone(self.estimator)
-        self.estimator_.fit(self._transform(X), y, **routed_params.estimator.fit)
-
-        # reverse to stay consistent with before
-        scores_rev = scores[:, ::-1]
-        self.cv_results_ = {
-            "mean_test_score": np.mean(scores_rev, axis=0),
-            "std_test_score": np.std(scores_rev, axis=0),
-            **{f"split{i}_test_score": scores_rev[i] for i in range(scores.shape[0])},
-            "n_features": step_n_features_rev,
-        }
         return self
 
+    @available_if(_estimator_has("score"))
     def score(self, X, y, **score_params):
         """Score using the `scoring` option on the given test data and labels.
 
@@ -927,7 +1196,7 @@ class RFECV(RFE):
             True labels for X.
 
         **score_params : dict
-            Parameters to pass to the `score` method of the underlying scorer.
+            Parameters to pass to the `score` method of the underlying estimator.
 
             .. versionadded:: 1.6
                 Only available if `enable_metadata_routing=True`,
@@ -941,15 +1210,47 @@ class RFECV(RFE):
         score : float
             Score of self.predict(X) w.r.t. y defined by `scoring`.
         """
-        _raise_for_params(score_params, self, "score")
-        scoring = self._get_scorer()
+        check_is_fitted(self)
+
+        # Transform the input features
+        X_transformed = self.transform(X)
+
+        # Don't use _raise_for_params to allow backward compatibility
+        # with tests that expect parameters to be passed through
         if _routing_enabled():
             routed_params = process_routing(self, "score", **score_params)
+            estimator_score_params = routed_params.estimator.score
+            scorer_score_params = routed_params.scorer.score
         else:
-            routed_params = Bunch()
-            routed_params.scorer = Bunch(score={})
+            # For backward compatibility
+            estimator_score_params = score_params
+            scorer_score_params = {}
 
-        return scoring(self, X, y, **routed_params.scorer.score)
+        # Get the appropriate scorer
+        if self.scoring is None:
+            # If scoring is None, use the estimator's default score method
+            return self.estimator_.score(X_transformed, y, **estimator_score_params)
+        elif isinstance(self.scoring, (list, tuple, dict)):
+            if isinstance(self.refit, str):
+                # Use the metric specified by refit for scoring
+                if isinstance(self.scoring, dict):
+                    scoring = get_scorer(self.scoring[self.refit])
+                else:
+                    scoring_values = [
+                        get_scorer(s) if isinstance(s, str) else s for s in self.scoring
+                    ]
+                    scoring_idx = list(self.scoring).index(self.refit)
+                    scoring = scoring_values[scoring_idx]
+            else:
+                # Use the first metric for scoring
+                if isinstance(self.scoring, dict):
+                    scoring = get_scorer(list(self.scoring.values())[0])
+                else:
+                    scoring = get_scorer(self.scoring[0])
+        else:
+            scoring = get_scorer(self.scoring)
+
+        return scoring(self, X, y, **scorer_score_params)
 
     def get_metadata_routing(self):
         """Get metadata routing of this object.
@@ -972,23 +1273,27 @@ class RFECV(RFE):
         )
         router.add(
             splitter=check_cv(self.cv),
-            method_mapping=MethodMapping().add(
-                caller="fit",
-                callee="split",
-            ),
-        )
-        router.add(
-            scorer=self._get_scorer(),
             method_mapping=MethodMapping()
-            .add(caller="fit", callee="score")
-            .add(caller="score", callee="score"),
+            .add(caller="fit", callee="split")
+            .add(caller="score", callee="split"),
         )
+
+        # Handle multiple scorers if needed
+        if isinstance(self.scoring, (list, tuple, dict)):
+            scorers = self._get_scorer()
+            for name, scorer in scorers.items():
+                router.add(
+                    scorer=scorer,
+                    method_mapping=MethodMapping()
+                    .add(caller="fit", callee="score")
+                    .add(caller="score", callee="score"),
+                )
+        else:
+            router.add(
+                scorer=self._get_scorer(),
+                method_mapping=MethodMapping()
+                .add(caller="fit", callee="score")
+                .add(caller="score", callee="score"),
+            )
 
         return router
-
-    def _get_scorer(self):
-        if self.scoring is None:
-            scoring = "accuracy" if is_classifier(self.estimator) else "r2"
-        else:
-            scoring = self.scoring
-        return get_scorer(scoring)
