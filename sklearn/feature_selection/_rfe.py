@@ -13,8 +13,7 @@ from scipy.stats import rankdata
 
 from ..base import BaseEstimator, MetaEstimatorMixin, _fit_context, clone, is_classifier
 from ..metrics import get_scorer
-from ..model_selection import check_cv
-from ..model_selection._validation import _score
+from ..model_selection._validation import _score, check_cv
 from ..utils import Bunch, metadata_routing
 from ..utils._metadata_requests import (
     MetadataRouter,
@@ -1100,19 +1099,13 @@ class RFECV(RFE):
             # Now we have cv_results_, use it to determine the number of
             # features to select
             if callable(refit_metric):
-                best_index = refit_metric(self.cv_results_)
-                if not isinstance(best_index, numbers.Integral):
-                    raise TypeError("best_index_ returned is not an integer")
-
-                # Check if the index is out of bounds
-                if (best_index < 0) or (best_index >= len(step_n_features_rev)):
-                    raise IndexError("best_index_ index out of range")
-
+                best_index = self._select_best_index(
+                    refit_metric, None, self.cv_results_
+                )
                 n_features_to_select = step_n_features_rev[best_index]
             elif refit_metric is not None:
                 # Use the specified string metric
-                scores_sum_rev = np.sum(all_scores[refit_metric], axis=0)[::-1]
-                best_index = np.argmax(scores_sum_rev)
+                best_index = np.argmax(self.cv_results_[f"mean_test_{refit_metric}"])
                 n_features_to_select = step_n_features_rev[best_index]
                 # Set mean_test_score to the refit metric for backward compatibility
                 self.cv_results_["mean_test_score"] = self.cv_results_[
@@ -1124,8 +1117,7 @@ class RFECV(RFE):
             else:
                 # Use first metric
                 first_metric = list(scorers.keys())[0]
-                scores_sum_rev = np.sum(all_scores[first_metric], axis=0)[::-1]
-                best_index = np.argmax(scores_sum_rev)
+                best_index = np.argmax(self.cv_results_[f"mean_test_{first_metric}"])
                 n_features_to_select = step_n_features_rev[best_index]
                 # Set mean_test_score to the first metric for backward compatibility
                 self.cv_results_["mean_test_score"] = self.cv_results_[
@@ -1182,6 +1174,39 @@ class RFECV(RFE):
             self.feature_names_in_ = final_rfe.feature_names_in_
 
         return self
+
+    def _select_best_index(self, refit, refit_metric, results):
+        """Select index of the best combination of features.
+
+        Parameters
+        ----------
+        refit : callable
+            A callable that takes the cv_results_ dict and returns the index
+            of the best estimator.
+
+        refit_metric : str or None
+            Not used in this implementation, kept for API compatibility.
+
+        results : dict
+            The cv_results_ dict with all the cross-validation results.
+
+        Returns
+        -------
+        best_index : int
+            The index with the best cross-validation result.
+        """
+        if callable(refit):
+            # If callable, refit is expected to return the index of the best
+            # parameter set.
+            best_index = refit(results)
+            if not isinstance(best_index, numbers.Integral):
+                raise TypeError("best_index_ returned is not an integer")
+
+            # Check if the index is out of bounds
+            if best_index < 0 or best_index >= len(results["n_features"]):
+                raise IndexError("best_index_ index out of range")
+
+        return best_index
 
     @available_if(_estimator_has("score"))
     def score(self, X, y, **score_params):
